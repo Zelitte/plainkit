@@ -891,7 +891,6 @@ body::before {
         <div id="file-chip" style="display:none"></div>
       </div>
 
-      <div id="turnstile-mount"></div>
 
       <button class="translate-btn" id="translate-btn" onclick="doTranslate()" disabled>
         <span id="translate-icon">✦</span>
@@ -950,7 +949,6 @@ body::before {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <script>
 // ═══ Multilingual content ═══
@@ -1142,7 +1140,6 @@ function selectLang(l) {
       app.classList.add('visible');
       applyLang();
       maybeShowCookieBanner();
-      mountTurnstile();
       renderQR();
     }, 20);
   }, 600);
@@ -1327,7 +1324,7 @@ function swapLangs() {
 
 function checkCanTranslate() {
   const hasContent = !!selectedFile;
-  document.getElementById('translate-btn').disabled = !(hasContent && turnstileToken);
+  document.getElementById('translate-btn').disabled = !hasContent;
 }
 
 function fIcon(n) {
@@ -1392,14 +1389,14 @@ function setLoading(on) {
   const btn = document.getElementById('translate-btn');
   const icon = document.getElementById('translate-icon');
   const label = document.getElementById('translate-label');
-  btn.disabled = on || !turnstileToken;
+  btn.disabled = on;
   if (on) {
     icon.innerHTML = '<div class="spinner"></div>';
     label.textContent = CONTENT[lang].translating;
   } else {
     icon.textContent = '✦';
     label.textContent = CONTENT[lang].translateBtn;
-    if (turnstileToken && selectedFile) {
+    if (selectedFile) {
       btn.disabled = false;
     }
   }
@@ -1555,7 +1552,6 @@ async function doTranslate() {
   const c = CONTENT[lang];
   hideResults();
 
-  if (!turnstileToken) { showError(c.err.noTurnstile); return; }
   if (!selectedFile) { showError(c.err.noContent); return; }
 
   const fromLang = document.getElementById('from-lang').value;
@@ -1624,7 +1620,6 @@ async function doTranslate() {
         body.totalChunks = chunks.length;
       }
       if (i === 0) {
-        body.turnstileToken = turnstileToken;
         body.pageCount = data.pageCount;
       } else {
         body.sessionToken = sessionToken;
@@ -1687,12 +1682,10 @@ async function doTranslate() {
     document.getElementById('dl-result-btn').onclick = () => dlBlob(blob, fname);
     document.getElementById('result-card').style.display = 'block';
 
-    resetTurnstile();
   } catch (err) {
     document.getElementById('progress-wrap').style.display = 'none';
     const msg = formatError(err, c);
     showError(msg);
-    if (err.code !== 'noContent') resetTurnstile();
   } finally {
     setLoading(false);
   }
