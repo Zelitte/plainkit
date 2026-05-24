@@ -942,7 +942,7 @@ body::before {
 <!-- ═══ Cookie banner ═══ -->
 <div id="cookie-banner">
   <div class="cookie-text" id="cookie-text">
-    🍪 <strong>Stránka používa lokálne úložisko a cookies</strong> výlučne na sledovanie denného limitu prekladov (3 dokumenty / 50 strán denne). Žiadne reklamy, žiadny tracking, žiadne tretie strany.
+    🍪 <strong>Stránka používa lokálne úložisko a cookies</strong> výlučne na sledovanie denného limitu prekladov (10 dokumentov / 400 strán denne). Žiadne reklamy, žiadny tracking, žiadne tretie strany.
   </div>
   <button class="cookie-btn" id="cookie-btn" onclick="acceptCookies()">Rozumiem</button>
 </div>
@@ -1570,8 +1570,8 @@ async function doTranslate() {
     else data = extractTxt(await selectedFile.text());
 
     // Client-side limits (matching backend)
-    const MAX_PAGES = 150;
-    const MAX_BLOCKS_DOC = 750;
+    const MAX_PAGES = 250;
+    const MAX_BLOCKS_DOC = 1500;
     const CHUNK_SIZE = 40;
 
     if (data.pageCount > MAX_PAGES) throw { code: 'tooLarge', pageCount: data.pageCount, max: MAX_PAGES };
