@@ -1,1 +1,1825 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07090f">
+<meta name="description" content="Prevodník jednotiek · zadarmo, bez reklamy. Výkon, sila, rýchlosť, dĺžka, plocha, objem, hmotnosť a viac.">
+<meta name="keywords" content="prevodník jednotiek, jednotky, kW HP, watt, newton, prevod, zadarmo, bez reklamy">
+<title>Prevodník jednotiek · zadarmo, bez reklamy</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2307090f'/><text x='16' y='24' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='24' font-weight='700' fill='%2334d399' text-anchor='middle'>j</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #07090f;
+  --bg-elev: #0d1117;
+  --bg-elev-2: #131a24;
+  --border: #1f2937;
+  --border-strong: #2d3748;
+  --text: #e8e8e8;
+  --text-muted: #8b95a5;
+  --text-dim: #5a6473;
+  --accent: #34d399;
+  --accent-dim: #1f6f56;
+  --warning: #fbbf24;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --radius: 4px;
+}
+html, body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(52, 211, 153, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 211, 153, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(52, 211, 153, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 211, 153, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+  background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+  color: var(--text);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.mono { font-family: 'IBM Plex Mono', monospace; }
 
+/* === HEADER === */
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  background: rgba(7, 9, 15, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.brand-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.brand-name {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.brand-name em { color: var(--accent); font-style: normal; }
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.btn-icon {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.btn-icon:hover { background: var(--bg-elev); border-color: var(--border-strong); }
+
+/* === MAIN LAYOUT === */
+.layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 24px 28px;
+  gap: 24px;
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 280px 1fr 200px;
+    gap: 32px;
+  }
+}
+
+/* === SIDEBAR (Notes/History) === */
+.sidebar {
+  display: none;
+}
+.sidebar.open { display: block; }
+@media (min-width: 1024px) {
+  .sidebar { display: block; }
+}
+.sidebar-section {
+  margin-bottom: 24px;
+}
+.sidebar h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.clear-btn:hover { color: var(--warning); }
+.history-list, .pinned-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.history-item, .pinned-item {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.history-item:hover, .pinned-item:hover { border-color: var(--accent-dim); }
+.history-item .text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.pin-toggle, .item-remove {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+.pin-toggle:hover { color: var(--accent); }
+.item-remove:hover { color: var(--warning); }
+.empty-state {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 6px 0;
+}
+
+/* === MAIN CONTENT === */
+.main-content { min-width: 0; }
+
+/* Search bar */
+.search-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+.search-input {
+  width: 100%;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 14px 16px 14px 44px;
+  font-family: inherit;
+  font-size: 15px;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 16px;
+  pointer-events: none;
+}
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+.search-results.open { display: block; }
+.search-result {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.search-result:last-child { border-bottom: none; }
+.search-result:hover { background: var(--bg-elev-2); }
+.search-result .category {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+}
+.search-result .unit-name { font-weight: 500; }
+.search-result .unit-symbol {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+/* === CATEGORIES VIEW === */
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+.section-label:first-child { margin-top: 0; }
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.category-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+}
+.category-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-elev-2);
+  transform: translateY(-1px);
+}
+.category-card .icon { font-size: 20px; margin-bottom: 8px; display: block; }
+.category-card .name { font-size: 15px; font-weight: 500; }
+.category-card .count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.category-card.favorite { border-color: var(--accent-dim); }
+
+/* === CONVERTER VIEW === */
+.converter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.back-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover { color: var(--text); border-color: var(--border-strong); }
+.category-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.category-title .icon { margin-right: 8px; }
+
+/* Input row */
+.input-row {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 600px) {
+  .input-row.tabuľka-mode { grid-template-columns: 1fr 1fr; }
+  .input-row.classic-mode { grid-template-columns: 1fr 1fr 1fr; }
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.field input, .field select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  border-radius: var(--radius);
+  outline: none;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+
+/* Mode toggle */
+.mode-toggle {
+  display: inline-flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 20px;
+}
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 7px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+.mode-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 500;
+}
+.mode-btn:not(.active):hover { color: var(--text); }
+
+/* Conversions table */
+.conversions {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.conv-group-label {
+  background: var(--bg-elev-2);
+  padding: 8px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.conv-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.conv-row:last-child { border-bottom: none; }
+.conv-row:hover { background: var(--bg-elev-2); }
+.conv-unit { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.conv-unit .name { font-size: 13px; color: var(--text-muted); }
+.conv-unit .symbol { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; }
+.conv-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  text-align: right;
+  color: var(--text);
+  font-weight: 500;
+}
+.conv-info {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.conv-info:hover { background: var(--bg-elev-2); color: var(--accent); }
+.show-all-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 10px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.show-all-btn:hover { color: var(--accent); background: var(--bg-elev-2); }
+
+/* Classic mode result */
+.classic-result {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+}
+.classic-result .formula {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px;
+  color: var(--text);
+  word-break: break-all;
+}
+.classic-result .formula .accent { color: var(--accent); }
+
+.pin-action {
+  margin-top: 12px;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  padding: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  border-radius: var(--radius);
+}
+.pin-action:hover { border-color: var(--accent); color: var(--accent); }
+.pin-action.pinned { color: var(--accent); border-color: var(--accent); }
+
+/* === LINKS PANEL === */
+.links-panel {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .links-panel { display: block; }
+}
+.links-panel h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.tool-link {
+  display: block;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  text-decoration: none;
+  color: var(--text);
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+.tool-link:hover { border-color: var(--accent); background: var(--bg-elev-2); }
+.tool-link .label {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tool-link .url {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* === TOOLTIP === */
+.tooltip {
+  position: fixed;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+  max-width: 280px;
+  z-index: 200;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.tooltip.show { opacity: 1; }
+
+/* === SUPPORT SECTION === */
+.support-section {
+  max-width: 1400px;
+  margin: 60px auto 0;
+  padding: 0 28px;
+}
+.support-toggle {
+  width: 100%;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.15s;
+}
+.support-toggle:hover { border-color: var(--accent-dim); }
+.support-toggle .chev { transition: transform 0.2s; color: var(--text-muted); }
+.support-toggle.open .chev { transform: rotate(180deg); }
+.support-content {
+  display: none;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -1px;
+  padding: 24px 20px 28px;
+  text-align: center;
+}
+.support-content.open { display: block; }
+.support-content .desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 540px;
+  margin: 0 auto 18px;
+  line-height: 1.55;
+}
+.support-content .scan-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.support-tabs {
+  display: inline-flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 20px;
+}
+.support-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+.support-tab.active {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 500;
+}
+.support-tab:not(.active):hover { color: var(--text); }
+.support-qr {
+  margin: 0 auto 14px;
+  max-width: 280px;
+}
+.support-qr img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+}
+.support-qr-placeholder {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 14px;
+  aspect-ratio: 880 / 1030;
+  background: var(--bg);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+.support-note {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+.iban-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+.iban-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.iban-copy {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.iban-copy:hover { color: var(--accent); }
+.iban-copy.copied { color: var(--accent); }
+
+
+footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 32px 28px;
+  text-align: center;
+}
+footer .tools-mobile {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (min-width: 1024px) {
+  footer .tools-mobile { display: none; }
+}
+.tools-mobile a {
+  color: var(--accent);
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  border-bottom: 1px solid var(--accent-dim);
+}
+footer .footer-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 90;
+}
+.sidebar-overlay.open { display: block; }
+@media (max-width: 1023px) {
+  .sidebar.open {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    background: var(--bg);
+    z-index: 100;
+    padding: 24px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar.open .sidebar-close {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+}
+.sidebar-close { display: none; }
+
+/* Cookies banner */
+.cookies-banner {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  z-index: 200;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.cookies-banner.show { display: flex; }
+.cookies-banner button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-tag">UNIT · CONVERTER · PREVODNÍK</div>
+    <div class="brand-name"><em>jednotky</em></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" id="sidebarToggle" aria-label="História a pripnuté">
+      <span>☰</span><span class="hide-mobile">História</span>
+    </button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose">✕ Zavrieť</button>
+    <div class="sidebar-section">
+      <h3>
+        Pripnuté
+      </h3>
+      <ul class="pinned-list" id="pinnedList">
+        <li class="empty-state">Žiadne pripnuté prevody</li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <h3>
+        História
+        <button class="clear-btn" id="clearHistory">Vymazať</button>
+      </h3>
+      <ul class="history-list" id="historyList">
+        <li class="empty-state">Zatiaľ žiadna história</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input
+        type="text"
+        class="search-input"
+        id="searchInput"
+        placeholder="Hľadaj jednotku alebo kategóriu... (napr. kW, watt, výkon)"
+        autocomplete="off"
+      >
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- HOMEPAGE -->
+    <div id="homeView">
+      <div class="section-label">Často používané</div>
+      <div class="categories-grid" id="favoriteCategories"></div>
+
+      <div class="section-label">Základné</div>
+      <div class="categories-grid" id="basicCategories"></div>
+    </div>
+
+    <!-- CONVERTER -->
+    <div id="converterView" style="display: none;">
+      <div class="converter-header">
+        <button class="back-btn" id="backBtn">← Späť</button>
+        <h2 class="category-title" id="categoryTitle"></h2>
+      </div>
+
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="table" id="modeTable">Tabuľka</button>
+        <button class="mode-btn" data-mode="classic" id="modeClassic">Klasický</button>
+      </div>
+
+      <div class="input-row tabuľka-mode" id="inputRow">
+        <div class="field">
+          <label for="valueInput">Hodnota</label>
+          <input type="text" inputmode="decimal" id="valueInput" value="1">
+        </div>
+        <div class="field">
+          <label for="fromUnit">Z jednotky</label>
+          <select id="fromUnit"></select>
+        </div>
+        <div class="field" id="toField" style="display: none;">
+          <label for="toUnit">Do jednotky</label>
+          <select id="toUnit"></select>
+        </div>
+      </div>
+
+      <!-- TABLE MODE -->
+      <div id="tableView" class="conversions"></div>
+
+      <!-- CLASSIC MODE -->
+      <div id="classicView" style="display: none;">
+        <div class="classic-result">
+          <div class="formula" id="classicResult"></div>
+        </div>
+      </div>
+
+      <button class="pin-action" id="pinAction">+ Pripnúť tento prevod</button>
+    </div>
+  </main>
+
+  <!-- LINKS -->
+  <aside class="links-panel">
+    <h3>Nástroje</h3>
+    <a href="/qr" class="tool-link" target="_blank" rel="noopener">
+      <div class="label">
+        <span>QR generátor</span>
+        <span style="color: var(--text-dim)">↗</span>
+      </div>
+      <div class="url">plainkit.app/qr</div>
+    </a>
+    <a href="/preklad" class="tool-link" target="_blank" rel="noopener">
+      <div class="label">
+        <span>Prekladač</span>
+        <span style="color: var(--text-dim)">↗</span>
+      </div>
+      <div class="url">plainkit.app/preklad</div>
+    </a>
+  </aside>
+</div>
+
+<!-- SUPPORT PROJECT -->
+<section class="support-section">
+  <button class="support-toggle" id="supportToggle" aria-expanded="false">
+    <span>♥ Podporte projekt</span>
+    <span class="chev">▾</span>
+  </button>
+  <div class="support-content" id="supportContent">
+    <p class="desc">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</p>
+    <div class="scan-hint">Na skenovanie použi bankovú aplikáciu</div>
+    <div class="support-tabs">
+      <button class="support-tab active" data-amount="free">Voľná</button>
+      <button class="support-tab" data-amount="10">10 €</button>
+      <button class="support-tab" data-amount="100">100 €</button>
+    </div>
+    <div id="supportQrWrap">
+      <div class="support-qr-placeholder" id="supportPlaceholder">Sumu si zvoľte priamo v bankovej aplikácii po naskenovaní niektorého z QR kódov vyššie (10 € alebo 100 €).</div>
+      <img class="support-qr" id="supportQr" src="" alt="" style="display:none;">
+    </div>
+    <div class="support-note">Sumu môžete v aplikácii zmeniť</div>
+    <div class="iban-row">
+      <span class="iban-text">SK06 1100 0000 0026 1224 7644</span>
+      <button class="iban-copy" id="ibanCopy" aria-label="Skopírovať IBAN" title="Skopírovať">📋</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="tools-mobile">
+    <a href="/qr" target="_blank" rel="noopener">↗ plainkit.app/qr</a>
+    <a href="/preklad" target="_blank" rel="noopener">↗ plainkit.app/preklad</a>
+  </div>
+  <div class="footer-note">Prevodník jednotiek · zadarmo, bez reklamy</div>
+</footer>
+
+<!-- COOKIES BANNER -->
+<div class="cookies-banner" id="cookiesBanner">
+  <span>🍪 <strong>Stránka používa lokálne úložisko</strong> na ukladanie histórie a pripnutých prevodov. Anonymné štatistiky návštevnosti cez Cloudflare (bez cookies). Žiadne reklamy, žiadne cookies tretích strán, žiadny personalizovaný tracking.</span>
+  <button id="cookiesAccept">Rozumiem</button>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ====== DATA: UNITS ======
+// Each unit: factor (multiply by this to get base unit)
+// Temperature is special — uses custom functions
+
+const UNITS = {
+  vykon: {
+    name: 'Výkon',
+    icon: '⚡',
+    favorite: true,
+    base: 'W',
+    common: ['W', 'kW', 'MW', 'HP', 'PS', 'BTU_h'],
+    units: {
+      'mW':    { name: 'milliwatt', symbol: 'mW', factor: 0.001 },
+      'W':     { name: 'watt', symbol: 'W', factor: 1 },
+      'kW':    { name: 'kilowatt', symbol: 'kW', factor: 1000 },
+      'MW':    { name: 'megawatt', symbol: 'MW', factor: 1e6 },
+      'GW':    { name: 'gigawatt', symbol: 'GW', factor: 1e9 },
+      'HP':    { name: 'konská sila (mechanická)', symbol: 'HP', factor: 745.6998715822702,
+                 info: 'Mechanická / imperiálna konská sila (USA, automotive). 1 HP ≈ 745,7 W. Pozor: nezamieňať s PS (metrická konská sila) — rozdiel je ~1,4 %.' },
+      'PS':    { name: 'konská sila (metrická) · k', symbol: 'PS', factor: 735.49875,
+                 info: 'Metrická konská sila / kôň (k). Európske autá, motory. 1 PS ≈ 735,5 W. Často sa zamieňa s mechanickou HP.' },
+      'BTU_h': { name: 'BTU za hodinu', symbol: 'BTU/h', factor: 0.29307107,
+                 info: 'British Thermal Unit za hodinu. Klimatizácie, vykurovanie (HVAC), tepelné čerpadlá.' },
+      'kcal_h':{ name: 'kilokalória za hodinu', symbol: 'kcal/h', factor: 1.163,
+                 info: 'Staršia jednotka v chladiarenstve a vykurovaní.' },
+      'tonR':  { name: 'tona chladenia', symbol: 'TR', factor: 3516.853,
+                 info: 'Tona chladenia (Refrigeration Ton). HVAC, klimatizácie veľkých budov. 1 TR = 12 000 BTU/h.' },
+      'ftlbf_s':{ name: 'ft·lbf za sekundu', symbol: 'ft·lbf/s', factor: 1.355817948 },
+    }
+  },
+
+  sila: {
+    name: 'Sila',
+    icon: '⬆',
+    favorite: true,
+    base: 'N',
+    common: ['N', 'kN', 'kgf', 'lbf'],
+    units: {
+      'mN':    { name: 'millinewton', symbol: 'mN', factor: 0.001 },
+      'N':     { name: 'newton', symbol: 'N', factor: 1 },
+      'kN':    { name: 'kilonewton', symbol: 'kN', factor: 1000 },
+      'MN':    { name: 'meganewton', symbol: 'MN', factor: 1e6 },
+      'dyn':   { name: 'dyna', symbol: 'dyn', factor: 1e-5, info: 'CGS jednotka, používaná vo fyzike.' },
+      'kgf':   { name: 'kilopond / kilogram-sila', symbol: 'kgf', factor: 9.80665,
+                 info: 'Staršia technická jednotka (kp). 1 kgf = sila, ktorou pôsobí 1 kg v normálnom gravitačnom poli.' },
+      'gf':    { name: 'pond / gram-sila', symbol: 'gf', factor: 0.00980665 },
+      'tonf_m':{ name: 'metrická tona-sila', symbol: 'tf', factor: 9806.65 },
+      'lbf':   { name: 'libra-sila', symbol: 'lbf', factor: 4.4482216152605,
+                 info: 'Imperiálna jednotka sily. US strojárina, letectvo.' },
+      'ozf':   { name: 'unca-sila', symbol: 'ozf', factor: 0.27801385095378125 },
+      'kip':   { name: 'kip (1000 lbf)', symbol: 'kip', factor: 4448.2216152605,
+                 info: 'Stavebné inžinierstvo v US (mostné konštrukcie). 1 kip = 1000 lbf.' },
+    }
+  },
+
+  rychlost: {
+    name: 'Rýchlosť',
+    icon: '➤',
+    favorite: true,
+    base: 'm_s',
+    common: ['m_s', 'km_h', 'mph', 'knot'],
+    units: {
+      'mm_s':  { name: 'milimeter za sekundu', symbol: 'mm/s', factor: 0.001,
+                 info: 'CNC posuvy, jemná mechanika.' },
+      'm_s':   { name: 'meter za sekundu', symbol: 'm/s', factor: 1 },
+      'km_h':  { name: 'kilometer za hodinu', symbol: 'km/h', factor: 0.27777777777777778 },
+      'km_s':  { name: 'kilometer za sekundu', symbol: 'km/s', factor: 1000 },
+      'mph':   { name: 'míľa za hodinu', symbol: 'mph', factor: 0.44704 },
+      'ft_s':  { name: 'stopa za sekundu', symbol: 'ft/s', factor: 0.3048 },
+      'ft_min':{ name: 'stopa za minútu', symbol: 'ft/min', factor: 0.00508 },
+      'knot':  { name: 'uzol', symbol: 'kt', factor: 0.5144444444444444,
+                 info: 'Letectvo, lodná doprava. 1 kt = 1 námorná míľa/h = 1,852 km/h.' },
+      'mach':  { name: 'Mach (pri zemi)', symbol: 'Mach', factor: 343,
+                 info: 'Pomer k rýchlosti zvuku. Závislé od podmienok — tu uvádzame štandardné podmienky pri morskej hladine (~343 m/s).' },
+      'm_min': { name: 'meter za minútu', symbol: 'm/min', factor: 0.01666666666666667 },
+    }
+  },
+
+  dlzka: {
+    name: 'Dĺžka',
+    icon: '↔',
+    base: 'm',
+    common: ['mm', 'cm', 'm', 'km', 'in', 'ft', 'mi'],
+    units: {
+      'nm':    { name: 'nanometer', symbol: 'nm', factor: 1e-9 },
+      'um':    { name: 'mikrometer', symbol: 'µm', factor: 1e-6 },
+      'mm':    { name: 'milimeter', symbol: 'mm', factor: 0.001 },
+      'cm':    { name: 'centimeter', symbol: 'cm', factor: 0.01 },
+      'dm':    { name: 'decimeter', symbol: 'dm', factor: 0.1 },
+      'm':     { name: 'meter', symbol: 'm', factor: 1 },
+      'km':    { name: 'kilometer', symbol: 'km', factor: 1000 },
+      'in':    { name: 'palec', symbol: 'in', factor: 0.0254 },
+      'ft':    { name: 'stopa', symbol: 'ft', factor: 0.3048 },
+      'yd':    { name: 'yard', symbol: 'yd', factor: 0.9144 },
+      'mi':    { name: 'míľa', symbol: 'mi', factor: 1609.344 },
+      'NM':    { name: 'námorná míľa', symbol: 'NM', factor: 1852,
+                 info: 'Letectvo a námorná doprava. 1 NM = 1,852 km.' },
+      'mil':   { name: 'mil (thou)', symbol: 'mil', factor: 0.0000254,
+                 info: 'Tisícina palca. US plechy, drôty, PCB.' },
+      'AU':    { name: 'astronomická jednotka', symbol: 'AU', factor: 149597870700 },
+      'ly':    { name: 'svetelný rok', symbol: 'ly', factor: 9.4607304725808e15 },
+    }
+  },
+
+  plocha: {
+    name: 'Plocha',
+    icon: '◰',
+    base: 'm2',
+    common: ['m2', 'ha', 'km2', 'sq_ft', 'acre'],
+    units: {
+      'mm2':   { name: 'milimeter štvorcový', symbol: 'mm²', factor: 1e-6 },
+      'cm2':   { name: 'centimeter štvorcový', symbol: 'cm²', factor: 0.0001 },
+      'dm2':   { name: 'decimeter štvorcový', symbol: 'dm²', factor: 0.01 },
+      'm2':    { name: 'meter štvorcový', symbol: 'm²', factor: 1 },
+      'ar':    { name: 'ár', symbol: 'a', factor: 100 },
+      'ha':    { name: 'hektár', symbol: 'ha', factor: 10000 },
+      'km2':   { name: 'kilometer štvorcový', symbol: 'km²', factor: 1e6 },
+      'sq_in': { name: 'palec štvorcový', symbol: 'sq in', factor: 0.00064516 },
+      'sq_ft': { name: 'stopa štvorcová', symbol: 'sq ft', factor: 0.09290304,
+                 info: 'Reality, US stavebníctvo.' },
+      'sq_yd': { name: 'yard štvorcový', symbol: 'sq yd', factor: 0.83612736 },
+      'acre':  { name: 'aker', symbol: 'ac', factor: 4046.8564224,
+                 info: 'Pozemkové miery US/UK.' },
+      'sq_mi': { name: 'míľa štvorcová', symbol: 'sq mi', factor: 2589988.110336 },
+    }
+  },
+
+  objem: {
+    name: 'Objem',
+    icon: '◧',
+    base: 'l',
+    common: ['ml', 'l', 'm3', 'gal_us', 'gal_uk'],
+    units: {
+      'ml':    { name: 'mililiter', symbol: 'ml', factor: 0.001 },
+      'cl':    { name: 'centiliter', symbol: 'cl', factor: 0.01 },
+      'dl':    { name: 'deciliter', symbol: 'dl', factor: 0.1 },
+      'l':     { name: 'liter', symbol: 'l', factor: 1 },
+      'hl':    { name: 'hektoliter', symbol: 'hl', factor: 100 },
+      'm3':    { name: 'meter kubický', symbol: 'm³', factor: 1000 },
+      'cm3':   { name: 'centimeter kubický', symbol: 'cm³', factor: 0.001 },
+      'tsp_us':{ name: 'čajová lyžička (US)', symbol: 'tsp', factor: 0.00492892159375 },
+      'tbsp_us':{ name: 'polievková lyžica (US)', symbol: 'tbsp', factor: 0.01478676478125 },
+      'fl_oz_us':{ name: 'fluid ounce (US)', symbol: 'fl oz US', factor: 0.0295735295625 },
+      'cup_us':{ name: 'šálka (US)', symbol: 'cup US', factor: 0.2365882365 },
+      'pt_us': { name: 'pinta (US)', symbol: 'pt US', factor: 0.473176473 },
+      'qt_us': { name: 'quart (US)', symbol: 'qt US', factor: 0.946352946 },
+      'gal_us':{ name: 'galón (US)', symbol: 'gal US', factor: 3.785411784,
+                 info: '⚠️ US galón ≠ UK galón. US galón = 3,785 l, UK galón = 4,546 l. Vždy si over, ktorý systém.' },
+      'fl_oz_uk':{ name: 'fluid ounce (UK)', symbol: 'fl oz UK', factor: 0.0284130625 },
+      'pt_uk': { name: 'pinta (UK)', symbol: 'pt UK', factor: 0.56826125 },
+      'gal_uk':{ name: 'galón (UK)', symbol: 'gal UK', factor: 4.54609,
+                 info: '⚠️ UK galón ≠ US galón. UK galón = 4,546 l, US galón = 3,785 l.' },
+      'cu_in': { name: 'palec kubický', symbol: 'cu in', factor: 0.016387064 },
+      'cu_ft': { name: 'stopa kubická', symbol: 'cu ft', factor: 28.316846592 },
+      'bbl':   { name: 'barel ropy', symbol: 'bbl', factor: 158.987294928,
+                 info: 'Štandardná jednotka v energetike. 1 bbl ≈ 159 l.' },
+    }
+  },
+
+  hmotnost: {
+    name: 'Hmotnosť',
+    icon: '⚖',
+    base: 'kg',
+    common: ['g', 'kg', 't', 'lb', 'oz'],
+    units: {
+      'ug':    { name: 'mikrogram', symbol: 'µg', factor: 1e-9 },
+      'mg':    { name: 'miligram', symbol: 'mg', factor: 1e-6 },
+      'g':     { name: 'gram', symbol: 'g', factor: 0.001 },
+      'dag':   { name: 'dekagram', symbol: 'dag', factor: 0.01 },
+      'kg':    { name: 'kilogram', symbol: 'kg', factor: 1 },
+      'q':     { name: 'metrický cent', symbol: 'q', factor: 100 },
+      't':     { name: 'tona', symbol: 't', factor: 1000 },
+      'gr':    { name: 'grain', symbol: 'gr', factor: 0.00006479891,
+                 info: 'Strelivo (hmotnosť strely, prachu), farmácia.' },
+      'oz':    { name: 'unca', symbol: 'oz', factor: 0.028349523125 },
+      'oz_t':  { name: 'trojská unca', symbol: 'oz t', factor: 0.0311034768,
+                 info: 'Drahé kovy (zlato, striebro). 1 oz t = 31,1 g.' },
+      'lb':    { name: 'libra', symbol: 'lb', factor: 0.45359237 },
+      'st':    { name: 'kameň (stone)', symbol: 'st', factor: 6.35029318,
+                 info: 'UK, ľudská hmotnosť. 1 st = 14 lb.' },
+      'cwt_us':{ name: 'krátky cent (US)', symbol: 'cwt US', factor: 45.359237 },
+      'ton_us':{ name: 'krátka tona (US)', symbol: 'ton US', factor: 907.18474 },
+      'ton_uk':{ name: 'dlhá tona (UK)', symbol: 'ton UK', factor: 1016.0469088 },
+      'ct':    { name: 'karát', symbol: 'ct', factor: 0.0002 },
+    }
+  },
+
+  teplota: {
+    name: 'Teplota',
+    icon: '🌡',
+    base: 'K',
+    common: ['C', 'F', 'K'],
+    isTemperature: true,
+    units: {
+      'C':     { name: 'stupeň Celzia', symbol: '°C',
+                 toBase: x => x + 273.15, fromBase: x => x - 273.15 },
+      'F':     { name: 'stupeň Fahrenheita', symbol: '°F',
+                 toBase: x => (x - 32) * 5/9 + 273.15, fromBase: x => (x - 273.15) * 9/5 + 32 },
+      'K':     { name: 'kelvin', symbol: 'K',
+                 toBase: x => x, fromBase: x => x },
+      'R':     { name: 'stupeň Rankina', symbol: '°R',
+                 toBase: x => x * 5/9, fromBase: x => x * 9/5,
+                 info: 'Absolútna teplotná stupnica založená na Fahrenheite. US strojárina.' },
+      'Re':    { name: 'stupeň Réaumura', symbol: '°Ré',
+                 toBase: x => x * 5/4 + 273.15, fromBase: x => (x - 273.15) * 4/5,
+                 info: 'Historická stupnica, dnes prevažne mimo použitia.' },
+    }
+  },
+
+  cas: {
+    name: 'Čas',
+    icon: '◷',
+    base: 's',
+    common: ['s', 'min', 'h', 'd'],
+    units: {
+      'ns':    { name: 'nanosekunda', symbol: 'ns', factor: 1e-9 },
+      'us':    { name: 'mikrosekunda', symbol: 'µs', factor: 1e-6 },
+      'ms':    { name: 'milisekunda', symbol: 'ms', factor: 0.001 },
+      's':     { name: 'sekunda', symbol: 's', factor: 1 },
+      'min':   { name: 'minúta', symbol: 'min', factor: 60 },
+      'h':     { name: 'hodina', symbol: 'h', factor: 3600 },
+      'd':     { name: 'deň', symbol: 'd', factor: 86400 },
+      'wk':    { name: 'týždeň', symbol: 'týž', factor: 604800 },
+      'mo':    { name: 'mesiac (priemer)', symbol: 'mes', factor: 2629746,
+                 info: 'Priemerná dĺžka mesiaca v gregoriánskom roku (30,44 dňa).' },
+      'yr':    { name: 'rok (juliánsky)', symbol: 'r', factor: 31557600,
+                 info: 'Juliánsky rok = 365,25 dňa. Štandard v astronómii.' },
+    }
+  },
+
+  tlak: {
+    name: 'Tlak',
+    icon: '⊙',
+    base: 'Pa',
+    common: ['Pa', 'kPa', 'bar', 'psi', 'atm'],
+    units: {
+      'Pa':    { name: 'pascal', symbol: 'Pa', factor: 1 },
+      'hPa':   { name: 'hektopascal', symbol: 'hPa', factor: 100 },
+      'kPa':   { name: 'kilopascal', symbol: 'kPa', factor: 1000 },
+      'MPa':   { name: 'megapascal', symbol: 'MPa', factor: 1e6 },
+      'bar':   { name: 'bar', symbol: 'bar', factor: 100000 },
+      'mbar':  { name: 'milibar', symbol: 'mbar', factor: 100 },
+      'atm':   { name: 'atmosféra štandardná', symbol: 'atm', factor: 101325,
+                 info: 'Štandardná atmosféra (atm) = 101 325 Pa. Pozor — technická atmosféra (at) má inú hodnotu (98 066,5 Pa).' },
+      'at':    { name: 'technická atmosféra', symbol: 'at', factor: 98066.5,
+                 info: 'Technická atmosféra (at) = 1 kgf/cm². ⚠️ Iná ako štandardná atm.' },
+      'mmHg':  { name: 'milimeter ortuti', symbol: 'mmHg', factor: 133.322387415,
+                 info: 'Medicína (krvný tlak), vákuum.' },
+      'torr':  { name: 'torr', symbol: 'Torr', factor: 133.322368421,
+                 info: 'Veľmi blízke mmHg (rozdiel < 1 ppm).' },
+      'inHg':  { name: 'palec ortuti', symbol: 'inHg', factor: 3386.389 },
+      'mmH2O': { name: 'milimeter vodného stĺpca', symbol: 'mmH₂O', factor: 9.80665 },
+      'psi':   { name: 'libra na palec štvorcový', symbol: 'psi', factor: 6894.757293168,
+                 info: 'Pneumatiky, hydraulika (US/UK).' },
+      'ksi':   { name: 'kip na palec štvorcový', symbol: 'ksi', factor: 6894757.293168 },
+    }
+  },
+
+  energia: {
+    name: 'Energia',
+    icon: '⚛',
+    base: 'J',
+    common: ['J', 'kJ', 'kWh', 'kcal', 'BTU'],
+    units: {
+      'J':     { name: 'joule', symbol: 'J', factor: 1 },
+      'kJ':    { name: 'kilojoule', symbol: 'kJ', factor: 1000 },
+      'MJ':    { name: 'megajoule', symbol: 'MJ', factor: 1e6 },
+      'GJ':    { name: 'gigajoule', symbol: 'GJ', factor: 1e9 },
+      'Wh':    { name: 'watthodina', symbol: 'Wh', factor: 3600 },
+      'kWh':   { name: 'kilowatthodina', symbol: 'kWh', factor: 3600000,
+                 info: 'Elektrina, fakturácia.' },
+      'MWh':   { name: 'megawatthodina', symbol: 'MWh', factor: 3.6e9 },
+      'cal':   { name: 'kalória', symbol: 'cal', factor: 4.184 },
+      'kcal':  { name: 'kilokalória', symbol: 'kcal', factor: 4184,
+                 info: 'Výživa (cal vo výživových údajoch = kcal).' },
+      'BTU':   { name: 'British Thermal Unit', symbol: 'BTU', factor: 1055.05585262 },
+      'eV':    { name: 'elektrónvolt', symbol: 'eV', factor: 1.602176634e-19 },
+      'ftlbf': { name: 'ft·lbf', symbol: 'ft·lbf', factor: 1.355817948 },
+      'tnt':   { name: 'tona TNT', symbol: 't TNT', factor: 4.184e9,
+                 info: 'Energetický ekvivalent výbuchu 1 tony TNT.' },
+    }
+  },
+
+  moment: {
+    name: 'Krútiaci moment',
+    icon: '↻',
+    base: 'Nm',
+    common: ['Nm', 'kNm', 'lbfft', 'kgfm'],
+    units: {
+      'mNm':   { name: 'milinewton-meter', symbol: 'mN·m', factor: 0.001 },
+      'Nm':    { name: 'newton-meter', symbol: 'N·m', factor: 1 },
+      'kNm':   { name: 'kilonewton-meter', symbol: 'kN·m', factor: 1000 },
+      'kgfm':  { name: 'kilogram-sila meter', symbol: 'kgf·m', factor: 9.80665,
+                 info: 'Staršia jednotka, často v starých manuáloch.' },
+      'kgfcm': { name: 'kilogram-sila centimeter', symbol: 'kgf·cm', factor: 0.0980665 },
+      'lbfft': { name: 'libra-sila stopa', symbol: 'lbf·ft', factor: 1.355817948,
+                 info: 'Autoservis (uťahovacie momenty), US strojárina.' },
+      'lbfin': { name: 'libra-sila palec', symbol: 'lbf·in', factor: 0.112984829 },
+      'ozfin': { name: 'unca-sila palec', symbol: 'ozf·in', factor: 0.007061552 },
+    }
+  },
+
+  prietok: {
+    name: 'Prietok',
+    icon: '⇉',
+    base: 'm3_s',
+    common: ['l_s', 'l_min', 'm3_h', 'gpm_us'],
+    units: {
+      'ml_s':  { name: 'mililiter za sekundu', symbol: 'ml/s', factor: 1e-6 },
+      'l_s':   { name: 'liter za sekundu', symbol: 'l/s', factor: 0.001 },
+      'l_min': { name: 'liter za minútu', symbol: 'l/min', factor: 0.0000166666666667 },
+      'l_h':   { name: 'liter za hodinu', symbol: 'l/h', factor: 0.000000277777778 },
+      'm3_s':  { name: 'meter kubický za sekundu', symbol: 'm³/s', factor: 1 },
+      'm3_h':  { name: 'meter kubický za hodinu', symbol: 'm³/h', factor: 0.000277777778 },
+      'gpm_us':{ name: 'galón (US) za minútu', symbol: 'GPM', factor: 0.0000630901964,
+                 info: 'US strojárina, čerpadlá.' },
+      'gph_us':{ name: 'galón (US) za hodinu', symbol: 'GPH', factor: 0.00000105150327 },
+      'cfm':   { name: 'kubická stopa za minútu', symbol: 'CFM', factor: 0.000471947443,
+                 info: 'Vzduchotechnika (HVAC), kompresory.' },
+      'cfh':   { name: 'kubická stopa za hodinu', symbol: 'CFH', factor: 0.00000786579072 },
+      'cfs':   { name: 'kubická stopa za sekundu', symbol: 'cfs', factor: 0.0283168466 },
+    }
+  },
+};
+
+// ====== STATE ======
+const state = {
+  currentCategory: null,
+  currentValue: 1,
+  currentFromUnit: null,
+  currentToUnit: null,
+  mode: 'table', // 'table' or 'classic'
+  showAll: false,
+  history: [],
+  pinned: [],
+};
+
+// ====== STORAGE ======
+const LS_HISTORY = 'jednotky_history';
+const LS_PINNED  = 'jednotky_pinned';
+const LS_COOKIES = 'jednotky_cookies_ack';
+
+function loadStorage() {
+  try {
+    state.history = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+    state.pinned  = JSON.parse(localStorage.getItem(LS_PINNED)  || '[]');
+  } catch (e) {
+    state.history = [];
+    state.pinned  = [];
+  }
+}
+function saveHistory()  { try { localStorage.setItem(LS_HISTORY, JSON.stringify(state.history)); } catch(e){} }
+function savePinned()   { try { localStorage.setItem(LS_PINNED,  JSON.stringify(state.pinned));  } catch(e){} }
+
+// ====== CONVERSION ======
+function convert(value, category, fromKey, toKey) {
+  const cat = UNITS[category];
+  const fromU = cat.units[fromKey];
+  const toU   = cat.units[toKey];
+  if (cat.isTemperature) {
+    const base = fromU.toBase(value);
+    return toU.fromBase(base);
+  } else {
+    const base = value * fromU.factor;
+    return base / toU.factor;
+  }
+}
+
+// ====== FORMATTING ======
+function formatValue(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  const abs = Math.abs(v);
+  if (v === 0) return '0';
+  if (abs < 1e-4 || abs >= 1e10) return v.toExponential(4).replace('e', '×10^').replace('+','');
+  // Nice rounding
+  let formatted;
+  if (abs >= 100) formatted = v.toFixed(2);
+  else if (abs >= 1) formatted = v.toFixed(4);
+  else if (abs >= 0.01) formatted = v.toFixed(5);
+  else formatted = v.toFixed(6);
+  // Remove trailing zeros after decimal
+  formatted = formatted.replace(/\.?0+$/, '');
+  // Split into integer and decimal parts, add space only as thousand separator in integer part
+  const parts = formatted.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  // Negative numbers: regex above also runs on the digit after the minus, so fix that
+  parts[0] = parts[0].replace(/^-\s/, '-');
+  return parts.join(',');
+}
+
+// ====== RENDERING: HOMEPAGE ======
+function renderHome() {
+  document.getElementById('homeView').style.display = '';
+  document.getElementById('converterView').style.display = 'none';
+
+  const favGrid   = document.getElementById('favoriteCategories');
+  const basicGrid = document.getElementById('basicCategories');
+  favGrid.innerHTML = '';
+  basicGrid.innerHTML = '';
+
+  Object.entries(UNITS).forEach(([key, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'category-card' + (cat.favorite ? ' favorite' : '');
+    btn.innerHTML = `
+      <span class="icon">${cat.icon}</span>
+      <div class="name">${cat.name}</div>
+      <div class="count">${Object.keys(cat.units).length} jednotiek</div>
+    `;
+    btn.addEventListener('click', () => openCategory(key));
+    if (cat.favorite) favGrid.appendChild(btn);
+    else basicGrid.appendChild(btn);
+  });
+}
+
+// ====== OPEN CATEGORY ======
+function openCategory(key, presetFromUnit) {
+  state.currentCategory = key;
+  const cat = UNITS[key];
+  const firstCommon = presetFromUnit || cat.common[0];
+  state.currentFromUnit = firstCommon;
+  state.currentToUnit = cat.common[1] || Object.keys(cat.units)[1] || cat.common[0];
+  state.showAll = false;
+
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('converterView').style.display = '';
+  document.getElementById('categoryTitle').innerHTML = `<span class="icon">${cat.icon}</span>${cat.name}`;
+
+  // Populate selects
+  const fromSelect = document.getElementById('fromUnit');
+  const toSelect   = document.getElementById('toUnit');
+  fromSelect.innerHTML = '';
+  toSelect.innerHTML = '';
+  Object.entries(cat.units).forEach(([uKey, u]) => {
+    const opt1 = document.createElement('option');
+    opt1.value = uKey;
+    opt1.textContent = `${u.symbol} — ${u.name}`;
+    fromSelect.appendChild(opt1);
+    const opt2 = opt1.cloneNode(true);
+    toSelect.appendChild(opt2);
+  });
+  fromSelect.value = state.currentFromUnit;
+  toSelect.value   = state.currentToUnit;
+
+  renderConversions();
+}
+
+function renderConversions() {
+  if (state.mode === 'table') {
+    document.getElementById('tableView').style.display = '';
+    document.getElementById('classicView').style.display = 'none';
+    document.getElementById('toField').style.display = 'none';
+    document.getElementById('inputRow').className = 'input-row tabuľka-mode';
+    renderTable();
+  } else {
+    document.getElementById('tableView').style.display = 'none';
+    document.getElementById('classicView').style.display = '';
+    document.getElementById('toField').style.display = '';
+    document.getElementById('inputRow').className = 'input-row classic-mode';
+    renderClassic();
+  }
+  updatePinButton();
+}
+
+function renderTable() {
+  const cat = UNITS[state.currentCategory];
+  const container = document.getElementById('tableView');
+  container.innerHTML = '';
+
+  // Common units
+  const commonGroup = document.createElement('div');
+  const lbl = document.createElement('div');
+  lbl.className = 'conv-group-label';
+  lbl.textContent = '⭐ Časté';
+  commonGroup.appendChild(lbl);
+  cat.common.forEach(uKey => commonGroup.appendChild(buildRow(uKey)));
+  container.appendChild(commonGroup);
+
+  // Other units
+  const others = Object.keys(cat.units).filter(k => !cat.common.includes(k));
+  if (others.length > 0) {
+    if (state.showAll) {
+      const allGroup = document.createElement('div');
+      const lbl2 = document.createElement('div');
+      lbl2.className = 'conv-group-label';
+      lbl2.textContent = 'Všetky';
+      allGroup.appendChild(lbl2);
+      others.forEach(uKey => allGroup.appendChild(buildRow(uKey)));
+      container.appendChild(allGroup);
+    } else {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'show-all-btn';
+      moreBtn.textContent = `▾ Zobraziť všetky (${others.length} ďalších)`;
+      moreBtn.addEventListener('click', () => { state.showAll = true; renderTable(); });
+      container.appendChild(moreBtn);
+    }
+  }
+}
+
+function buildRow(uKey) {
+  const cat = UNITS[state.currentCategory];
+  const u = cat.units[uKey];
+  const value = convert(state.currentValue, state.currentCategory, state.currentFromUnit, uKey);
+  const isFrom = uKey === state.currentFromUnit;
+
+  const row = document.createElement('div');
+  row.className = 'conv-row';
+  row.innerHTML = `
+    <div class="conv-unit">
+      <span class="name">${u.name}</span>
+      <span class="symbol">${u.symbol}</span>
+    </div>
+    <div class="conv-value">${isFrom ? '<span style="color: var(--accent)">' + formatValue(value) + '</span>' : formatValue(value)}</div>
+    ${u.info ? '<button class="conv-info" data-info="' + escapeHtml(u.info) + '">ℹ</button>' : '<span></span>'}
+  `;
+  return row;
+}
+
+function renderClassic() {
+  const cat = UNITS[state.currentCategory];
+  const fromU = cat.units[state.currentFromUnit];
+  const toU = cat.units[state.currentToUnit];
+  const value = convert(state.currentValue, state.currentCategory, state.currentFromUnit, state.currentToUnit);
+  document.getElementById('classicResult').innerHTML =
+    `<span class="accent">${formatValue(state.currentValue)}</span> ${fromU.symbol} = <span class="accent">${formatValue(value)}</span> ${toU.symbol}`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ====== SEARCH ======
+function performSearch(query) {
+  const q = query.toLowerCase().trim();
+  const results = document.getElementById('searchResults');
+  if (!q) { results.classList.remove('open'); return; }
+
+  const matches = [];
+  Object.entries(UNITS).forEach(([catKey, cat]) => {
+    if (cat.name.toLowerCase().includes(q)) {
+      matches.push({ type: 'category', catKey, label: cat.name, icon: cat.icon });
+    }
+    Object.entries(cat.units).forEach(([uKey, u]) => {
+      if (u.name.toLowerCase().includes(q) || u.symbol.toLowerCase().includes(q) || uKey.toLowerCase().includes(q)) {
+        matches.push({ type: 'unit', catKey, catName: cat.name, uKey, label: u.name, symbol: u.symbol });
+      }
+    });
+  });
+
+  if (matches.length === 0) {
+    results.innerHTML = '<div class="search-result"><span style="color: var(--text-dim)">Žiadne výsledky</span></div>';
+    results.classList.add('open');
+    return;
+  }
+
+  results.innerHTML = matches.slice(0, 30).map(m => {
+    if (m.type === 'category') {
+      return `<div class="search-result" data-cat="${m.catKey}">
+        <div><span class="category">Kategória</span><div class="unit-name">${m.icon} ${m.label}</div></div>
+      </div>`;
+    }
+    return `<div class="search-result" data-cat="${m.catKey}" data-unit="${m.uKey}">
+      <div><span class="category">${m.catName}</span><div class="unit-name">${m.label}</div></div>
+      <span class="unit-symbol">${m.symbol}</span>
+    </div>`;
+  }).join('');
+
+  results.querySelectorAll('.search-result').forEach(el => {
+    el.addEventListener('click', () => {
+      const catKey = el.dataset.cat;
+      const uKey = el.dataset.unit;
+      results.classList.remove('open');
+      document.getElementById('searchInput').value = '';
+      if (catKey) openCategory(catKey, uKey);
+    });
+  });
+  results.classList.add('open');
+}
+
+// ====== HISTORY & PINNED ======
+function addToHistory(value, category, fromKey, toKey) {
+  const entry = { value, category, fromKey, toKey, ts: Date.now() };
+  state.history.unshift(entry);
+  state.history = state.history.slice(0, 50);
+  saveHistory();
+  renderSidebar();
+}
+
+function togglePin() {
+  const entry = {
+    category: state.currentCategory,
+    fromKey: state.currentFromUnit,
+    toKey: state.currentToUnit,
+    value: state.currentValue
+  };
+  const idx = state.pinned.findIndex(p =>
+    p.category === entry.category && p.fromKey === entry.fromKey && p.toKey === entry.toKey
+  );
+  if (idx >= 0) state.pinned.splice(idx, 1);
+  else state.pinned.unshift(entry);
+  savePinned();
+  renderSidebar();
+  updatePinButton();
+}
+
+function updatePinButton() {
+  const btn = document.getElementById('pinAction');
+  const isPinned = state.pinned.some(p =>
+    p.category === state.currentCategory &&
+    p.fromKey === state.currentFromUnit &&
+    p.toKey === state.currentToUnit
+  );
+  btn.textContent = isPinned ? '★ Odopnúť' : '+ Pripnúť tento prevod';
+  btn.classList.toggle('pinned', isPinned);
+}
+
+function renderSidebar() {
+  const histEl = document.getElementById('historyList');
+  const pinEl  = document.getElementById('pinnedList');
+
+  if (state.pinned.length === 0) {
+    pinEl.innerHTML = '<li class="empty-state">Žiadne pripnuté prevody</li>';
+  } else {
+    pinEl.innerHTML = state.pinned.map((p, i) => {
+      const cat = UNITS[p.category];
+      const from = cat.units[p.fromKey];
+      const to = cat.units[p.toKey];
+      return `<li class="pinned-item" data-idx="${i}">
+        <span class="text">${cat.icon} ${from.symbol} → ${to.symbol}</span>
+        <button class="item-remove" data-unpin="${i}" aria-label="Odopnúť">✕</button>
+      </li>`;
+    }).join('');
+    pinEl.querySelectorAll('[data-idx]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.dataset.unpin !== undefined) return;
+        const idx = parseInt(el.dataset.idx);
+        const p = state.pinned[idx];
+        openCategory(p.category, p.fromKey);
+        document.getElementById('toUnit').value = p.toKey;
+        state.currentToUnit = p.toKey;
+        if (p.value !== undefined) {
+          state.currentValue = p.value;
+          document.getElementById('valueInput').value = p.value;
+        }
+        renderConversions();
+        closeSidebarMobile();
+      });
+    });
+    pinEl.querySelectorAll('[data-unpin]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(el.dataset.unpin);
+        state.pinned.splice(idx, 1);
+        savePinned();
+        renderSidebar();
+        updatePinButton();
+      });
+    });
+  }
+
+  if (state.history.length === 0) {
+    histEl.innerHTML = '<li class="empty-state">Zatiaľ žiadna história</li>';
+  } else {
+    histEl.innerHTML = state.history.slice(0, 20).map((h, i) => {
+      const cat = UNITS[h.category];
+      const from = cat.units[h.fromKey];
+      const to = cat.units[h.toKey];
+      return `<li class="history-item" data-idx="${i}">
+        <span class="text">${formatValue(h.value)} ${from.symbol} → ${to.symbol}</span>
+        <button class="pin-toggle" data-pin="${i}" aria-label="Pripnúť">📌</button>
+      </li>`;
+    }).join('');
+    histEl.querySelectorAll('[data-idx]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.dataset.pin !== undefined) return;
+        const idx = parseInt(el.dataset.idx);
+        const h = state.history[idx];
+        openCategory(h.category, h.fromKey);
+        document.getElementById('toUnit').value = h.toKey;
+        state.currentToUnit = h.toKey;
+        state.currentValue = h.value;
+        document.getElementById('valueInput').value = h.value;
+        renderConversions();
+        closeSidebarMobile();
+      });
+    });
+    histEl.querySelectorAll('[data-pin]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(el.dataset.pin);
+        const h = state.history[idx];
+        const exists = state.pinned.some(p =>
+          p.category === h.category && p.fromKey === h.fromKey && p.toKey === h.toKey
+        );
+        if (!exists) {
+          state.pinned.unshift({
+            category: h.category, fromKey: h.fromKey, toKey: h.toKey, value: h.value
+          });
+          savePinned();
+          renderSidebar();
+          updatePinButton();
+        }
+      });
+    });
+  }
+}
+
+// ====== TOOLTIPS ======
+const tooltipEl = document.getElementById('tooltip');
+document.addEventListener('click', (e) => {
+  if (e.target.classList && e.target.classList.contains('conv-info')) {
+    const info = e.target.dataset.info;
+    tooltipEl.textContent = info;
+    const r = e.target.getBoundingClientRect();
+    tooltipEl.style.left = Math.min(window.innerWidth - 300, r.right + 8) + 'px';
+    tooltipEl.style.top  = (r.top + window.scrollY - 8) + 'px';
+    tooltipEl.classList.add('show');
+    setTimeout(() => tooltipEl.classList.remove('show'), 4000);
+    e.stopPropagation();
+  } else {
+    tooltipEl.classList.remove('show');
+  }
+});
+
+// ====== EVENT BINDINGS ======
+document.getElementById('searchInput').addEventListener('input', (e) => performSearch(e.target.value));
+document.getElementById('searchInput').addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('searchResults').classList.remove('open'), 200);
+});
+
+document.getElementById('backBtn').addEventListener('click', renderHome);
+
+document.getElementById('valueInput').addEventListener('input', (e) => {
+  const raw = e.target.value.replace(',', '.');
+  const v = parseFloat(raw);
+  if (!isNaN(v)) {
+    state.currentValue = v;
+    renderConversions();
+  }
+});
+
+document.getElementById('valueInput').addEventListener('change', () => {
+  if (state.currentCategory) {
+    addToHistory(state.currentValue, state.currentCategory, state.currentFromUnit, state.currentToUnit);
+  }
+});
+
+document.getElementById('fromUnit').addEventListener('change', (e) => {
+  state.currentFromUnit = e.target.value;
+  renderConversions();
+  if (state.currentCategory) {
+    addToHistory(state.currentValue, state.currentCategory, state.currentFromUnit, state.currentToUnit);
+  }
+});
+
+document.getElementById('toUnit').addEventListener('change', (e) => {
+  state.currentToUnit = e.target.value;
+  renderConversions();
+});
+
+document.getElementById('modeTable').addEventListener('click', () => {
+  state.mode = 'table';
+  document.getElementById('modeTable').classList.add('active');
+  document.getElementById('modeClassic').classList.remove('active');
+  renderConversions();
+});
+document.getElementById('modeClassic').addEventListener('click', () => {
+  state.mode = 'classic';
+  document.getElementById('modeClassic').classList.add('active');
+  document.getElementById('modeTable').classList.remove('active');
+  renderConversions();
+});
+
+document.getElementById('pinAction').addEventListener('click', togglePin);
+
+document.getElementById('clearHistory').addEventListener('click', () => {
+  if (confirm('Vymazať celú históriu?')) {
+    state.history = [];
+    saveHistory();
+    renderSidebar();
+  }
+});
+
+// Sidebar mobile
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+});
+document.getElementById('sidebarClose').addEventListener('click', closeSidebarMobile);
+document.getElementById('sidebarOverlay').addEventListener('click', closeSidebarMobile);
+function closeSidebarMobile() {
+  if (window.innerWidth < 1024) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+}
+
+// Cookies
+if (!localStorage.getItem(LS_COOKIES)) {
+  document.getElementById('cookiesBanner').classList.add('show');
+}
+document.getElementById('cookiesAccept').addEventListener('click', () => {
+  localStorage.setItem(LS_COOKIES, '1');
+  document.getElementById('cookiesBanner').classList.remove('show');
+});
+
+// ====== SUPPORT SECTION ======
+const supportToggle = document.getElementById('supportToggle');
+const supportContent = document.getElementById('supportContent');
+supportToggle.addEventListener('click', () => {
+  const open = supportContent.classList.toggle('open');
+  supportToggle.classList.toggle('open', open);
+  supportToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+
+const qrSources = {
+  '10':  '/qr-10e.png',
+  '100': '/qr-100e.png'
+};
+const supportQr = document.getElementById('supportQr');
+const supportPlaceholder = document.getElementById('supportPlaceholder');
+
+document.querySelectorAll('.support-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.support-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const amt = tab.dataset.amount;
+    if (amt === 'free') {
+      supportQr.style.display = 'none';
+      supportPlaceholder.style.display = '';
+    } else {
+      supportPlaceholder.style.display = 'none';
+      supportQr.src = qrSources[amt];
+      supportQr.alt = `QR ${amt} €`;
+      supportQr.style.display = '';
+    }
+  });
+});
+
+// IBAN copy
+document.getElementById('ibanCopy').addEventListener('click', async () => {
+  const btn = document.getElementById('ibanCopy');
+  try {
+    await navigator.clipboard.writeText('SK0611000000002612247644');
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+  } catch (e) {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = 'SK0611000000002612247644';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); btn.textContent = '✓'; btn.classList.add('copied'); }
+    catch(e2) {}
+    document.body.removeChild(ta);
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+  }
+});
+
+// ====== INIT ======
+loadStorage();
+renderHome();
+renderSidebar();
+</script>
+
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a0adf262995c487c8b0bb23eb0eacab3"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body>
+</html>
