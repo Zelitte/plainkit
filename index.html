@@ -4,160 +4,428 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07090f">
-<title>plainkit · čoskoro</title>
-<meta name="description" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Čoskoro spustené.">
+<title>plainkit · jednoduché nástroje bez reklám</title>
+<meta name="description" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač, QR generátor, prevodník jednotiek, svetový čas a vyhľadávanie.">
+<meta name="keywords" content="plainkit, nástroje, prekladač, qr generátor, prevodník jednotiek, svetový čas, vyhľadávanie, zadarmo, bez reklamy">
 
-<meta property="og:title" content="plainkit">
-<meta property="og:description" content="Jednoduché nástroje bez reklám. Čoskoro.">
+<!-- Open Graph -->
+<meta property="og:title" content="plainkit · jednoduché nástroje bez reklám">
+<meta property="og:description" content="Prekladač, QR generátor, prevodník jednotiek, svetový čas a vyhľadávanie. Bez reklám, bez registrácie, bez sledovania.">
 <meta property="og:image" content="https://plainkit.app/og-image.png">
+<meta property="og:url" content="https://plainkit.app/">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="plainkit · jednoduché nástroje">
+<meta name="twitter:image" content="https://plainkit.app/og-image.png">
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307090f'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='62' font-style='italic' font-weight='600' fill='%2300d4e8'%3EP%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --bg: #0a0f14;
-    --bg2: #11171f;
-    --accent: #00d4e8;
-    --accent-dim: rgba(0,212,232,0.13);
-    --text: #f5f7fa;
-    --text-2: #8b95a3;
-    --text-3: #4a5260;
-    --border: rgba(255,255,255,0.06);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-  }
-  /* atmosférické pozadie */
-  body::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 40%, var(--accent-dim), transparent 70%),
-      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-    z-index: 0;
-  }
-  .wrap {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 2rem;
-    animation: rise 0.9s cubic-bezier(.16,1,.3,1) both;
-  }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1.4rem;
-    animation-delay: 0.05s;
-  }
-  .logo {
-    font-size: clamp(3.2rem, 12vw, 6rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    margin-bottom: 1.2rem;
-  }
-  .logo .dot { color: var(--accent); }
-  .tagline {
-    font-size: clamp(0.95rem, 3vw, 1.15rem);
-    color: var(--text-2);
-    font-weight: 300;
-    max-width: 30ch;
-    margin: 0 auto 2.6rem;
-    line-height: 1.6;
-  }
-  .status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--text);
-    padding: 0.7rem 1.4rem;
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    background: rgba(255,255,255,0.02);
-  }
-  .pulse {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 0 var(--accent);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(0,212,232,0.5); }
-    70%  { box-shadow: 0 0 0 10px rgba(0,212,232,0); }
-    100% { box-shadow: 0 0 0 0 rgba(0,212,232,0); }
-  }
-  .links {
-    margin-top: 2.4rem;
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .links a {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--text-2);
-    text-decoration: none;
-    padding: 0.55rem 1.1rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    transition: all 0.25s ease;
-  }
-  .links a:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: var(--accent-dim);
-  }
-  .foot {
-    position: absolute;
-    bottom: 1.6rem;
-    left: 0; right: 0;
-    text-align: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--text-3);
-    letter-spacing: 0.1em;
-    z-index: 1;
-  }
+:root {
+  --bg: #0a0f14;
+  --bg2: #11171f;
+  --bg-elev: rgba(255,255,255,0.025);
+  --bg-elev-2: rgba(0,212,232,0.05);
+  --glass: rgba(255,255,255,0.025);
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --accent: #00d4e8;
+  --accent-dim: rgba(0,212,232,0.13);
+  --yellow: #ffc629;
+  --text: #f5f7fa;
+  --text-2: #8b95a3;
+  --text-dim: #8b95a3;
+  --text-3: #4a5260;
+  --green: #00e676;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 0%, var(--accent-dim), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+/* ═══ Layout: 3 stĺpce ═══ */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px;
+  min-height: 100vh;
+}
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 1fr; }
+  .panel-left, .panel-right { order: 2; }
+  .panel-center { order: 1; }
+}
+
+.panel { display: flex; flex-direction: column; gap: 20px; }
+h3.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+/* ═══ ĽAVÁ LIŠTA: Poznámky ═══ */
+.notes-card, .support-card, .clock-card, .search-card, .links-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.notes-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.notes-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-3); }
+#notes {
+  width: 100%; min-height: 180px; resize: vertical;
+  background: transparent; border: none; color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
+  outline: none;
+}
+#notes::placeholder { color: var(--text-3); }
+.notes-btn {
+  width: 100%; margin-top: 10px; padding: 10px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.15s;
+}
+.notes-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══ ĽAVÁ LIŠTA: Podpora ═══ */
+.support-card h4 { font-size: 0.95rem; margin-bottom: 6px; }
+.support-sub { font-size: 0.8rem; color: var(--text-2); line-height: 1.5; margin-bottom: 14px; }
+.donate-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.donate-tab {
+  flex: 1; padding: 7px; background: transparent;
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-2); font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+}
+.donate-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.qr-box { text-align: center; }
+.qr-box img, .qr-box canvas { width: 180px; height: 180px; border-radius: 8px; background: #fff; padding: 8px; }
+.iban-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; color: var(--text-2);
+}
+.iban-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
+
+/* ═══ STRED: Hlavička ═══ */
+.home-head { text-align: center; margin-bottom: 8px; }
+.home-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+}
+.home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
+.home-logo .dot { color: var(--accent); }
+
+/* ═══ STRED: Svetové hodiny ═══ */
+.clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.clock {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+}
+.clock .city {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2);
+  margin-bottom: 8px;
+}
+.clock .time {
+  font-family: 'JetBrains Mono', monospace; font-size: 1.5rem;
+  font-weight: 600; color: var(--text); letter-spacing: 0.02em;
+}
+.clock .time .sec { color: var(--accent); font-size: 1rem; }
+.clock .date { font-size: 0.68rem; color: var(--text-3); margin-top: 4px; }
+
+/* ═══ STRED: Vyhľadávanie ═══ */
+.search-card { padding: 24px; }
+.search-box { display: flex; gap: 10px; }
+#search-input {
+  flex: 1; padding: 14px 18px; font-size: 1rem;
+  background: var(--bg2); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.15s;
+}
+#search-input:focus { border-color: var(--accent); }
+#search-input::placeholder { color: var(--text-3); }
+.engines { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.engine-btn {
+  flex: 1; min-width: 110px; padding: 12px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.engine-btn:hover { border-color: var(--accent); background: var(--bg-elev-2); }
+.engine-btn .dot-g { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ═══ PRAVÁ LIŠTA: Nástroje (štýl prevodníka) ═══ */
+.tool-link {
+  display: block; background: var(--bg-elev);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px; text-decoration: none; color: var(--text);
+  margin-bottom: 8px; transition: all 0.15s;
+}
+.tool-link:hover { border-color: var(--accent); background: var(--bg-elev-2); }
+.tool-link .label {
+  font-size: 0.85rem; font-weight: 500;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.tool-link .url {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  color: var(--text-dim); margin-top: 3px;
+}
+
+.foot {
+  text-align: center; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.1em;
+  padding: 20px; margin-top: 20px;
+}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="eyebrow">no ads · no signup · no tracking</div>
-    <div class="logo">plainkit<span class="dot">.</span></div>
-    <div class="tagline">Jednoduché nástroje bez reklám, bez registrácie, bez sledovania.</div>
-    <div class="status">
-      <span class="pulse"></span>
-      Domovská stránka čoskoro
+<div class="layout">
+
+  <!-- ═══════════════ ĽAVÁ LIŠTA ═══════════════ -->
+  <aside class="panel panel-left">
+    <!-- Poznámky -->
+    <div class="notes-card">
+      <div class="notes-head">
+        <h3 class="section-title">Poznámky</h3>
+        <span class="notes-count" id="notes-count">0 znakov</span>
+      </div>
+      <textarea id="notes" placeholder="Píšte tu vaše poznámky..."></textarea>
+      <button class="notes-btn" onclick="downloadNotes()">↓ Stiahnuť poznámky</button>
     </div>
-    <div class="links">
-      <a href="/preklad">Prekladač →</a>
+
+    <!-- Podpora -->
+    <div class="support-card">
+      <h3 class="section-title">Podporte projekt</h3>
+      <h4>Na skenovanie použi bankovú aplikáciu</h4>
+      <p class="support-sub">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</p>
+      <div class="donate-tabs">
+        <button class="donate-tab active" data-amt="variable" onclick="switchQr('variable')">Voľná</button>
+        <button class="donate-tab" data-amt="10" onclick="switchQr('10')">10 €</button>
+        <button class="donate-tab" data-amt="100" onclick="switchQr('100')">100 €</button>
+      </div>
+      <div class="qr-box">
+        <div id="qr-variable"></div>
+        <img id="qr-10" src="/qr-10e.png" alt="QR 10 €" style="display:none">
+        <img id="qr-100" src="/qr-100e.png" alt="QR 100 €" style="display:none">
+      </div>
+      <div class="iban-row">
+        <span id="iban-display">SK06 1100 0000 ···· ···· 7644</span>
+        <button class="iban-copy" onclick="copyIban()" title="Skopírovať IBAN">📋</button>
+      </div>
     </div>
-  </div>
-  <div class="foot">plainkit.app</div>
+  </aside>
+
+  <!-- ═══════════════ STRED ═══════════════ -->
+  <main class="panel panel-center">
+    <div class="home-head">
+      <div class="home-eyebrow">no ads · no signup · no tracking</div>
+      <div class="home-logo">plainkit<span class="dot">.</span></div>
+    </div>
+
+    <!-- Svetové hodiny -->
+    <div class="clock-card">
+      <h3 class="section-title">Svetový čas</h3>
+      <div class="clocks" id="clocks"></div>
+    </div>
+
+    <!-- Vyhľadávanie -->
+    <div class="search-card">
+      <h3 class="section-title">Vyhľadávanie</h3>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Zadajte hľadaný výraz a vyberte vyhľadávač..."
+               onkeydown="if(event.key==='Enter') search('google')">
+      </div>
+      <div class="engines">
+        <button class="engine-btn" onclick="search('google')">
+          <span class="dot-g" style="background:#4285f4"></span> Google
+        </button>
+        <button class="engine-btn" onclick="search('bing')">
+          <span class="dot-g" style="background:#008373"></span> Bing
+        </button>
+        <button class="engine-btn" onclick="search('ddg')">
+          <span class="dot-g" style="background:#de5833"></span> DuckDuckGo
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════ PRAVÁ LIŠTA: NÁSTROJE ═══════════════ -->
+  <aside class="panel panel-right">
+    <div class="links-card">
+      <h3 class="section-title">Nástroje</h3>
+
+      <!-- ╔══════════════════════════════════════════════╗
+           ║  AKO PRIDAŤ NOVÝ NÁSTROJ:                     ║
+           ║  Skopíruj jeden blok <a class="tool-link">    ║
+           ║  nižšie, zmeň:                                ║
+           ║    href="/cesta"     → URL nástroja           ║
+           ║    <span>Názov</span> → zobrazený názov        ║
+           ║    .url text         → plainkit.app/cesta     ║
+           ╚══════════════════════════════════════════════╝ -->
+
+      <!-- NÁSTROJ: Prekladač -->
+      <a href="/preklad" class="tool-link">
+        <div class="label"><span>Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/preklad</div>
+      </a>
+
+      <!-- NÁSTROJ: QR generátor -->
+      <a href="/qr" class="tool-link">
+        <div class="label"><span>QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/qr</div>
+      </a>
+
+      <!-- NÁSTROJ: Prevodník jednotiek -->
+      <a href="/jednotky" class="tool-link">
+        <div class="label"><span>Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/jednotky</div>
+      </a>
+
+      <!-- NÁSTROJ: Hopko (hra) -->
+      <a href="/hopko" class="tool-link">
+        <div class="label"><span>Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/hopko</div>
+      </a>
+
+      <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok vyššie) ↓↓↓ -->
+
+
+    </div>
+  </aside>
+
+</div>
+
+<div class="foot">plainkit.app · bez reklám, bez registrácie, bez sledovania</div>
+
+<!-- QR knižnica pre "Voľná" SEPA platbu -->
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+<script>
+// ═══ Konfigurácia ═══
+const IBAN_FULL    = 'SK06 1100 0000 0026 1224 7644';
+const IBAN_COMPACT = 'SK0611000000002612247644';
+const BENEFICIARY  = 'plainkit';
+const BIC          = 'TATRSKBX';
+
+// ═══ Svetové hodiny ═══
+const CITIES = [
+  { name: 'Bratislava', tz: 'Europe/Bratislava' },
+  { name: 'Londýn',     tz: 'Europe/London' },
+  { name: 'New York',   tz: 'America/New_York' },
+  { name: 'Tokio',      tz: 'Asia/Tokyo' },
+  { name: 'Sydney',     tz: 'Australia/Sydney' },
+];
+
+function buildClocks() {
+  const wrap = document.getElementById('clocks');
+  wrap.innerHTML = CITIES.map((c, i) => `
+    <div class="clock">
+      <div class="city">${c.name}</div>
+      <div class="time" id="clk-${i}">--:--<span class="sec">:--</span></div>
+      <div class="date" id="dat-${i}"></div>
+    </div>`).join('');
+}
+function tickClocks() {
+  const now = new Date();
+  CITIES.forEach((c, i) => {
+    const t = new Intl.DateTimeFormat('sk-SK', {
+      timeZone: c.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    }).formatToParts(now);
+    const get = p => (t.find(x => x.type === p) || {}).value || '00';
+    const el = document.getElementById('clk-' + i);
+    if (el) el.innerHTML = `${get('hour')}:${get('minute')}<span class="sec">:${get('second')}</span>`;
+    const d = new Intl.DateTimeFormat('sk-SK', {
+      timeZone: c.tz, weekday: 'short', day: 'numeric', month: 'short'
+    }).format(now);
+    const de = document.getElementById('dat-' + i);
+    if (de) de.textContent = d;
+  });
+}
+
+// ═══ Vyhľadávanie ═══
+function search(engine) {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) { document.getElementById('search-input').focus(); return; }
+  const urls = {
+    google: 'https://www.google.com/search?q=',
+    bing:   'https://www.bing.com/search?q=',
+    ddg:    'https://duckduckgo.com/?q=',
+  };
+  window.open(urls[engine] + encodeURIComponent(q), '_blank', 'noopener');
+}
+
+// ═══ Poznámky ═══
+const notesEl = document.getElementById('notes');
+notesEl.addEventListener('input', () => {
+  document.getElementById('notes-count').textContent = notesEl.value.length + ' znakov';
+});
+function downloadNotes() {
+  const txt = notesEl.value || '';
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'poznamky.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ═══ Podpora: prepínanie QR + IBAN ═══
+let qrVariable = null;
+function switchQr(amt) {
+  document.querySelectorAll('.donate-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.amt === amt));
+  document.getElementById('qr-variable').style.display = amt === 'variable' ? 'block' : 'none';
+  document.getElementById('qr-10').style.display  = amt === '10'  ? 'block' : 'none';
+  document.getElementById('qr-100').style.display = amt === '100' ? 'block' : 'none';
+}
+function buildVariableQr() {
+  // EPC QR (SEPA Credit Transfer) - voľná suma
+  const epc = ['BCD','002','1','SCT', BIC, BENEFICIARY, IBAN_COMPACT, '', '', '', 'plainkit'].join('\n');
+  qrVariable = new QRCodeStyling({
+    width: 180, height: 180, data: epc,
+    backgroundOptions: { color: '#ffffff' },
+    dotsOptions: { color: '#0a0f14', type: 'square' },
+  });
+  qrVariable.append(document.getElementById('qr-variable'));
+}
+function copyIban() {
+  navigator.clipboard.writeText(IBAN_COMPACT).then(() => {
+    const el = document.getElementById('iban-display');
+    const orig = el.textContent;
+    el.textContent = '✓ Skopírované';
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+
+// ═══ Init ═══
+buildClocks();
+tickClocks();
+setInterval(tickClocks, 1000);
+buildVariableQr();
+document.getElementById('iban-display').textContent = IBAN_FULL;
+</script>
 </body>
 </html>
