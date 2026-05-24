@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="sk" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f14">
+<meta name="google" content="notranslate">
+
+<title>gencod · QR generátor · QR generator · zadarmo, bez reklamy</title>
+
+<!-- ═══ SEO ═══ -->
+<meta name="description" content="QR generátor · QR code generator · Générateur de codes QR. URL, WiFi, vCard, email, SMS, geo. S logom, vlastnými farbami, PNG aj SVG export. Zadarmo, bez reklamy.">
+<meta name="keywords" content="QR generátor, QR code generator, générateur QR, qr s logom, wifi qr, vcard qr, zadarmo, bez reklamy">
+<meta name="author" content="plainkit.app/qr">
+<meta name="robots" content="index, follow">
+
+<!-- ═══ Open Graph ═══ -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://plainkit.app/qr/">
+<meta property="og:title" content="gencod · QR generátor · QR code generator · Générateur de codes QR">
+<meta property="og:description" content="QR generátor s logom, vlastnými farbami, PNG aj SVG. Zadarmo, bez reklamy.">
+<meta property="og:locale" content="sk_SK">
+<meta property="og:locale:alternate" content="en_GB">
+<meta property="og:locale:alternate" content="fr_FR">
+
+<!-- ═══ Twitter Card ═══ -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gencod · QR generátor zadarmo">
+<meta name="twitter:description" content="QR s logom, vlastnými farbami, PNG aj SVG. Zadarmo, bez reklamy.">
+
+<!-- ═══ JSON-LD structured data ═══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "gencod",
+  "alternateName": ["QR generator", "Générateur de codes QR"],
+  "url": "https://plainkit.app/qr/",
+  "description": "QR generátor s logom, vlastnými farbami, PNG aj SVG. Zadarmo, bez reklamy.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "inLanguage": ["sk", "en", "fr"]
+}
+</script>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0f14'/%3E%3Crect x='22' y='22' width='18' height='18' fill='%2300d4e8'/%3E%3Crect x='60' y='22' width='18' height='18' fill='%2300d4e8'/%3E%3Crect x='22' y='60' width='18' height='18' fill='%2300d4e8'/%3E%3Crect x='46' y='46' width='8' height='8' fill='%23ffc629'/%3E%3Crect x='60' y='60' width='8' height='8' fill='%23ffc629'/%3E%3Crect x='70' y='60' width='8' height='8' fill='%23ffc629'/%3E%3Crect x='60' y='70' width='8' height='8' fill='%23ffc629'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Cloudflare Web Analytics (no cookies, no personal tracking) -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5495343649c1497bb30b65059ad7d408"}'></script>
+
+<!-- qr-code-styling@1.9.2 - pinned version with SRI integrity hash -->
+<script
+  src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"
+  integrity="sha384-P7sw4KeI1SDhOs6wYFsBysIIHFqMTgG4y9vunEfL8ZuV0WhnHsh9MRu9Rso17MtY"
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ambient"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     Language selection screen
+     ═══════════════════════════════════════════════════════ -->
+<div id="lang-screen">
+  <div class="lang-header">
+    <div class="lang-tag">QR · GENERATOR · GÉNÉRATEUR</div>
+    <h1 class="lang-logo">gencod</h1>
+    <div class="lang-tagline">Vyberte jazyk · Choose language · Choisissez la langue</div>
+  </div>
+  <div class="lang-cards">
+    <div class="lang-card" onclick="selectLang('sk')">
+      <div class="lang-flag">🇸🇰</div>
+      <div class="lang-name">Slovenčina</div>
+      <div class="lang-native">Slovakia</div>
+    </div>
+    <div class="lang-card" onclick="selectLang('en')">
+      <div class="lang-flag">🇬🇧</div>
+      <div class="lang-name">English</div>
+      <div class="lang-native">United Kingdom</div>
+    </div>
+    <div class="lang-card" onclick="selectLang('fr')">
+      <div class="lang-flag">🇫🇷</div>
+      <div class="lang-name">Français</div>
+      <div class="lang-native">France</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     Main app
+     ═══════════════════════════════════════════════════════ -->
+<div id="app">
+  <header class="app-header">
+    <div class="app-logo"><em>gencod</em></div>
+    <button class="lang-switch-btn" onclick="switchLang()">
+      <span id="curr-flag">🇸🇰</span>
+      <span id="lang-btn-label">Zmeniť jazyk</span>
+    </button>
+  </header>
+
+  <div class="app-content">
+    <!-- ═══ Left side panel: History + Donations ═══ -->
+    <aside class="side-panel">
+      <!-- History -->
+      <div class="history-section">
+        <div class="panel-header">
+          <div class="panel-title" id="history-title">História</div>
+          <div class="panel-count" id="history-count">0 / 50</div>
+        </div>
+        <div class="history-list" id="history-list"></div>
+        <div class="history-footer">
+          <button class="history-clear-btn" id="history-clear-btn" onclick="clearHistory()" disabled>
+            <span id="history-clear-label">Vymazať históriu</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Donations -->
+      <div class="donations-section">
+        <div class="donation-title" id="donation-title">Podporte projekt</div>
+        <div class="donation-instruction" id="donation-instruction">Na skenovanie použi bankovú aplikáciu</div>
+        <div class="donation-text" id="donation-text">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</div>
+
+        <div class="qr-tabs">
+          <button class="qr-tab active" data-qr="variable" onclick="switchDonateQr('variable')" id="qr-tab-variable">Voľná</button>
+          <button class="qr-tab" data-qr="10" onclick="switchDonateQr('10')">10 €</button>
+          <button class="qr-tab" data-qr="100" onclick="switchDonateQr('100')">100 €</button>
+        </div>
+
+        <div class="qr-wrap" id="qr-wrap" title="QR — SEPA platba">
+          <div id="donate-qr-variable" class="donate-qr-target"></div>
+          <img id="donate-qr-10" src="/qr-10e.png" alt="QR 10 €" style="display:none">
+          <img id="donate-qr-100" src="/qr-100e.png" alt="QR 100 €" style="display:none">
+        </div>
+
+        <div class="qr-hint" id="qr-hint">Sumu môžete v aplikácii zmeniť</div>
+        <div class="iban-row">
+          <span class="iban-display" id="iban-display">SK06 1100 0000 ···· ···· 7644</span>
+          <button class="iban-copy-btn" id="iban-copy-btn" onclick="copyIban()" title="Skopírovať IBAN">📋</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ Main generator panel ═══ -->
+    <section class="gen-panel">
+      <!-- LEFT column: form -->
+      <div class="gen-col">
+        <!-- Type selector -->
+        <div>
+          <label class="field-label" id="type-label">Typ kódu</label>
+          <div class="select-wrap">
+            <select class="select" id="qr-type" onchange="onTypeChange()">
+              <option value="url" data-i18n-type="url">URL adresa</option>
+              <option value="text" data-i18n-type="text">Text</option>
+              <option value="wifi" data-i18n-type="wifi">WiFi sieť</option>
+              <option value="vcard" data-i18n-type="vcard">Kontakt (vCard)</option>
+              <option value="email" data-i18n-type="email">Email</option>
+              <option value="sms" data-i18n-type="sms">SMS</option>
+              <option value="geo" data-i18n-type="geo">Geolokácia</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sensitive warning (shown only for wifi/vcard) -->
+        <div class="sensitive-warning" id="sensitive-warning" style="display:none">
+          <span id="sensitive-warning-text">Tento typ obsahuje citlivé údaje — neuloží sa do histórie.</span>
+        </div>
+
+        <!-- Dynamic input fields per type -->
+        <div id="inputs-container">
+          <!-- URL -->
+          <div class="input-group" data-type="url">
+            <label class="field-label">URL</label>
+            <input type="url" class="text-input" id="in-url" data-placeholder="urlPlaceholder" placeholder="https://example.com">
+          </div>
+
+          <!-- Text -->
+          <div class="input-group" data-type="text" style="display:none">
+            <label class="field-label">Text</label>
+            <textarea class="textarea" id="in-text" rows="4" data-placeholder="textPlaceholder" placeholder="Akýkoľvek text..."></textarea>
+          </div>
+
+          <!-- WiFi -->
+          <div class="input-group" data-type="wifi" style="display:none">
+            <div class="field-grid">
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="wifiSsid">Názov siete (SSID)</label>
+                <input type="text" class="text-input" id="in-wifi-ssid">
+              </div>
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="wifiPassword">Heslo</label>
+                <input type="text" class="text-input" id="in-wifi-pass">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="wifiEncryption">Zabezpečenie</label>
+                <div class="select-wrap">
+                  <select class="select" id="in-wifi-enc">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">None</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <label class="check-row">
+                  <input type="checkbox" id="in-wifi-hidden">
+                  <span data-i18n-input="wifiHidden">Skrytá sieť</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- vCard -->
+          <div class="input-group" data-type="vcard" style="display:none">
+            <div class="field-grid">
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="vcardName">Meno a priezvisko</label>
+                <input type="text" class="text-input" id="in-vcard-name">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="vcardPhone">Telefón</label>
+                <input type="tel" class="text-input" id="in-vcard-phone">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="vcardEmail">Email</label>
+                <input type="email" class="text-input" id="in-vcard-email">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="vcardOrg">Firma</label>
+                <input type="text" class="text-input" id="in-vcard-org">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="vcardUrl">Webstránka</label>
+                <input type="url" class="text-input" id="in-vcard-url">
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="input-group" data-type="email" style="display:none">
+            <div class="field-grid">
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="emailTo">Adresát</label>
+                <input type="email" class="text-input" id="in-email-to">
+              </div>
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="emailSubject">Predmet</label>
+                <input type="text" class="text-input" id="in-email-subject">
+              </div>
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="emailBody">Telo správy</label>
+                <textarea class="textarea" id="in-email-body" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- SMS -->
+          <div class="input-group" data-type="sms" style="display:none">
+            <div class="field-grid">
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="smsPhone">Telefónne číslo</label>
+                <input type="tel" class="text-input" id="in-sms-phone">
+              </div>
+              <div class="field-full">
+                <label class="field-label" data-i18n-input="smsBody">Správa</label>
+                <textarea class="textarea" id="in-sms-body" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Geo -->
+          <div class="input-group" data-type="geo" style="display:none">
+            <div class="field-grid">
+              <div>
+                <label class="field-label" data-i18n-input="geoLat">Zemepisná šírka</label>
+                <input type="number" class="text-input" id="in-geo-lat" step="any" placeholder="48.1486">
+              </div>
+              <div>
+                <label class="field-label" data-i18n-input="geoLng">Zemepisná dĺžka</label>
+                <input type="number" class="text-input" id="in-geo-lng" step="any" placeholder="17.1077">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Styling section -->
+        <div class="section-title" id="styling-title">Vzhľad</div>
+
+        <div>
+          <label class="field-label" id="size-label">Veľkosť</label>
+          <div class="slider-row">
+            <input type="range" class="slider" id="opt-size" min="128" max="1024" step="32" value="512">
+            <div class="slider-value" id="size-value">512 px</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" id="ecc-label">Korekcia chýb</label>
+          <div class="ecc-row">
+            <div class="select-wrap">
+              <select class="select" id="opt-ecc">
+                <option value="L">L · 7%</option>
+                <option value="M">M · 15%</option>
+                <option value="Q" selected>Q · 25%</option>
+                <option value="H">H · 30%</option>
+              </select>
+            </div>
+            <div class="ecc-hint" id="ecc-hint">Vyššia úroveň = väčší kód, ale odolnejší voči poškodeniu.</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" id="colors-label">Farby</label>
+          <div class="color-row">
+            <div class="color-field">
+              <input type="color" id="opt-fg" value="#0a0f14">
+              <div>
+                <div class="color-field-label" id="fg-label">Popredie</div>
+                <div class="color-field-hex" id="fg-hex">#0a0f14</div>
+              </div>
+            </div>
+            <div class="color-field">
+              <input type="color" id="opt-bg" value="#ffffff">
+              <div>
+                <div class="color-field-label" id="bg-label">Pozadie</div>
+                <div class="color-field-hex" id="bg-hex">#ffffff</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" id="logo-label">Logo (voliteľné)</label>
+          <div class="logo-zone" id="logo-zone" onclick="document.getElementById('logo-input').click()">
+            <div class="logo-zone-empty" id="logo-zone-empty">
+              <span id="logo-upload-label">Pridať logo</span>
+            </div>
+            <div class="logo-preview" id="logo-preview" style="display:none">
+              <img id="logo-img" alt="Logo">
+              <div class="logo-preview-name" id="logo-name"></div>
+              <button class="logo-remove-btn" onclick="removeLogo(event)" id="logo-remove-btn" title="Odstrániť">×</button>
+            </div>
+          </div>
+          <input type="file" id="logo-input" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+        </div>
+      </div>
+
+      <!-- RIGHT column: preview + downloads -->
+      <div class="gen-col preview-wrap">
+        <div class="preview-card empty" id="preview-card">
+          <div class="preview-empty-text" id="preview-empty-text">Vyplňte vstup pre náhľad QR kódu</div>
+          <div id="qr-canvas"></div>
+        </div>
+
+        <div class="dl-row">
+          <button class="dl-btn" id="dl-png-btn" onclick="downloadQr('png')" disabled>
+            <span id="dl-png-label">PNG</span>
+          </button>
+          <button class="dl-btn" id="dl-svg-btn" onclick="downloadQr('svg')" disabled>
+            <span id="dl-svg-label">SVG</span>
+          </button>
+          <button class="dl-btn copy" id="copy-btn" onclick="copyQrToClipboard()" disabled>
+            <span id="copy-label">Skopírovať</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Right side panel: Tools ═══ -->
+    <aside class="right-panel">
+      <div class="panel-header">
+        <div class="panel-title" id="tools-title">Nástroje</div>
+      </div>
+      <div class="right-panel-list">
+        <a href="/preklad" class="tool-link">
+          <div class="tool-link-name">
+            <span>Prekladač · Translator</span>
+            <span class="arrow">↗</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/preklad</div>
+        </a>
+        <a href="https://jednotky.netlify.app/" class="tool-link" target="_blank" rel="noopener">
+          <div class="tool-link-name">
+            <span>Prevodník jednotiek · Unit converter</span>
+            <span class="arrow">↗</span>
+          </div>
+          <div class="tool-link-url">jednotky.netlify.app</div>
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ═══ Cookie banner ═══ -->
+<div id="cookie-banner">
+  <div class="cookie-text" id="cookie-text">
+    🍪 <strong>Stránka používa lokálne úložisko</strong> na ukladanie histórie a jazyka. Anonymné štatistiky návštevnosti cez Cloudflare (bez cookies). Žiadne reklamy, žiadne cookies tretích strán, žiadny personalizovaný tracking.
+  </div>
+  <button class="cookie-btn" id="cookie-btn" onclick="acceptCookies()">Rozumiem</button>
+</div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
