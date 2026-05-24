@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HOPKO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Fredoka',sans-serif;
+    background:#ffe6c9;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100dvh;padding:14px;overflow:hidden;user-select:none;
+  }
+  .wrap{width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;}
+  .head{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px;}
+  h1{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:40px;line-height:1;letter-spacing:1px;
+    color:#ff6f3c;text-shadow:0 3px 0 #ffce54, 0 5px 8px rgba(0,0,0,.12);
+  }
+  .scorewrap{text-align:right;}
+  .scorewrap .lab{font-size:11px;color:#b07a4a;letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+  .scorewrap .sc{font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;color:#5a3a1e;line-height:1;}
+  .scorewrap .best{font-size:12px;color:#b07a4a;font-weight:600;}
+
+  .frame{
+    position:relative;width:100%;height:min(74dvh,680px);border-radius:26px;overflow:hidden;
+    box-shadow:0 22px 50px rgba(120,70,20,.35), inset 0 0 0 4px rgba(255,255,255,.6);
+    touch-action:none;
+  }
+  canvas{display:block;width:100%;height:100%;}
+
+  .overlay{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    background:rgba(40,120,180,.32);backdrop-filter:blur(4px);text-align:center;padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .overlay .card{background:#fff;border-radius:22px;padding:24px 26px;box-shadow:0 14px 40px rgba(0,0,0,.25);max-width:300px;}
+  .overlay .emoji{font-size:48px;}
+  .overlay h2{font-family:'Baloo 2',cursive;font-weight:800;font-size:28px;color:#ff6f3c;margin:6px 0;}
+  .overlay p{color:#7a5a3a;font-weight:500;margin-bottom:8px;}
+  .overlay .big{font-family:'Baloo 2',cursive;font-size:36px;color:#5a3a1e;font-weight:800;}
+  .overlay button{
+    margin-top:14px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;color:#fff;
+    background:linear-gradient(160deg,#ff9a3c,#ff6f3c);border:none;border-radius:16px;padding:13px 30px;cursor:pointer;
+    box-shadow:0 6px 0 #d8521f;transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .overlay button:active{transform:translateY(4px);box-shadow:0 2px 0 #d8521f;}
+  .controls-hint{margin-top:10px;color:#b07a4a;font-size:12.5px;font-weight:500;text-align:center;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1>HOPKO</h1>
+      <div class="scorewrap">
+        <div class="lab">Výška</div>
+        <div class="sc" id="score">0</div>
+        <div class="best" id="best">najlepšie 0</div>
+      </div>
+    </div>
+
+    <div class="frame">
+      <canvas id="game"></canvas>
+      <div class="overlay show" id="overlay">
+        <div class="card">
+          <div class="emoji" id="ovEmoji">🟢</div>
+          <h2 id="ovTitle">Pripravený?</h2>
+          <p id="ovText">Navádzaj Hopka doľava a doprava a skáč čo najvyššie!</p>
+          <div class="big" id="ovScore" style="display:none"></div>
+          <button id="ovBtn">Hrať</button>
+        </div>
+      </div>
+    </div>
+    <div class="controls-hint">💻 šípky ← →  •  📱 ťukaj a podrž ľavú/pravú stranu</div>
+  </div>
+
+<script>
+const cvs = document.getElementById('game');
+const ctx = cvs.getContext('2d');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle');
+const ovText = document.getElementById('ovText');
+const ovScore = document.getElementById('ovScore');
+const ovEmoji = document.getElementById('ovEmoji');
+const ovBtn = document.getElementById('ovBtn');
+
+let W=0, H=0, dpr=1;
+function resize(){
+  const r = cvs.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1;
+  W = r.width; H = r.height;
+  cvs.width = Math.round(W*dpr); cvs.height = Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+// ---- tuning ----
+const GRAV = 0.42;
+const JUMP = -12.6;
+const SPRING = -21;
+const MOVE = 5.4;
+const PW = 36, PH = 36;
+const PLW = 66, PLH = 15;
+
+let player=null, platforms=[], clouds=[], totalScroll=0, score=0, best=0, over=false, started=false, dir=0;
+
+function gap(){
+  const diff = Math.min(totalScroll/2600, 1);          // 0..1 with height
+  return 60 + Math.random()*32 + diff*26;
+}
+
+function makePlatform(y){
+  const x = Math.random()*(W - PLW);
+  const diff = Math.min(totalScroll/2200, 1);
+  let type = 'normal';
+  const roll = Math.random();
+  if (roll < 0.10 + diff*0.10) type = 'spring';
+  else if (roll < 0.10 + diff*0.30) type = 'moving';
+  return { x, y, w:PLW, h:PLH, type, vx:(Math.random()<.5?-1:1)*(1.1+diff*1.4) };
+}
+
+function init(){
+  totalScroll = 0; score = 0; over = false; started = true; dir = 0;
+  platforms = [];
+  const baseY = H - 70;
+  platforms.push({x:W/2-PLW/2, y:baseY, w:PLW, h:PLH, type:'normal', vx:0});
+  let y = baseY;
+  while (y > -H){ y -= gap(); platforms.push(makePlatform(y)); }
+  player = { x:W/2-PW/2, y:baseY-PH, vx:0, vy:JUMP, squash:0, face:0 };
+  clouds = [];
+  for (let i=0;i<5;i++) clouds.push({x:Math.random()*W, y:Math.random()*H, s:0.5+Math.random()*0.6, r:24+Math.random()*26});
+  overlay.classList.remove('show');
+}
+
+// ---- input ----
+let leftHeld=false, rightHeld=false;
+function updateDir(){ dir = (rightHeld?1:0) - (leftHeld?1:0); }
+window.addEventListener('keydown', e=>{
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'){leftHeld=true;e.preventDefault();}
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'){rightHeld=true;e.preventDefault();}
+  updateDir();
+});
+window.addEventListener('keyup', e=>{
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')leftHeld=false;
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')rightHeld=false;
+  updateDir();
+});
+const frame = document.querySelector('.frame');
+function touchPoint(x){
+  const r = cvs.getBoundingClientRect();
+  dir = (x - r.left) < r.width/2 ? -1 : 1;
+}
+frame.addEventListener('touchstart', e=>{ if(!over&&started){touchPoint(e.touches[0].clientX); e.preventDefault();} }, {passive:false});
+frame.addEventListener('touchmove',  e=>{ if(!over&&started){touchPoint(e.touches[0].clientX); e.preventDefault();} }, {passive:false});
+frame.addEventListener('touchend',   e=>{ dir=0; }, {passive:true});
+// mouse for desktop testing
+frame.addEventListener('mousedown', e=>{ if(!over&&started) touchPoint(e.clientX); });
+frame.addEventListener('mouseup', ()=>{ dir=0; });
+
+ovBtn.addEventListener('click', init);
+
+// ---- loop ----
+let lastT = performance.now();
+function frameLoop(now){
+  let dt = (now-lastT)/16.667; lastT = now;
+  if (dt>2.2) dt=2.2;
+  if (started && !over) update(dt);
+  draw();
+  requestAnimationFrame(frameLoop);
+}
+
+function update(dt){
+  // horizontal
+  player.vx = dir * MOVE;
+  player.x += player.vx * dt;
+  if (player.x > W) player.x = -PW;
+  if (player.x + PW < 0) player.x = W;
+
+  // vertical
+  const prevBottom = player.y + PH;
+  player.vy += GRAV * dt;
+  player.y += player.vy * dt;
+  const curBottom = player.y + PH;
+
+  // moving platforms
+  for (const p of platforms){
+    if (p.type==='moving'){
+      p.x += p.vx * dt;
+      if (p.x < 0){ p.x = 0; p.vx*=-1; }
+      if (p.x > W-p.w){ p.x = W-p.w; p.vx*=-1; }
+    }
+  }
+
+  // landing (only while falling)
+  if (player.vy > 0){
+    for (const p of platforms){
+      const overlapX = player.x + PW > p.x && player.x < p.x + p.w;
+      const crossed = prevBottom <= p.y + 8 && curBottom >= p.y;
+      if (overlapX && crossed){
+        if (p.type==='spring'){ player.vy = SPRING; player.squash = 1.4; }
+        else { player.vy = JUMP; player.squash = 1; }
+        break;
+      }
+    }
+  }
+
+  player.face = player.vx;
+  if (player.squash>0) player.squash -= 0.08*dt;
+
+  // camera scroll
+  const threshold = H*0.42;
+  if (player.y < threshold){
+    const d = threshold - player.y;
+    player.y = threshold;
+    for (const p of platforms) p.y += d;
+    for (const c of clouds) c.y += d*0.4;
+    totalScroll += d;
+    score = Math.floor(totalScroll/10);
+  }
+
+  // recycle clouds
+  for (const c of clouds){ if (c.y > H+40){ c.y = -40; c.x = Math.random()*W; } }
+  // recycle platforms
+  platforms = platforms.filter(p => p.y < H + 30);
+  let top = Math.min(...platforms.map(p=>p.y));
+  while (top > -H){ top -= gap(); platforms.push(makePlatform(top)); }
+
+  if (score > best){ best = score; }
+
+  // game over
+  if (player.y > H + 10){
+    over = true;
+    showOver();
+  }
+  scoreEl.textContent = score;
+  bestEl.textContent = 'najlepšie ' + best;
+}
+
+function showOver(){
+  ovEmoji.textContent = '😵';
+  ovTitle.textContent = 'Spadol si!';
+  ovText.textContent = 'Dostal si sa do výšky:';
+  ovScore.style.display = 'block';
+  ovScore.textContent = score + (score>=best ? ' 🏆' : '');
+  ovBtn.textContent = 'Skúsiť znova';
+  overlay.classList.add('show');
+}
+
+// ---- draw ----
+function draw(){
+  // sky gradient
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#9fd8ff');
+  g.addColorStop(.55,'#c9ecff');
+  g.addColorStop(1,'#fff2d6');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // clouds
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  for (const c of clouds) cloud(c.x, c.y, c.r);
+
+  // platforms
+  for (const p of platforms) drawPlatform(p);
+
+  // player
+  if (started) drawPlayer();
+}
+
+function cloud(x,y,r){
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,7); ctx.arc(x+r*0.8,y+6,r*0.75,0,7); ctx.arc(x-r*0.8,y+6,r*0.7,0,7);
+  ctx.arc(x+r*0.2,y+r*0.5,r*0.9,0,7);
+  ctx.fill();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function drawPlatform(p){
+  let top, side;
+  if (p.type==='spring'){ top='#ffd34d'; side='#e0a81f'; }
+  else if (p.type==='moving'){ top='#5ac8fa'; side='#2f9bd6'; }
+  else { top='#7ed957'; side='#4caa34'; }
+  // shadow base
+  ctx.fillStyle = side; roundRect(p.x, p.y+4, p.w, p.h, 7); ctx.fill();
+  ctx.fillStyle = top;  roundRect(p.x, p.y, p.w, p.h, 7); ctx.fill();
+  // glossy highlight
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  roundRect(p.x+5, p.y+3, p.w-10, p.h*0.32, 4); ctx.fill();
+  // spring coil
+  if (p.type==='spring'){
+    ctx.strokeStyle='#c8881a'; ctx.lineWidth=2.5; ctx.beginPath();
+    const cx=p.x+p.w/2;
+    ctx.moveTo(cx-8,p.y-2); ctx.lineTo(cx+8,p.y-6); ctx.lineTo(cx-8,p.y-10); ctx.lineTo(cx+8,p.y-14);
+    ctx.stroke();
+  }
+}
+
+function drawPlayer(){
+  const cx = player.x + PW/2;
+  const cy = player.y + PH/2;
+  const sq = player.squash;            // squash on bounce
+  const sx = 1 + sq*0.18;
+  const sy = 1 - sq*0.18;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(sx, sy);
+
+  // soft shadow under
+  ctx.fillStyle='rgba(0,0,0,.10)';
+  ctx.beginPath(); ctx.ellipse(0, PH/2+2, PW*0.42, 5, 0, 0, 7); ctx.fill();
+
+  // body
+  const bg = ctx.createLinearGradient(0,-PH/2,0,PH/2);
+  bg.addColorStop(0,'#ff9a3c'); bg.addColorStop(1,'#ff6f3c');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.arc(0,0,PW/2,0,7); ctx.fill();
+  // cheek shine
+  ctx.fillStyle='rgba(255,255,255,.4)';
+  ctx.beginPath(); ctx.arc(-7,-7,5,0,7); ctx.fill();
+
+  // eyes (look toward movement)
+  const look = Math.max(-2,Math.min(2,player.face));
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(-7,-2,5.5,0,7); ctx.arc(7,-2,5.5,0,7); ctx.fill();
+  ctx.fillStyle='#3a2410';
+  ctx.beginPath(); ctx.arc(-7+look,-2,2.6,0,7); ctx.arc(7+look,-2,2.6,0,7); ctx.fill();
+
+  // smile
+  ctx.strokeStyle='#3a2410'; ctx.lineWidth=2.4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(0,5,6,0.15*Math.PI,0.85*Math.PI); ctx.stroke();
+
+  ctx.restore();
+}
+
+window.addEventListener('resize', ()=>{ resize(); if(started && !over) init(); });
+resize();
+requestAnimationFrame(frameLoop);
+</script>
+</body>
+</html>
