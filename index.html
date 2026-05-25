@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07090f">
-<title>plainkit · jednoduché nástroje bez reklám</title>
-<meta name="description" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač, QR generátor, prevodník jednotiek, svetový čas a vyhľadávanie.">
-<meta name="keywords" content="plainkit, nástroje, prekladač, qr generátor, prevodník jednotiek, svetový čas, vyhľadávanie, zadarmo, bez reklamy">
+
+<!-- Titulka + popis sa menia podľa jazyka cez JS (viď applyLang) -->
+<title>plainkit · prekladač, QR, prevodník — zadarmo, bez reklám</title>
+<meta name="description" id="meta-desc" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas. Free online tools, no ads, no signup.">
+<meta name="keywords" content="plainkit, nástroje, prekladač dokumentov, qr generátor, prevodník jednotiek, svetový čas, free online tools, document translator, qr code generator, unit converter, world clock, no ads, no signup, zadarmo, bez reklamy">
 
 <!-- Open Graph -->
-<meta property="og:title" content="plainkit · jednoduché nástroje bez reklám">
-<meta property="og:description" content="Prekladač, QR generátor, prevodník jednotiek, svetový čas a vyhľadávanie. Bez reklám, bez registrácie, bez sledovania.">
+<meta property="og:title" content="plainkit · free online tools, no ads">
+<meta property="og:description" content="Document translator, QR generator, unit converter, world clock & search. No ads, no signup, no tracking. Prekladač, QR, prevodník — zadarmo.">
 <meta property="og:image" content="https://plainkit.app/og-image.png">
 <meta property="og:url" content="https://plainkit.app/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="plainkit · jednoduché nástroje">
+<meta name="twitter:title" content="plainkit · free online tools, no ads">
 <meta name="twitter:image" content="https://plainkit.app/og-image.png">
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307090f'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='62' font-style='italic' font-weight='600' fill='%2300d4e8'%3EP%3C/text%3E%3C/svg%3E">
@@ -53,6 +55,21 @@ body {
     linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
 }
 
+/* ═══ Prepínač jazyka (vpravo hore) ═══ */
+.lang-switch {
+  position: fixed; top: 16px; right: 16px; z-index: 50;
+  display: flex; gap: 4px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 100px; padding: 4px;
+}
+.lang-switch button {
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--text-2); padding: 5px 12px; border-radius: 100px;
+  transition: all 0.15s;
+}
+.lang-switch button.active { background: var(--accent-dim); color: var(--accent); }
+
 /* ═══ Layout: 3 stĺpce ═══ */
 .layout {
   display: grid;
@@ -79,23 +96,18 @@ h3.section-title {
   margin-bottom: 12px;
 }
 
-/* ═══ ĽAVÁ LIŠTA: Poznámky ═══ */
 .notes-card, .support-card, .clock-card, .search-card, .links-card {
   background: var(--glass);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
 }
-.notes-head {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 10px;
-}
+.notes-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .notes-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-3); }
 #notes {
   width: 100%; min-height: 180px; resize: vertical;
   background: transparent; border: none; color: var(--text);
-  font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
-  outline: none;
+  font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6; outline: none;
 }
 #notes::placeholder { color: var(--text-3); }
 .notes-btn {
@@ -103,12 +115,10 @@ h3.section-title {
   background: transparent; border: 1px solid var(--border);
   border-radius: var(--radius); color: var(--text-2);
   font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-  transition: all 0.15s;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
 }
 .notes-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ═══ ĽAVÁ LIŠTA: Podpora ═══ */
 .support-card h4 { font-size: 0.95rem; margin-bottom: 6px; }
 .support-sub { font-size: 0.8rem; color: var(--text-2); line-height: 1.5; margin-bottom: 14px; }
 .donate-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
@@ -123,39 +133,42 @@ h3.section-title {
 .qr-box img, .qr-box canvas { width: 180px; height: 180px; border-radius: 8px; background: #fff; padding: 8px; }
 .iban-row {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 12px; font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem; color: var(--text-2);
+  margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-2);
 }
 .iban-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
 
-/* ═══ STRED: Hlavička ═══ */
 .home-head { text-align: center; margin-bottom: 8px; }
-.home-eyebrow {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
-}
+.home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
 .home-logo .dot { color: var(--accent); }
 
-/* ═══ STRED: Svetové hodiny ═══ */
+/* ═══ Svetové hodiny ═══ */
+.clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
 .clock {
+  position: relative;
   background: var(--glass); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px; text-align: center;
 }
-.clock .city {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2);
-  margin-bottom: 8px;
+.clock .remove {
+  position: absolute; top: 6px; right: 8px;
+  background: none; border: none; color: var(--text-3);
+  cursor: pointer; font-size: 0.9rem; line-height: 1; opacity: 0; transition: opacity 0.15s;
 }
-.clock .time {
-  font-family: 'JetBrains Mono', monospace; font-size: 1.5rem;
-  font-weight: 600; color: var(--text); letter-spacing: 0.02em;
-}
+.clock:hover .remove { opacity: 1; }
+.clock .remove:hover { color: var(--accent); }
+.clock .city { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px; }
+.clock .time { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
 .clock .time .sec { color: var(--accent); font-size: 1rem; }
 .clock .date { font-size: 0.68rem; color: var(--text-3); margin-top: 4px; }
+.add-city {
+  background: var(--bg2); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 0.78rem;
+  padding: 7px 10px; cursor: pointer; outline: none;
+}
+.add-city:focus { border-color: var(--accent); }
 
-/* ═══ STRED: Vyhľadávanie ═══ */
 .search-card { padding: 24px; }
 .search-box { display: flex; gap: 10px; }
 #search-input {
@@ -178,7 +191,6 @@ h3.section-title {
 .engine-btn:hover { border-color: var(--accent); background: var(--bg-elev-2); }
 .engine-btn .dot-g { width: 10px; height: 10px; border-radius: 50%; }
 
-/* ═══ PRAVÁ LIŠTA: Nástroje (štýl prevodníka) ═══ */
 .tool-link {
   display: block; background: var(--bg-elev);
   border: 1px solid var(--border); border-radius: var(--radius);
@@ -186,44 +198,39 @@ h3.section-title {
   margin-bottom: 8px; transition: all 0.15s;
 }
 .tool-link:hover { border-color: var(--accent); background: var(--bg-elev-2); }
-.tool-link .label {
-  font-size: 0.85rem; font-weight: 500;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.tool-link .url {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-  color: var(--text-dim); margin-top: 3px;
-}
+.tool-link .label { font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+.tool-link .url { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
 
-.foot {
-  text-align: center; font-family: 'JetBrains Mono', monospace;
-  font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.1em;
-  padding: 20px; margin-top: 20px;
-}
+.foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 20px; margin-top: 20px; line-height: 1.8; }
 </style>
 </head>
 <body>
+
+<!-- Prepínač jazyka -->
+<div class="lang-switch">
+  <button id="lang-sk" class="active" onclick="setLang('sk')">SK</button>
+  <button id="lang-en" onclick="setLang('en')">EN</button>
+</div>
+
 <div class="layout">
 
   <!-- ═══════════════ ĽAVÁ LIŠTA ═══════════════ -->
   <aside class="panel panel-left">
-    <!-- Poznámky -->
     <div class="notes-card">
       <div class="notes-head">
-        <h3 class="section-title">Poznámky</h3>
-        <span class="notes-count" id="notes-count">0 znakov</span>
+        <h3 class="section-title" data-i18n="notes">Poznámky</h3>
+        <span class="notes-count" id="notes-count">0 <span data-i18n="chars">znakov</span></span>
       </div>
-      <textarea id="notes" placeholder="Píšte tu vaše poznámky..."></textarea>
-      <button class="notes-btn" onclick="downloadNotes()">↓ Stiahnuť poznámky</button>
+      <textarea id="notes" data-i18n-ph="notesPh" placeholder="Píšte tu vaše poznámky..."></textarea>
+      <button class="notes-btn" onclick="downloadNotes()" data-i18n="downloadNotes">↓ Stiahnuť poznámky</button>
     </div>
 
-    <!-- Podpora -->
     <div class="support-card">
-      <h3 class="section-title">Podporte projekt</h3>
-      <h4>Na skenovanie použi bankovú aplikáciu</h4>
-      <p class="support-sub">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</p>
+      <h3 class="section-title" data-i18n="support">Podporte projekt</h3>
+      <h4 data-i18n="supportH">Na skenovanie použi bankovú aplikáciu</h4>
+      <p class="support-sub" data-i18n="supportSub">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</p>
       <div class="donate-tabs">
-        <button class="donate-tab active" data-amt="variable" onclick="switchQr('variable')">Voľná</button>
+        <button class="donate-tab active" data-amt="variable" onclick="switchQr('variable')" data-i18n="amtFree">Voľná</button>
         <button class="donate-tab" data-amt="10" onclick="switchQr('10')">10 €</button>
         <button class="donate-tab" data-amt="100" onclick="switchQr('100')">100 €</button>
       </div>
@@ -234,7 +241,7 @@ h3.section-title {
       </div>
       <div class="iban-row">
         <span id="iban-display">SK06 1100 0000 ···· ···· 7644</span>
-        <button class="iban-copy" onclick="copyIban()" title="Skopírovať IBAN">📋</button>
+        <button class="iban-copy" onclick="copyIban()" title="Kopírovať IBAN">📋</button>
       </div>
     </div>
   </aside>
@@ -248,27 +255,27 @@ h3.section-title {
 
     <!-- Svetové hodiny -->
     <div class="clock-card">
-      <h3 class="section-title">Svetový čas</h3>
+      <div class="clock-head">
+        <h3 class="section-title" data-i18n="worldTime">Svetový čas</h3>
+        <select class="add-city" id="add-city" onchange="addCity(this.value); this.value=''">
+          <option value="" data-i18n="addCity">+ Pridať mesto</option>
+        </select>
+      </div>
       <div class="clocks" id="clocks"></div>
     </div>
 
     <!-- Vyhľadávanie -->
     <div class="search-card">
-      <h3 class="section-title">Vyhľadávanie</h3>
+      <h3 class="section-title" data-i18n="search">Vyhľadávanie</h3>
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="Zadajte hľadaný výraz a vyberte vyhľadávač..."
+        <input type="text" id="search-input" data-i18n-ph="searchPh"
+               placeholder="Zadajte hľadaný výraz a vyberte vyhľadávač..."
                onkeydown="if(event.key==='Enter') search('google')">
       </div>
       <div class="engines">
-        <button class="engine-btn" onclick="search('google')">
-          <span class="dot-g" style="background:#4285f4"></span> Google
-        </button>
-        <button class="engine-btn" onclick="search('bing')">
-          <span class="dot-g" style="background:#008373"></span> Bing
-        </button>
-        <button class="engine-btn" onclick="search('ddg')">
-          <span class="dot-g" style="background:#de5833"></span> DuckDuckGo
-        </button>
+        <button class="engine-btn" onclick="search('google')"><span class="dot-g" style="background:#4285f4"></span> Google</button>
+        <button class="engine-btn" onclick="search('bing')"><span class="dot-g" style="background:#008373"></span> Bing</button>
+        <button class="engine-btn" onclick="search('ddg')"><span class="dot-g" style="background:#de5833"></span> DuckDuckGo</button>
       </div>
     </div>
   </main>
@@ -276,52 +283,49 @@ h3.section-title {
   <!-- ═══════════════ PRAVÁ LIŠTA: NÁSTROJE ═══════════════ -->
   <aside class="panel panel-right">
     <div class="links-card">
-      <h3 class="section-title">Nástroje</h3>
+      <h3 class="section-title" data-i18n="tools">Nástroje</h3>
 
       <!-- ╔══════════════════════════════════════════════╗
            ║  AKO PRIDAŤ NOVÝ NÁSTROJ:                     ║
-           ║  Skopíruj jeden blok <a class="tool-link">    ║
-           ║  nižšie, zmeň:                                ║
-           ║    href="/cesta"     → URL nástroja           ║
-           ║    <span>Názov</span> → zobrazený názov        ║
-           ║    .url text         → plainkit.app/cesta     ║
+           ║  Skopíruj jeden blok <a class="tool-link">,   ║
+           ║  zmeň href, názov v <span> a .url text.       ║
            ╚══════════════════════════════════════════════╝ -->
 
       <!-- NÁSTROJ: Prekladač -->
       <a href="/preklad" class="tool-link">
-        <div class="label"><span>Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tPreklad">Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/preklad</div>
       </a>
 
       <!-- NÁSTROJ: QR generátor -->
       <a href="/qr" class="tool-link">
-        <div class="label"><span>QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/qr</div>
       </a>
 
       <!-- NÁSTROJ: Prevodník jednotiek -->
       <a href="/jednotky" class="tool-link">
-        <div class="label"><span>Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/jednotky</div>
       </a>
 
       <!-- NÁSTROJ: Hopko (hra) -->
       <a href="/hopko" class="tool-link">
-        <div class="label"><span>Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tHopko">Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/hopko</div>
       </a>
 
       <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok vyššie) ↓↓↓ -->
 
-
     </div>
   </aside>
-
 </div>
 
-<div class="foot">plainkit.app · bez reklám, bez registrácie, bez sledovania</div>
+<div class="foot">
+  <span data-i18n="footTag">plainkit.app · bez reklám, bez registrácie, bez sledovania</span><br>
+  <span data-i18n="footPrivacy">Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.</span>
+</div>
 
-<!-- QR knižnica pre "Voľná" SEPA platbu -->
 <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
 <script>
 // ═══ Konfigurácia ═══
@@ -330,102 +334,207 @@ const IBAN_COMPACT = 'SK0611000000002612247644';
 const BENEFICIARY  = 'plainkit';
 const BIC          = 'TATRSKBX';
 
-// ═══ Svetové hodiny ═══
-const CITIES = [
-  { name: 'Bratislava', tz: 'Europe/Bratislava' },
-  { name: 'Londýn',     tz: 'Europe/London' },
-  { name: 'New York',   tz: 'America/New_York' },
-  { name: 'Tokio',      tz: 'Asia/Tokyo' },
-  { name: 'Sydney',     tz: 'Australia/Sydney' },
+// ═══ Ponuka miest pre dropdown (názov SK | EN | timezone) ═══
+const CITY_POOL = [
+  { sk:'Bratislava', en:'Bratislava', tz:'Europe/Bratislava' },
+  { sk:'Praha',      en:'Prague',     tz:'Europe/Prague' },
+  { sk:'Londýn',     en:'London',     tz:'Europe/London' },
+  { sk:'Paríž',      en:'Paris',      tz:'Europe/Paris' },
+  { sk:'Berlín',     en:'Berlin',     tz:'Europe/Berlin' },
+  { sk:'Moskva',     en:'Moscow',     tz:'Europe/Moscow' },
+  { sk:'Istanbul',   en:'Istanbul',   tz:'Europe/Istanbul' },
+  { sk:'Dubaj',      en:'Dubai',      tz:'Asia/Dubai' },
+  { sk:'Naí Dillí',  en:'New Delhi',  tz:'Asia/Kolkata' },
+  { sk:'Bangkok',    en:'Bangkok',    tz:'Asia/Bangkok' },
+  { sk:'Peking',     en:'Beijing',    tz:'Asia/Shanghai' },
+  { sk:'Hongkong',   en:'Hong Kong',  tz:'Asia/Hong_Kong' },
+  { sk:'Tokio',      en:'Tokyo',      tz:'Asia/Tokyo' },
+  { sk:'Singapur',   en:'Singapore',  tz:'Asia/Singapore' },
+  { sk:'Sydney',     en:'Sydney',     tz:'Australia/Sydney' },
+  { sk:'Auckland',   en:'Auckland',   tz:'Pacific/Auckland' },
+  { sk:'New York',   en:'New York',   tz:'America/New_York' },
+  { sk:'Chicago',    en:'Chicago',    tz:'America/Chicago' },
+  { sk:'Denver',     en:'Denver',     tz:'America/Denver' },
+  { sk:'Los Angeles',en:'Los Angeles',tz:'America/Los_Angeles' },
+  { sk:'Mexiko',     en:'Mexico City',tz:'America/Mexico_City' },
+  { sk:'São Paulo',  en:'São Paulo',  tz:'America/Sao_Paulo' },
+  { sk:'Buenos Aires',en:'Buenos Aires',tz:'America/Argentina/Buenos_Aires' },
+  { sk:'Honolulu',   en:'Honolulu',   tz:'Pacific/Honolulu' },
+  { sk:'Káhira',     en:'Cairo',      tz:'Africa/Cairo' },
+  { sk:'Johannesburg',en:'Johannesburg',tz:'Africa/Johannesburg' },
 ];
+const DEFAULT_CITIES = ['Europe/Bratislava','Europe/London','America/New_York','Asia/Tokyo','Australia/Sydney'];
 
-function buildClocks() {
+// ═══ Preklady (i18n) ═══
+const I18N = {
+  sk: {
+    notes:'Poznámky', chars:'znakov', downloadNotes:'↓ Stiahnuť poznámky', notesPh:'Píšte tu vaše poznámky...',
+    support:'Podporte projekt', supportH:'Na skenovanie použi bankovú aplikáciu',
+    supportSub:'Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.',
+    amtFree:'Voľná',
+    worldTime:'Svetový čas', addCity:'+ Pridať mesto',
+    search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
+    tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra',
+    footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
+    footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
+    title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
+    desc:'plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas.'
+  },
+  en: {
+    notes:'Notes', chars:'chars', downloadNotes:'↓ Download notes', notesPh:'Write your notes here...',
+    support:'Support the project', supportH:'Scan with your banking app',
+    supportSub:'This site is free, no ads. It runs on paid services — a voluntary contribution helps keep it running.',
+    amtFree:'Custom',
+    worldTime:'World time', addCity:'+ Add city',
+    search:'Search', searchPh:'Type your query and choose a search engine...',
+    tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game',
+    footTag:'plainkit.app · no ads, no signup, no tracking',
+    footPrivacy:'We only store your language and city settings in your browser. No tracking.',
+    title:'plainkit · free translator, QR generator, unit converter',
+    desc:'plainkit — simple tools with no ads, no signup, no tracking. Document translator, QR code generator, unit converter, world clock.'
+  }
+};
+
+let lang = 'sk';
+let activeCities = [];  // zoznam timezone reťazcov
+
+// ═══ Jazyk ═══
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('pk_lang', l);
+  applyLang();
+}
+function applyLang() {
+  const t = I18N[lang];
+  document.documentElement.lang = lang;
+  document.getElementById('lang-sk').classList.toggle('active', lang==='sk');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  // texty
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k]) el.textContent = t[k];
+  });
+  // placeholdery
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.getAttribute('data-i18n-ph');
+    if (t[k]) el.placeholder = t[k];
+  });
+  // titulka + popis
+  document.title = t.title;
+  document.getElementById('meta-desc').setAttribute('content', t.desc);
+  // dropdown + hodiny (názvy miest v správnom jazyku)
+  buildCityDropdown();
+  renderClocks();
+}
+
+// ═══ Svetové hodiny ═══
+function cityByTz(tz) { return CITY_POOL.find(c => c.tz === tz); }
+function buildCityDropdown() {
+  const sel = document.getElementById('add-city');
+  const placeholder = I18N[lang].addCity;
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    CITY_POOL
+      .filter(c => !activeCities.includes(c.tz))
+      .map(c => `<option value="${c.tz}">${c[lang]}</option>`)
+      .join('');
+}
+function renderClocks() {
   const wrap = document.getElementById('clocks');
-  wrap.innerHTML = CITIES.map((c, i) => `
-    <div class="clock">
-      <div class="city">${c.name}</div>
-      <div class="time" id="clk-${i}">--:--<span class="sec">:--</span></div>
-      <div class="date" id="dat-${i}"></div>
-    </div>`).join('');
+  wrap.innerHTML = activeCities.map(tz => {
+    const c = cityByTz(tz);
+    const name = c ? c[lang] : tz;
+    return `<div class="clock" data-tz="${tz}">
+      <button class="remove" onclick="removeCity('${tz}')" title="✕">✕</button>
+      <div class="city">${name}</div>
+      <div class="time">--:--<span class="sec">:--</span></div>
+      <div class="date"></div>
+    </div>`;
+  }).join('');
+  tickClocks();
 }
 function tickClocks() {
   const now = new Date();
-  CITIES.forEach((c, i) => {
-    const t = new Intl.DateTimeFormat('sk-SK', {
-      timeZone: c.tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    }).formatToParts(now);
-    const get = p => (t.find(x => x.type === p) || {}).value || '00';
-    const el = document.getElementById('clk-' + i);
-    if (el) el.innerHTML = `${get('hour')}:${get('minute')}<span class="sec">:${get('second')}</span>`;
-    const d = new Intl.DateTimeFormat('sk-SK', {
-      timeZone: c.tz, weekday: 'short', day: 'numeric', month: 'short'
-    }).format(now);
-    const de = document.getElementById('dat-' + i);
-    if (de) de.textContent = d;
+  document.querySelectorAll('.clock').forEach(el => {
+    const tz = el.dataset.tz;
+    const parts = new Intl.DateTimeFormat('sk-SK', { timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }).formatToParts(now);
+    const get = p => (parts.find(x => x.type === p) || {}).value || '00';
+    el.querySelector('.time').innerHTML = `${get('hour')}:${get('minute')}<span class="sec">:${get('second')}</span>`;
+    el.querySelector('.date').textContent = new Intl.DateTimeFormat(lang==='en'?'en-GB':'sk-SK', { timeZone: tz, weekday:'short', day:'numeric', month:'short' }).format(now);
   });
 }
+function addCity(tz) {
+  if (!tz || activeCities.includes(tz)) return;
+  activeCities.push(tz);
+  saveCities();
+  buildCityDropdown();
+  renderClocks();
+}
+function removeCity(tz) {
+  activeCities = activeCities.filter(x => x !== tz);
+  saveCities();
+  buildCityDropdown();
+  renderClocks();
+}
+function saveCities() { localStorage.setItem('pk_cities', JSON.stringify(activeCities)); }
 
 // ═══ Vyhľadávanie ═══
 function search(engine) {
   const q = document.getElementById('search-input').value.trim();
   if (!q) { document.getElementById('search-input').focus(); return; }
-  const urls = {
-    google: 'https://www.google.com/search?q=',
-    bing:   'https://www.bing.com/search?q=',
-    ddg:    'https://duckduckgo.com/?q=',
-  };
+  const urls = { google:'https://www.google.com/search?q=', bing:'https://www.bing.com/search?q=', ddg:'https://duckduckgo.com/?q=' };
   window.open(urls[engine] + encodeURIComponent(q), '_blank', 'noopener');
 }
 
 // ═══ Poznámky ═══
 const notesEl = document.getElementById('notes');
 notesEl.addEventListener('input', () => {
-  document.getElementById('notes-count').textContent = notesEl.value.length + ' znakov';
+  document.querySelector('#notes-count').firstChild.textContent = notesEl.value.length + ' ';
 });
 function downloadNotes() {
-  const txt = notesEl.value || '';
-  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([notesEl.value || ''], { type:'text/plain;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'poznamky.txt';
-  a.click();
+  a.href = URL.createObjectURL(blob); a.download = 'poznamky.txt'; a.click();
   URL.revokeObjectURL(a.href);
 }
 
-// ═══ Podpora: prepínanie QR + IBAN ═══
+// ═══ Podpora ═══
 let qrVariable = null;
 function switchQr(amt) {
-  document.querySelectorAll('.donate-tab').forEach(b =>
-    b.classList.toggle('active', b.dataset.amt === amt));
+  document.querySelectorAll('.donate-tab').forEach(b => b.classList.toggle('active', b.dataset.amt === amt));
   document.getElementById('qr-variable').style.display = amt === 'variable' ? 'block' : 'none';
   document.getElementById('qr-10').style.display  = amt === '10'  ? 'block' : 'none';
   document.getElementById('qr-100').style.display = amt === '100' ? 'block' : 'none';
 }
 function buildVariableQr() {
-  // EPC QR (SEPA Credit Transfer) - voľná suma
   const epc = ['BCD','002','1','SCT', BIC, BENEFICIARY, IBAN_COMPACT, '', '', '', 'plainkit'].join('\n');
-  qrVariable = new QRCodeStyling({
-    width: 180, height: 180, data: epc,
-    backgroundOptions: { color: '#ffffff' },
-    dotsOptions: { color: '#0a0f14', type: 'square' },
-  });
+  qrVariable = new QRCodeStyling({ width:180, height:180, data:epc,
+    backgroundOptions:{ color:'#ffffff' }, dotsOptions:{ color:'#0a0f14', type:'square' } });
   qrVariable.append(document.getElementById('qr-variable'));
 }
 function copyIban() {
   navigator.clipboard.writeText(IBAN_COMPACT).then(() => {
-    const el = document.getElementById('iban-display');
-    const orig = el.textContent;
-    el.textContent = '✓ Skopírované';
+    const el = document.getElementById('iban-display'); const orig = el.textContent;
+    el.textContent = lang==='en' ? '✓ Copied' : '✓ Skopírované';
     setTimeout(() => el.textContent = orig, 1500);
   });
 }
 
-// ═══ Init ═══
-buildClocks();
-tickClocks();
-setInterval(tickClocks, 1000);
-buildVariableQr();
-document.getElementById('iban-display').textContent = IBAN_FULL;
+// ═══ Init: načítaj uložené nastavenia ═══
+(function init() {
+  // jazyk
+  const savedLang = localStorage.getItem('pk_lang');
+  if (savedLang === 'en' || savedLang === 'sk') lang = savedLang;
+  // mestá
+  try {
+    const saved = JSON.parse(localStorage.getItem('pk_cities') || 'null');
+    activeCities = (Array.isArray(saved) && saved.length) ? saved : [...DEFAULT_CITIES];
+  } catch { activeCities = [...DEFAULT_CITIES]; }
+
+  applyLang();
+  buildVariableQr();
+  document.getElementById('iban-display').textContent = IBAN_FULL;
+  setInterval(tickClocks, 1000);
+})();
 </script>
 </body>
 </html>
