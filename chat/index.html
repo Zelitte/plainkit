@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit · tajný chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1014; --panel:#121a20; --panel2:#18232b; --line:#23323c;
+    --txt:#e6f0f2; --muted:#7d96a1; --accent:#3fd9a0; --accent2:#2bb083; --mine:#16323f; --danger:#ff6b6b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:radial-gradient(900px 500px at 50% -5%, #14222a 0%, transparent 60%), var(--bg);
+    color:var(--txt); font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:14px;
+  }
+  .app{width:100%; max-width:540px; height:min(88dvh,760px); background:var(--panel);
+    border:1px solid var(--line); border-radius:18px; overflow:hidden; display:flex; flex-direction:column;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);}
+
+  /* ---------- entry ---------- */
+  .entry{flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:30px 26px;}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:4px;}
+  .lock{width:34px;height:34px;border-radius:9px;background:linear-gradient(160deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;color:#06231a;font-size:18px;}
+  .brand h1{font-size:21px;font-weight:700;letter-spacing:.3px;}
+  .brand .sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px 2px;font-family:'JetBrains Mono',monospace;}
+  .field input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    color:var(--txt);font-size:16px;padding:13px 14px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border .15s;}
+  .field input:focus{border-color:var(--accent);}
+  .hint{font-size:12.5px;color:var(--muted);line-height:1.5;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;}
+  .hint b{color:var(--accent);}
+  .enter{background:linear-gradient(160deg,var(--accent),var(--accent2));color:#06231a;border:none;
+    border-radius:13px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+    transition:transform .1s, filter .1s;}
+  .enter:hover{filter:brightness(1.06);} .enter:active{transform:scale(.98);}
+  .err{color:var(--danger);font-size:13px;min-height:16px;text-align:center;}
+
+  /* ---------- chat ---------- */
+  .chat{flex:1; display:none; flex-direction:column; min-height:0;}
+  .bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel2);}
+  .bar .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);transition:background .2s;flex:none;}
+  .bar.live .dot{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+  .bar .room{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar .room b{color:var(--txt);}
+  .leave{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;
+    padding:7px 12px;font-size:13px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+  .leave:hover{border-color:var(--danger);color:var(--danger);}
+
+  .log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+  .sys{align-self:center;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    background:var(--panel2);border:1px solid var(--line);padding:5px 11px;border-radius:20px;}
+  .msg{max-width:80%;padding:9px 13px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);
+    align-self:flex-start;word-wrap:break-word;}
+  .msg.mine{align-self:flex-end;background:var(--mine);border-color:#1f4a5c;}
+  .msg .who{font-size:11.5px;color:var(--accent);font-weight:500;margin-bottom:2px;font-family:'JetBrains Mono',monospace;}
+  .msg.mine .who{color:var(--muted);}
+  .msg .body{font-size:15px;line-height:1.4;white-space:pre-wrap;}
+  .msg .time{font-size:10px;color:var(--muted);margin-top:3px;text-align:right;font-family:'JetBrains Mono',monospace;}
+
+  .compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--panel2);}
+  .compose input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--txt);
+    font-size:16px;padding:12px 14px;outline:none;font-family:'Space Grotesk',sans-serif;}
+  .compose input:focus{border-color:var(--accent);}
+  .compose button{background:linear-gradient(160deg,var(--accent),var(--accent2));color:#06231a;border:none;
+    border-radius:12px;width:50px;font-size:20px;cursor:pointer;flex:none;}
+  .compose button:active{transform:scale(.95);}
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- ENTRY -->
+    <div class="entry" id="entry">
+      <div class="brand">
+        <div class="lock">🔒</div>
+        <div>
+          <h1>Tajný chat</h1>
+          <div class="sub">živý · šifrovaný · bez histórie</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>tajné heslo izby</label>
+        <input id="secret" type="text" autocomplete="off" placeholder="napr. zelený slon utorok dážď" />
+      </div>
+      <div class="field">
+        <label>tvoja prezývka</label>
+        <input id="nick" type="text" autocomplete="off" maxlength="24" placeholder="napr. Maťo" />
+      </div>
+
+      <div class="hint">
+        Všetci, čo zadajú <b>rovnaké heslo</b>, sa ocitnú v tej istej izbe a uvidia si správy.
+        Heslo nikdy neopustí tvoj prehliadač — odvodí sa z neho šifrovací kľúč.
+        Zvoľ <b>niekoľko slov</b>, nie krátke číslo: krátke sa dá uhádnuť.
+      </div>
+
+      <button class="enter" id="enterBtn">Vstúpiť do izby</button>
+      <div class="err" id="err"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat" id="chat">
+      <div class="bar" id="bar">
+        <span class="dot"></span>
+        <span class="room" id="roomLabel"></span>
+        <button class="leave" id="leaveBtn">Odísť</button>
+      </div>
+      <div class="log" id="log"></div>
+      <div class="compose">
+        <input id="text" type="text" autocomplete="off" placeholder="Napíš správu…" />
+        <button id="sendBtn">➤</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ======================================================================
+//  NASTAVENIE: sem daj adresu svojho relay Workera (bez koncového /).
+//  Po nasadení Workera dostaneš niečo ako:
+//    wss://plainkit-chat-relay.TVOJ-NICK.workers.dev
+//  alebo vlastnú trasu na plainkit.app.
+const RELAY = "wss://plainkit-chat-relay.EXAMPLE.workers.dev";
+// ======================================================================
+
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+
+// ---- base64 <-> bytes ----
+function b64(bytes){ let s=""; for(const b of bytes) s+=String.fromCharCode(b); return btoa(s); }
+function ub64(str){ const bin=atob(str); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i); return a; }
+function hex(bytes){ return [...bytes].map(b=>b.toString(16).padStart(2,"0")).join(""); }
+
+// ---- derive room id (server sees only this hash) ----
+async function deriveRoomId(secret){
+  const h = await crypto.subtle.digest("SHA-256", enc.encode("plainkit-room-v1:"+secret));
+  return hex(new Uint8Array(h)).slice(0,24);
+}
+// ---- derive AES-GCM key (never sent anywhere) ----
+async function deriveKey(secret){
+  const base = await crypto.subtle.importKey("raw", enc.encode(secret), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name:"PBKDF2", salt: enc.encode("plainkit-chat-key-v1"), iterations:150000, hash:"SHA-256" },
+    base, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]);
+}
+async function encryptMsg(key, obj){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(JSON.stringify(obj)));
+  return JSON.stringify({ iv:b64(iv), ct:b64(new Uint8Array(ct)) });
+}
+async function decryptMsg(key, str){
+  const {iv, ct} = JSON.parse(str);
+  const data = await crypto.subtle.decrypt({name:"AES-GCM", iv:ub64(iv)}, key, ub64(ct));
+  return JSON.parse(dec.decode(data));
+}
+
+// ---- state ----
+let ws=null, key=null, nick="", leaving=false, retry=0;
+
+function showErr(m){ $("err").textContent = m||""; }
+
+async function enterRoom(){
+  const secret = $("secret").value.trim();
+  nick = $("nick").value.trim() || "Anonym";
+  if(secret.length < 3){ showErr("Heslo je príliš krátke."); return; }
+  if(!crypto?.subtle){ showErr("Tento prehliadač nepodporuje šifrovanie (potrebné je https)."); return; }
+  showErr("");
+  try{
+    key = await deriveKey(secret);
+    const roomId = await deriveRoomId(secret);
+    $("entry").style.display="none";
+    $("chat").style.display="flex";
+    $("roomLabel").innerHTML = "izba <b>"+roomId.slice(0,8)+"…</b>";
+    sysLine("Si v izbe. Vidíš len správy odoslané odteraz.");
+    leaving=false; retry=0;
+    connect(roomId);
+    $("text").focus();
+  }catch(e){ showErr("Nepodarilo sa odvodiť kľúč: "+e.message); }
+}
+
+function connect(roomId){
+  try{
+    ws = new WebSocket(RELAY + "/room/" + roomId);
+  }catch(e){ sysLine("Chyba spojenia: "+e.message); return; }
+
+  ws.onopen = ()=>{ $("bar").classList.add("live"); retry=0; };
+  ws.onmessage = async (ev)=>{
+    try{
+      const obj = await decryptMsg(key, ev.data);
+      addMsg(obj.nick, obj.text, obj.ts, false);
+    }catch(_){ /* undecryptable -> ignore */ }
+  };
+  ws.onclose = ()=>{
+    $("bar").classList.remove("live");
+    if(leaving) return;
+    // auto-reconnect with small backoff
+    retry++;
+    const wait = Math.min(1000*retry, 5000);
+    sysLine("Spojenie prerušené, skúšam znova…");
+    setTimeout(()=>{ if(!leaving) connect(roomId); }, wait);
+  };
+  ws.onerror = ()=>{ try{ws.close();}catch(_){} };
+}
+
+async function send(){
+  const t = $("text").value.trim();
+  if(!t || !ws || ws.readyState!==1) { if(ws && ws.readyState!==1) sysLine("Ešte nie si pripojený…"); return; }
+  const ts = Date.now();
+  $("text").value="";
+  addMsg(nick, t, ts, true);                 // show my own message locally
+  try{ ws.send(await encryptMsg(key, {nick, text:t, ts})); }
+  catch(e){ sysLine("Správa neodoslaná."); }
+}
+
+function addMsg(who, text, ts, mine){
+  const el = document.createElement("div");
+  el.className = "msg" + (mine?" mine":"");
+  const time = new Date(ts||Date.now()).toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit"});
+  el.innerHTML = '<div class="who"></div><div class="body"></div><div class="time"></div>';
+  el.querySelector(".who").textContent = mine ? "ty" : (who||"?");
+  el.querySelector(".body").textContent = text;
+  el.querySelector(".time").textContent = time;
+  const log = $("log"); log.appendChild(el); log.scrollTop = log.scrollHeight;
+}
+function sysLine(text){
+  const el=document.createElement("div"); el.className="sys"; el.textContent=text;
+  const log=$("log"); log.appendChild(el); log.scrollTop=log.scrollHeight;
+}
+
+function leave(){
+  leaving=true;
+  try{ ws && ws.close(); }catch(_){}
+  ws=null; key=null;                          // drop the key from memory
+  $("log").innerHTML="";
+  $("chat").style.display="none";
+  $("entry").style.display="flex";
+  $("secret").value=""; $("text").value="";
+}
+
+// ---- wire up ----
+$("enterBtn").addEventListener("click", enterRoom);
+$("secret").addEventListener("keydown", e=>{ if(e.key==="Enter") $("nick").focus(); });
+$("nick").addEventListener("keydown", e=>{ if(e.key==="Enter") enterRoom(); });
+$("sendBtn").addEventListener("click", send);
+$("text").addEventListener("keydown", e=>{ if(e.key==="Enter") send(); });
+$("leaveBtn").addEventListener("click", leave);
+</script>
+</body>
+</html>
