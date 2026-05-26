@@ -1,0 +1,14 @@
+name = "plainkit-chat-relay"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Bind the ChatRoom Durable Object class so the Worker can route to rooms.
+[[durable_objects.bindings]]
+name = "CHAT_ROOM"
+class_name = "ChatRoom"
+
+# On the Free plan, Durable Objects must use the SQLite-backed storage class.
+# (We never actually write to storage — this is just required to register the class.)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoom"]
