@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>plainkit · tajný chat</title>
+<title>plainkit · bez stopy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -24,7 +24,12 @@
     box-shadow:0 24px 60px rgba(0,0,0,.5);}
 
   /* ---------- entry ---------- */
-  .entry{flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:30px 26px;}
+  .entry{flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:30px 26px; position:relative;}
+  .langtoggle{position:absolute;top:14px;right:14px;display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px;}
+  .langtoggle button{background:transparent;border:none;color:var(--muted);padding:4px 10px;border-radius:999px;cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.5px;}
+  .langtoggle button.on{background:var(--accent);color:#06231a;}
+
   .brand{display:flex; align-items:center; gap:10px; margin-bottom:4px;}
   .lock{width:34px;height:34px;border-radius:9px;background:linear-gradient(160deg,var(--accent),var(--accent2));
     display:flex;align-items:center;justify-content:center;color:#06231a;font-size:18px;}
@@ -50,6 +55,8 @@
   .bar.live .dot{background:var(--accent);box-shadow:0 0 8px var(--accent);}
   .bar .room{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .bar .room b{color:var(--txt);}
+  .people{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);padding:4px 10px;
+    border:1px solid var(--line);border-radius:999px;flex:none;background:var(--panel);}
   .leave{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;
     padding:7px 12px;font-size:13px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
   .leave:hover{border-color:var(--danger);color:var(--danger);}
@@ -78,24 +85,29 @@
   <div class="app">
     <!-- ENTRY -->
     <div class="entry" id="entry">
+      <div class="langtoggle">
+        <button id="langSK">SK</button>
+        <button id="langEN">EN</button>
+      </div>
+
       <div class="brand">
         <div class="lock">🔒</div>
         <div>
-          <h1>Tajný chat</h1>
-          <div class="sub">živý · šifrovaný · bez histórie</div>
+          <h1 id="brandH1">Bez stopy</h1>
+          <div class="sub" id="brandSub">živý · šifrovaný · bez histórie</div>
         </div>
       </div>
 
       <div class="field">
-        <label>tajné heslo izby</label>
+        <label id="secretLabel">tajné heslo izby</label>
         <input id="secret" type="text" autocomplete="off" placeholder="napr. zelený slon utorok dážď" />
       </div>
       <div class="field">
-        <label>tvoja prezývka</label>
+        <label id="nickLabel">tvoja prezývka</label>
         <input id="nick" type="text" autocomplete="off" maxlength="24" placeholder="napr. Maťo" />
       </div>
 
-      <div class="hint">
+      <div class="hint" id="hint">
         Všetci, čo zadajú <b>rovnaké heslo</b>, sa ocitnú v tej istej izbe a uvidia si správy.
         Heslo nikdy neopustí tvoj prehliadač — odvodí sa z neho šifrovací kľúč.
         Zvoľ <b>niekoľko slov</b>, nie krátke číslo: krátke sa dá uhádnuť.
@@ -110,6 +122,7 @@
       <div class="bar" id="bar">
         <span class="dot"></span>
         <span class="room" id="roomLabel"></span>
+        <span class="people" id="people" title="">👥 –</span>
         <button class="leave" id="leaveBtn">Odísť</button>
       </div>
       <div class="log" id="log"></div>
@@ -121,13 +134,64 @@
   </div>
 
 <script>
-// ======================================================================
-//  NASTAVENIE: sem daj adresu svojho relay Workera (bez koncového /).
-//  Po nasadení Workera dostaneš niečo ako:
-//    wss://plainkit-chat-relay.TVOJ-NICK.workers.dev
-//  alebo vlastnú trasu na plainkit.app.
+// Relay Worker (deployed on Cloudflare).
 const RELAY = "wss://plainkit-chat-relay.4o2a11.workers.dev";
-// ======================================================================
+
+// ---- translations ----
+const T = {
+  sk: {
+    title: "plainkit · bez stopy",
+    brand: "Bez stopy",
+    tagline: "živý · šifrovaný · bez histórie",
+    secretLabel: "tajné heslo izby",
+    secretPh: "napr. zelený slon utorok dážď",
+    nickLabel: "tvoja prezývka",
+    nickPh: "napr. Maťo",
+    hint: 'Všetci, čo zadajú <b>rovnaké heslo</b>, sa ocitnú v tej istej izbe a uvidia si správy. Heslo nikdy neopustí tvoj prehliadač — odvodí sa z neho šifrovací kľúč. Zvoľ <b>niekoľko slov</b>, nie krátke číslo: krátke sa dá uhádnuť.',
+    enter: "Vstúpiť do izby",
+    leave: "Odísť",
+    composePh: "Napíš správu…",
+    you: "ty",
+    roomWord: "izba",
+    peopleTitle: "ľudia v izbe",
+    anon: "Anonym",
+    errShort: "Heslo je príliš krátke.",
+    errNoCrypto: "Tento prehliadač nepodporuje šifrovanie (potrebné je https).",
+    errKey: "Nepodarilo sa odvodiť kľúč: ",
+    sysJoined: "Si v izbe. Vidíš len správy odoslané odteraz.",
+    sysReconnect: "Spojenie prerušené, skúšam znova…",
+    sysNotConnected: "Ešte nie si pripojený…",
+    sysNotSent: "Správa neodoslaná.",
+    sysWsErr: "Chyba spojenia: ",
+    locale: "sk-SK"
+  },
+  en: {
+    title: "plainkit · off the record",
+    brand: "Off the record",
+    tagline: "live · encrypted · no history",
+    secretLabel: "room secret",
+    secretPh: "e.g. green elephant tuesday rain",
+    nickLabel: "your nickname",
+    nickPh: "e.g. Alex",
+    hint: "Everyone who enters the <b>same secret</b> lands in the same room and sees each other's messages. The secret never leaves your browser — the encryption key is derived from it. Pick <b>several words</b>, not a short number: short ones can be guessed.",
+    enter: "Enter room",
+    leave: "Leave",
+    composePh: "Type a message…",
+    you: "you",
+    roomWord: "room",
+    peopleTitle: "people in room",
+    anon: "Anonymous",
+    errShort: "Secret is too short.",
+    errNoCrypto: "This browser does not support encryption (https required).",
+    errKey: "Failed to derive key: ",
+    sysJoined: "You are in the room. You will only see messages sent from now.",
+    sysReconnect: "Connection lost, reconnecting…",
+    sysNotConnected: "Not connected yet…",
+    sysNotSent: "Message not sent.",
+    sysWsErr: "Connection error: ",
+    locale: "en-GB"
+  }
+};
 
 const $ = id => document.getElementById(id);
 const enc = new TextEncoder(), dec = new TextDecoder();
@@ -160,37 +224,67 @@ async function decryptMsg(key, str){
   return JSON.parse(dec.decode(data));
 }
 
+// ---- language ----
+let lang = (navigator.language || "en").toLowerCase().startsWith("sk") ? "sk" : "en";
+function setLang(l){ if(!T[l]) return; lang = l; applyLang(); }
+function applyLang(){
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.title = t.title;
+  $("brandH1").textContent = t.brand;
+  $("brandSub").textContent = t.tagline;
+  $("secretLabel").textContent = t.secretLabel;
+  $("secret").placeholder = t.secretPh;
+  $("nickLabel").textContent = t.nickLabel;
+  $("nick").placeholder = t.nickPh;
+  $("hint").innerHTML = t.hint;
+  $("enterBtn").textContent = t.enter;
+  $("leaveBtn").textContent = t.leave;
+  $("text").placeholder = t.composePh;
+  $("people").title = t.peopleTitle;
+  $("langSK").classList.toggle("on", lang === "sk");
+  $("langEN").classList.toggle("on", lang === "en");
+}
+
 // ---- state ----
 let ws=null, key=null, nick="", leaving=false, retry=0;
 
 function showErr(m){ $("err").textContent = m||""; }
+function setPeople(n){ $("people").textContent = "👥 " + (n==null ? "–" : n); }
 
 async function enterRoom(){
+  const t = T[lang];
   const secret = $("secret").value.trim();
-  nick = $("nick").value.trim() || "Anonym";
-  if(secret.length < 3){ showErr("Heslo je príliš krátke."); return; }
-  if(!crypto?.subtle){ showErr("Tento prehliadač nepodporuje šifrovanie (potrebné je https)."); return; }
+  nick = $("nick").value.trim() || t.anon;
+  if(secret.length < 3){ showErr(t.errShort); return; }
+  if(!crypto?.subtle){ showErr(t.errNoCrypto); return; }
   showErr("");
   try{
     key = await deriveKey(secret);
     const roomId = await deriveRoomId(secret);
     $("entry").style.display="none";
     $("chat").style.display="flex";
-    $("roomLabel").innerHTML = "izba <b>"+roomId.slice(0,8)+"…</b>";
-    sysLine("Si v izbe. Vidíš len správy odoslané odteraz.");
+    $("roomLabel").innerHTML = t.roomWord + " <b>"+roomId.slice(0,8)+"…</b>";
+    setPeople(null);
+    sysLine(t.sysJoined);
     leaving=false; retry=0;
     connect(roomId);
     $("text").focus();
-  }catch(e){ showErr("Nepodarilo sa odvodiť kľúč: "+e.message); }
+  }catch(e){ showErr(t.errKey + e.message); }
 }
 
 function connect(roomId){
   try{
     ws = new WebSocket(RELAY + "/room/" + roomId);
-  }catch(e){ sysLine("Chyba spojenia: "+e.message); return; }
+  }catch(e){ sysLine(T[lang].sysWsErr + e.message); return; }
 
   ws.onopen = ()=>{ $("bar").classList.add("live"); retry=0; };
   ws.onmessage = async (ev)=>{
+    // system message (count) -> clear JSON with _t marker
+    let parsed = null;
+    try { parsed = JSON.parse(ev.data); } catch(_) {}
+    if (parsed && parsed._t === "count"){ setPeople(parsed.n); return; }
+    // otherwise it is an encrypted envelope {iv, ct}
     try{
       const obj = await decryptMsg(key, ev.data);
       addMsg(obj.nick, obj.text, obj.ts, false);
@@ -198,32 +292,33 @@ function connect(roomId){
   };
   ws.onclose = ()=>{
     $("bar").classList.remove("live");
+    setPeople(null);
     if(leaving) return;
-    // auto-reconnect with small backoff
     retry++;
     const wait = Math.min(1000*retry, 5000);
-    sysLine("Spojenie prerušené, skúšam znova…");
+    sysLine(T[lang].sysReconnect);
     setTimeout(()=>{ if(!leaving) connect(roomId); }, wait);
   };
   ws.onerror = ()=>{ try{ws.close();}catch(_){} };
 }
 
 async function send(){
-  const t = $("text").value.trim();
-  if(!t || !ws || ws.readyState!==1) { if(ws && ws.readyState!==1) sysLine("Ešte nie si pripojený…"); return; }
+  const txt = $("text").value.trim();
+  if(!txt || !ws || ws.readyState!==1){ if(ws && ws.readyState!==1) sysLine(T[lang].sysNotConnected); return; }
   const ts = Date.now();
   $("text").value="";
-  addMsg(nick, t, ts, true);                 // show my own message locally
-  try{ ws.send(await encryptMsg(key, {nick, text:t, ts})); }
-  catch(e){ sysLine("Správa neodoslaná."); }
+  addMsg(nick, txt, ts, true);
+  try{ ws.send(await encryptMsg(key, {nick, text:txt, ts})); }
+  catch(e){ sysLine(T[lang].sysNotSent); }
 }
 
 function addMsg(who, text, ts, mine){
+  const t = T[lang];
   const el = document.createElement("div");
   el.className = "msg" + (mine?" mine":"");
-  const time = new Date(ts||Date.now()).toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit"});
+  const time = new Date(ts||Date.now()).toLocaleTimeString(t.locale,{hour:"2-digit",minute:"2-digit"});
   el.innerHTML = '<div class="who"></div><div class="body"></div><div class="time"></div>';
-  el.querySelector(".who").textContent = mine ? "ty" : (who||"?");
+  el.querySelector(".who").textContent = mine ? t.you : (who||"?");
   el.querySelector(".body").textContent = text;
   el.querySelector(".time").textContent = time;
   const log = $("log"); log.appendChild(el); log.scrollTop = log.scrollHeight;
@@ -236,8 +331,9 @@ function sysLine(text){
 function leave(){
   leaving=true;
   try{ ws && ws.close(); }catch(_){}
-  ws=null; key=null;                          // drop the key from memory
+  ws=null; key=null;
   $("log").innerHTML="";
+  setPeople(null);
   $("chat").style.display="none";
   $("entry").style.display="flex";
   $("secret").value=""; $("text").value="";
@@ -250,6 +346,10 @@ $("nick").addEventListener("keydown", e=>{ if(e.key==="Enter") enterRoom(); });
 $("sendBtn").addEventListener("click", send);
 $("text").addEventListener("keydown", e=>{ if(e.key==="Enter") send(); });
 $("leaveBtn").addEventListener("click", leave);
+$("langSK").addEventListener("click", ()=> setLang("sk"));
+$("langEN").addEventListener("click", ()=> setLang("en"));
+
+applyLang();
 </script>
 </body>
 </html>
