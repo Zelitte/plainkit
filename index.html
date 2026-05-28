@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07090f">
 
+<!-- PWA: inštalácia na plochu -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="application-name" content="plainkit">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="plainkit">
+
 <!-- Titulka + popis sa menia podľa jazyka cez JS (viď applyLang) -->
 <title>plainkit · prekladač, QR, prevodník — zadarmo, bez reklám</title>
 <meta name="description" id="meta-desc" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas. Free online tools, no ads, no signup.">
@@ -144,7 +153,7 @@ h3.section-title {
 
 /* ═══ Svetové hodiny ═══ */
 .clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.clocks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .clock {
   position: relative;
   background: var(--glass); border: 1px solid var(--border);
@@ -168,6 +177,40 @@ h3.section-title {
   padding: 7px 10px; cursor: pointer; outline: none;
 }
 .add-city:focus { border-color: var(--accent); }
+
+/* ═══ Ovládací riadok hodín (pridať mesto + na plochu) ═══ */
+.clock-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.install-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--accent-dim); border: 1px solid var(--accent);
+  color: var(--accent); border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
+  letter-spacing: 0.04em; padding: 8px 14px; cursor: pointer; transition: all 0.15s;
+}
+.install-btn:hover { background: rgba(0,212,232,0.18); }
+.install-btn .ico { font-size: 0.95rem; line-height: 1; }
+@media (max-width: 600px) { .clocks { grid-template-columns: repeat(2, 1fr); } }
+
+/* ═══ iOS návod (modal) ═══ */
+.ios-modal {
+  position: fixed; inset: 0; z-index: 100; display: none;
+  align-items: center; justify-content: center; padding: 24px;
+  background: rgba(5,8,12,0.7); backdrop-filter: blur(4px);
+}
+.ios-modal.show { display: flex; }
+.ios-card {
+  background: var(--bg2); border: 1px solid var(--border-strong);
+  border-radius: 12px; padding: 24px; max-width: 320px; width: 100%;
+}
+.ios-card h4 { font-size: 1.05rem; margin-bottom: 14px; color: var(--text); }
+.ios-card ol { margin: 0 0 18px 18px; padding: 0; color: var(--text-2); font-size: 0.9rem; line-height: 1.7; }
+.ios-card li { margin-bottom: 6px; }
+.ios-close {
+  width: 100%; padding: 11px; background: var(--accent-dim);
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  color: var(--accent); font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+}
 
 .search-card { padding: 24px; }
 .search-box { display: flex; gap: 10px; }
@@ -257,11 +300,16 @@ h3.section-title {
     <div class="clock-card">
       <div class="clock-head">
         <h3 class="section-title" data-i18n="worldTime">Svetový čas</h3>
+      </div>
+      <div class="clocks" id="clocks"></div>
+      <div class="clock-controls">
         <select class="add-city" id="add-city" onchange="addCity(this.value); this.value=''">
           <option value="" data-i18n="addCity">+ Pridať mesto</option>
         </select>
+        <button class="install-btn" id="install-btn" type="button" onclick="onInstallClick()" style="display:none">
+          <span class="ico">🏠</span> <span data-i18n="install">Na plochu</span>
+        </button>
       </div>
-      <div class="clocks" id="clocks"></div>
     </div>
 
     <!-- Vyhľadávanie -->
@@ -333,6 +381,19 @@ h3.section-title {
   </aside>
 </div>
 
+<!-- iOS návod na pridanie na plochu -->
+<div class="ios-modal" id="ios-modal" onclick="closeIosHelp(event)">
+  <div class="ios-card">
+    <h4 data-i18n="iosTitle">Pridať na plochu</h4>
+    <ol>
+      <li data-i18n="iosStep1">Klepni na ikonu Zdieľať v Safari (štvorček so šípkou nahor).</li>
+      <li data-i18n="iosStep2">Vyber „Pridať na plochu".</li>
+      <li data-i18n="iosStep3">Potvrď „Pridať" vpravo hore.</li>
+    </ol>
+    <button class="ios-close" type="button" onclick="closeIosHelp()" data-i18n="iosClose">Rozumiem</button>
+  </div>
+</div>
+
 <div class="foot">
   <span data-i18n="footTag">plainkit.app · bez reklám, bez registrácie, bez sledovania</span><br>
   <span data-i18n="footPrivacy">Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.</span>
@@ -375,7 +436,7 @@ const CITY_POOL = [
   { sk:'Káhira',     en:'Cairo',      tz:'Africa/Cairo' },
   { sk:'Johannesburg',en:'Johannesburg',tz:'Africa/Johannesburg' },
 ];
-const DEFAULT_CITIES = ['Europe/Bratislava','Europe/London','America/New_York','Asia/Tokyo','Australia/Sydney'];
+const DEFAULT_CITIES = ['Europe/Bratislava','Europe/London','America/New_York','Asia/Tokyo'];
 
 // ═══ Preklady (i18n) ═══
 const I18N = {
@@ -385,6 +446,8 @@ const I18N = {
     supportSub:'Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.',
     amtFree:'Voľná',
     worldTime:'Svetový čas', addCity:'+ Pridať mesto',
+    install:'Na plochu',
+    iosTitle:'Pridať na plochu', iosStep1:'Klepni na ikonu Zdieľať v Safari (štvorček so šípkou nahor).', iosStep2:'Vyber „Pridať na plochu".', iosStep3:'Potvrď „Pridať" vpravo hore.', iosClose:'Rozumiem',
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
@@ -398,6 +461,8 @@ const I18N = {
     supportSub:'This site is free, no ads. It runs on paid services — a voluntary contribution helps keep it running.',
     amtFree:'Custom',
     worldTime:'World time', addCity:'+ Add city',
+    install:'Add to home',
+    iosTitle:'Add to Home Screen', iosStep1:'Tap the Share icon in Safari (a square with an up arrow).', iosStep2:'Choose "Add to Home Screen".', iosStep3:'Confirm with "Add" at the top right.', iosClose:'Got it',
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game',
     footTag:'plainkit.app · no ads, no signup, no tracking',
@@ -531,6 +596,41 @@ function copyIban() {
   });
 }
 
+// ═══ Inštalácia na plochu (PWA) ═══
+let deferredPrompt = null;
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function showInstallBtn() { const b = document.getElementById('install-btn'); if (b) b.style.display = ''; }
+function hideInstallBtn() { const b = document.getElementById('install-btn'); if (b) b.style.display = 'none'; }
+function setupInstall() {
+  if (isStandalone()) return;      // už nainštalované → nič
+  if (isIOS()) showInstallBtn();   // iOS → tlačidlo otvorí návod
+  // Android/Chrome → tlačidlo sa zobrazí až keď príde 'beforeinstallprompt'
+}
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; showInstallBtn(); });
+window.addEventListener('appinstalled', () => { hideInstallBtn(); deferredPrompt = null; });
+async function onInstallClick() {
+  if (isIOS()) { document.getElementById('ios-modal').classList.add('show'); return; }
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') hideInstallBtn();
+  }
+}
+function closeIosHelp(e) {
+  if (e && e.target.closest && e.target.closest('.ios-card')) return;
+  document.getElementById('ios-modal').classList.remove('show');
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
 // ═══ Init: načítaj uložené nastavenia ═══
 (function init() {
   // jazyk
@@ -546,6 +646,7 @@ function copyIban() {
   buildVariableQr();
   document.getElementById('iban-display').textContent = IBAN_FULL;
   setInterval(tickClocks, 1000);
+  setupInstall();
 })();
 </script>
 </body>
