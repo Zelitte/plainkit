@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit · súkromie</title>
+<meta name="description" content="plainkit – súkromie a podmienky. V obyčajnej reči: čo sa (ne)deje s tvojimi dátami.">
+<meta name="theme-color" content="#07090f">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307090f'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='62' font-style='italic' font-weight='600' fill='%2300d4e8'%3EP%3C/text%3E%3C/svg%3E">
+<style>
+  /* Self-hostované fonty — žiadne volania na tretie strany. */
+  @font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(/fonts/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(/fonts/inter-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(/fonts/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(/fonts/inter-latin-ext-600-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'Inter';font-weight:700;font-display:swap;src:url(/fonts/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-weight:700;font-display:swap;src:url(/fonts/inter-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'JetBrains Mono';font-weight:500;font-display:swap;src:url(/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'JetBrains Mono';font-weight:500;font-display:swap;src:url(/fonts/jetbrains-mono-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+
+  :root{
+    --bg:#0a0f14; --bg2:#11171f; --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.14);
+    --accent:#00d4e8; --accent-dim:rgba(0,212,232,0.13); --text:#f5f7fa; --text-2:#8b95a3; --radius:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:radial-gradient(900px 500px at 50% -10%, #11202a 0%, transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',system-ui,sans-serif; line-height:1.65;
+    min-height:100dvh; padding:0 20px 80px;
+  }
+  .wrap{max-width:720px; margin:0 auto;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:22px 0 30px; gap:14px;}
+  .home{font-family:'JetBrains Mono',monospace; font-weight:500; font-size:13px; color:var(--text-2);
+    text-decoration:none; display:inline-flex; align-items:center; gap:7px;}
+  .home:hover{color:var(--accent);}
+  .home b{color:var(--text); font-weight:700;}
+  .langtoggle{display:flex; background:var(--bg2); border:1px solid var(--border); border-radius:999px; padding:3px; flex:none;}
+  .langtoggle button{background:transparent; border:none; color:var(--text-2); padding:5px 12px; border-radius:999px;
+    cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.5px;}
+  .langtoggle button.on{background:var(--accent); color:#06222a; font-weight:500;}
+
+  h1{font-size:clamp(28px,7vw,40px); font-weight:700; letter-spacing:-0.5px; margin-bottom:6px;}
+  .lead{color:var(--text-2); font-size:15px; margin-bottom:8px;}
+  .updated{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-2); opacity:.7; margin-bottom:34px;}
+
+  h2{font-size:18px; font-weight:700; margin:34px 0 10px; color:var(--text); display:flex; align-items:baseline; gap:9px;}
+  h2 .n{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); font-weight:500;}
+  p{margin-bottom:12px; color:#d4dae2;}
+  ul{margin:0 0 12px 2px; list-style:none;}
+  li{position:relative; padding-left:20px; margin-bottom:8px; color:#d4dae2;}
+  li::before{content:"–"; position:absolute; left:0; color:var(--accent);}
+  strong{color:var(--text); font-weight:600;}
+  .accent{color:var(--accent);}
+  .note{background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:var(--radius); padding:14px 16px; margin:14px 0; font-size:14.5px; color:#cdd4dd;}
+  .note strong{color:var(--accent);}
+  .pull{font-family:'Inter',sans-serif; font-weight:600; font-size:17px; color:var(--text);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:18px 0; margin:34px 0; text-align:center;}
+  footer{margin-top:44px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-2); font-size:13px;}
+  footer a{color:var(--accent); text-decoration:none;}
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="home" href="/">← <b>plainkit</b></a>
+    <div class="langtoggle">
+      <button id="langSK" onclick="setLang('sk')">SK</button>
+      <button id="langEN" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <!-- ============ SLOVENSKY ============ -->
+  <div id="content-sk" class="content">
+    <h1>Súkromie a podmienky</h1>
+    <p class="lead">plainkit stojí na jednoduchej myšlienke: <strong>nechceme tvoje dáta.</strong> Tu je v obyčajnej reči, čo sa s tvojimi údajmi (ne)deje. Žiadny právnický žargón.</p>
+    <p class="updated">Posledná aktualizácia: máj 2026</p>
+
+    <h2><span class="n">01</span> Čo nerobíme</h2>
+    <ul>
+      <li>Žiadne kontá, žiadna registrácia, žiadne prihlasovanie.</li>
+      <li>Žiadne reklamy, žiadna analytika, žiadne sledovanie, žiadne sledovacie cookies.</li>
+      <li>Žiadne skripty tretích strán — celý web sa načítava výlučne z <span class="accent">plainkit.app</span>. Žiadne Google fonty, žiadne CDN, nič nevolá „domov".</li>
+      <li>Je to <strong>webová stránka, nie aplikácia</strong> — nepýta si a ani technicky nemá ako získať prístup k tvojim súborom, polohe, kontaktom, kamere či mikrofónu.</li>
+    </ul>
+
+    <h2><span class="n">02</span> Čo zostáva len v tvojom prehliadači</h2>
+    <p>Poznámky, mestá vo svetovom čase a voľba jazyka sa ukladajú do <strong>lokálneho úložiska tvojho prehliadača</strong>. Nikdy sa neposielajú k nám, na žiadny server. Keď vymažeš dáta prehliadača, zmiznú.</p>
+
+    <h2><span class="n">03</span> Chat „Bez stopy"</h2>
+    <p>Správy sa <strong>šifrujú priamo v tvojom prehliadači</strong> z hesla, na ktorom sa dohodnete. Náš server (relay) len preposiela nečitateľnú šifru a sám ju neprečíta. <strong>Žiadna história</strong> — nič sa neukladá; zavrieš kartu a je preč.</p>
+    <p>Čestne o hraniciach: chat je presne taký súkromný, aké je vaše heslo a ako si ho vymeníte. Relay nevidí obsah, ale vidí, že nejaká izba je aktívna a kedy (metadáta). Je to nástroj na rýchly súkromný rozhovor medzi ľuďmi, čo si dôverujú — nie na použitie proti odhodlanému protivníkovi so zdrojmi.</p>
+
+    <h2><span class="n">04</span> Prekladač</h2>
+    <div class="note"><strong>Pozor:</strong> keď použiješ Prekladač, text, ktorý zadáš, sa <strong>odošle do Google Gemini API</strong>, ktoré ho preloží a vráti späť. My ho neukladáme, ale text <em>opúšťa</em> tvoj prehliadač a prechádza cez Google. <strong>Nevkladaj doň citlivé alebo osobné informácie.</strong></div>
+
+    <h2><span class="n">05</span> Vyhľadávanie</h2>
+    <p>Vyhľadávacie políčko pošle tvoj dopyt do vyhľadávača, ktorý si <strong>sám vyberieš</strong> (Google, Bing alebo DuckDuckGo), a to až vo chvíli, keď klikneš. Tieto služby majú vlastné pravidlá ochrany súkromia.</p>
+
+    <h2><span class="n">06</span> IP adresa — nevyhnutné minimum</h2>
+    <p>Aby k tebe vôbec doletela odpoveď, server musí vidieť IP adresu tvojho pripojenia. To je <strong>úplný základ, na ktorom stojí celý internet</strong> — nie niečo, čo zbierame navyše. Nepoužívame ju na sledovanie, neukladáme ju do žiadnej databázy a nespájame ju s tebou.</p>
+    <p>Predstav si to ako <strong>poštové smerovacie číslo na obálke</strong>: bez neho list nedôjde, ale nehovorí nič o tom, čo je vnútri — a to vnútro je u nás v chate aj tak zašifrované. Na úrovni infraštruktúry tieto pripojenia spracúva náš poskytovateľ hostingu (Cloudflare) tak, ako pri každej webovej stránke.</p>
+
+    <p class="pull">Nepýtame si od teba nič. Nemáme čo o tebe prezradiť, lebo o tebe nič nevieme.</p>
+
+    <h2><span class="n">07</span> Podmienky a vylúčenie zodpovednosti</h2>
+    <ul>
+      <li>plainkit je poskytovaný „<strong>ako je</strong>" (as is), zadarmo a bez akejkoľvek záruky.</li>
+      <li>Nástroje vrátane šifrovania chatu <strong>nie sú nezávisle auditované</strong>. Nespoliehaj sa na ne tam, kde ide o život, bezpečnosť alebo významné peniaze.</li>
+      <li>Za to, čo napíšeš a zdieľaš, zodpovedáš ty.</li>
+      <li>Ktorýkoľvek nástroj môžeme kedykoľvek zmeniť alebo zrušiť.</li>
+    </ul>
+
+    <footer>Toto je osobný projekt. Ak je niečo nejasné, ozvi sa — <a href="/">plainkit.app</a>.</footer>
+  </div>
+
+  <!-- ============ ENGLISH ============ -->
+  <div id="content-en" class="content" hidden>
+    <h1>Privacy &amp; Terms</h1>
+    <p class="lead">plainkit is built on a simple idea: <strong>we don't want your data.</strong> Here, in plain language, is what does and doesn't happen with your information. No legal jargon.</p>
+    <p class="updated">Last updated: May 2026</p>
+
+    <h2><span class="n">01</span> What we don't do</h2>
+    <ul>
+      <li>No accounts, no signup, no login.</li>
+      <li>No ads, no analytics, no tracking, no tracking cookies.</li>
+      <li>No third-party scripts — the whole site loads only from <span class="accent">plainkit.app</span>. No Google Fonts, no CDNs, nothing phoning home.</li>
+      <li>It's a <strong>website, not an app</strong> — it doesn't ask for, and technically cannot access, your files, location, contacts, camera or microphone.</li>
+    </ul>
+
+    <h2><span class="n">02</span> What stays only in your browser</h2>
+    <p>Your notes, world-clock cities and language choice are saved in <strong>your browser's local storage</strong>. They are never sent to us or to any server. Clear your browser data and they're gone.</p>
+
+    <h2><span class="n">03</span> The "Off the record" chat</h2>
+    <p>Messages are <strong>encrypted in your browser</strong> using the password you agree on. Our relay server only forwards scrambled text and cannot read it. <strong>No history</strong> — nothing is stored; close the tab and it's gone.</p>
+    <p>Honest about the limits: the chat is only as private as your password and how you share it. The relay can't see the content, but it does see that a room is active and when (metadata). It's a tool for a quick private conversation between people who trust each other — not for standing up to a determined, well-resourced adversary.</p>
+
+    <h2><span class="n">04</span> The translator</h2>
+    <div class="note"><strong>Note:</strong> when you use the Translator, the text you enter is <strong>sent to Google's Gemini API</strong>, which translates it and sends it back. We don't store it, but the text <em>does leave</em> your browser and passes through Google. <strong>Don't paste sensitive or personal information into it.</strong></div>
+
+    <h2><span class="n">05</span> Search</h2>
+    <p>The search box sends your query to the engine <strong>you choose</strong> (Google, Bing or DuckDuckGo), and only when you click. Those services have their own privacy policies.</p>
+
+    <h2><span class="n">06</span> Your IP address — the bare minimum</h2>
+    <p>For any reply to reach you at all, the server has to see your connection's IP address. That's <strong>the foundation the entire internet runs on</strong> — not something we collect on top. We don't use it to track you, don't store it in any database, and don't link it to you.</p>
+    <p>Think of it like the <strong>postal code on an envelope</strong>: without it the letter can't arrive, but it says nothing about what's inside — and with us, the inside (your chat) is encrypted anyway. At the infrastructure level, our host (Cloudflare) handles these connections the way it does for any website.</p>
+
+    <p class="pull">We ask you for nothing. We have nothing to reveal about you, because we know nothing about you.</p>
+
+    <h2><span class="n">07</span> Terms &amp; disclaimer</h2>
+    <ul>
+      <li>plainkit is provided "<strong>as is</strong>", free of charge, with no warranty of any kind.</li>
+      <li>The tools, including the chat's encryption, are <strong>not independently audited</strong>. Don't rely on them where lives, safety, or significant money are at stake.</li>
+      <li>You are responsible for what you write and share.</li>
+      <li>We may change or remove any tool at any time.</li>
+    </ul>
+
+    <footer>This is a personal project. If anything here is unclear, reach out — <a href="/">plainkit.app</a>.</footer>
+  </div>
+</div>
+
+<script>
+  let lang = (navigator.language || 'en').toLowerCase().startsWith('sk') ? 'sk' : 'en';
+  function setLang(l){
+    lang = l;
+    document.documentElement.lang = l;
+    document.title = l === 'sk' ? 'plainkit · súkromie' : 'plainkit · privacy';
+    document.getElementById('content-sk').hidden = l !== 'sk';
+    document.getElementById('content-en').hidden = l !== 'en';
+    document.getElementById('langSK').classList.toggle('on', l === 'sk');
+    document.getElementById('langEN').classList.toggle('on', l === 'en');
+  }
+  setLang(lang);
+</script>
+</body>
+</html>
