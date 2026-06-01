@@ -11,12 +11,12 @@
 <!-- ═══ SEO ═══ -->
 <meta name="description" content="AI prekladač dokumentov · AI document translator · Traducteur de documents IA. DOCX, XLSX, PPTX, TXT. Zadarmo, bez reklamy.">
 <meta name="keywords" content="prekladač dokumentov, document translator, traducteur, docx, xlsx, pptx, AI translation, free translation, zadarmo, bez reklamy, prekladač zadarmo">
-<meta name="author" content="preklad.netlify.app">
+<meta name="author" content="plainkit.app/preklad">
 <meta name="robots" content="index, follow">
 
 <!-- ═══ Open Graph ═══ -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://preklad.netlify.app/">
+<meta property="og:url" content="https://plainkit.app/preklad/">
 <meta property="og:title" content="Prekladač · Translator · Traducteur — AI prekladač dokumentov zadarmo">
 <meta property="og:description" content="AI prekladač dokumentov · zadarmo · bez reklamy. AI document translator. Traducteur de documents IA.">
 <meta property="og:image" content="https://plainkit.app/og-image.png">
@@ -40,7 +40,7 @@
   "@type": "WebApplication",
   "name": "Prekladač",
   "alternateName": ["Translator", "Traducteur"],
-  "url": "https://preklad.netlify.app/",
+  "url": "https://plainkit.app/preklad/",
   "description": "AI prekladač dokumentov — DOCX, XLSX, PPTX, TXT preklad zadarmo, bez reklamy.",
   "applicationCategory": "UtilityApplication",
   "operatingSystem": "Web",
@@ -930,43 +930,68 @@ body::before {
       </div>
     </section>
 
-   <!-- NÁSTROJ: QR generátor -->
-      <a href="/qr" class="tool-link">
-        <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/qr</div>
-      </a>
-
-      <!-- NÁSTROJ: Prevodník jednotiek -->
-      <a href="/jednotky" class="tool-link">
-        <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/jednotky</div>
-      </a>
-
-      <!-- NÁSTROJ: Hopko (hra) -->
-      <a href="/hopko" class="tool-link">
-        <div class="label"><span data-i18n="tHopko">Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/hopko</div>
-      </a>
-      
-      <!-- NÁSTROJ: Skokan (hra) -->
-      <a href="/skokan" class="tool-link">
-        <div class="label"><span data-i18n="tSkokan">Skokan · hra</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/skokan</div>
-      </a>
-
-     <!-- NÁSTROJ: Chat bez stopy_Off the record -->
-      <a href="/chat" class="tool-link">
-        <div class="label"><span data-i18n="tChat">Chat</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/chat</div>
-      </a>
-
-      <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok vyššie) ↓↓↓ -->
-
-      <!-- NÁSTROJ: Súkromie a podmienky/Privacy & Terms -->
-      <a href="/politika" class="tool-link">
-        <div class="label"><span data-i18n="tpolitika">Súkromie a podmienky/Privacy & Terms</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/politika</div>
-      </a>
+    <!-- Right panel - related tools -->
+    <aside class="right-panel" id="right-panel">
+      <div class="panel-header">
+        <div class="panel-title" id="tools-title">Nástroje</div>
+      </div>
+      <div class="right-panel-list">
+        <a href="/qr" class="tool-link">
+          <div class="tool-link-name">
+            <span>QR generátor · QR code generator</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/qr</div>
+        </a>
+        <a href="/jednotky" class="tool-link">
+          <div class="tool-link-name">
+            <span>Prevodník jednotiek · Unit converter</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/jednotky</div>
+        </a>
+        <a href="/chat" class="tool-link">
+          <div class="tool-link-name">
+            <span>Chat · Bez stopy</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/chat</div>
+        </a>
+        <a href="/sach" class="tool-link">
+          <div class="tool-link-name">
+            <span>Šach · Chess</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/sach</div>
+        </a>
+        <a href="/hopko" class="tool-link">
+          <div class="tool-link-name">
+            <span>Hopko · hra</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/hopko</div>
+        </a>
+        <a href="/skokan" class="tool-link">
+          <div class="tool-link-name">
+            <span>Skokan · hra</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/skokan</div>
+        </a>
+        <a href="/" class="tool-link">
+          <div class="tool-link-name">
+            <span>Domov · plainkit</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app</div>
+        </a>
+        <a href="/politika" class="tool-link">
+          <div class="tool-link-name">
+            <span>Súkromie · Privacy</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="tool-link-url">plainkit.app/politika</div>
+        </a>
       </div>
     </aside>
   </div>
