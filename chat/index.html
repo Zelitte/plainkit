@@ -33,7 +33,7 @@
     box-shadow:0 24px 60px rgba(0,0,0,.5);}
 
   /* ---------- entry ---------- */
-  .entry{flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:30px 26px; position:relative;}
+  .entry{flex:1; display:flex; flex-direction:column; gap:16px; padding:30px 26px; position:relative; overflow-y:auto;}
   .langtoggle{position:absolute;top:14px;right:14px;display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px;}
   .langtoggle button{background:transparent;border:none;color:var(--muted);padding:4px 10px;border-radius:999px;cursor:pointer;
     font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.5px;}
@@ -124,21 +124,17 @@
 
       <button class="enter" id="enterBtn">Vstúpiť do izby</button>
       <div class="err" id="err"></div>
-      <a href="/politika" style="display:block;text-align:center;margin-top:8px;font-size:12px;color:var(--muted);text-decoration:none;">Súkromie · Privacy</a> 
-      <details style="margin-top:6px;text-align:center;">
-  <summary style="font-size:11px;color:var(--muted);cursor:pointer;">v1.2 · novinky</summary>
-  <div style="margin-top:8px;text-align:left;font-size:12px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.7;">
-    <b style="color:var(--accent)">v1.2</b><br>
-    • Nová hra: šach proti počítaču<br>
-    • Chat sa po zhasnutí obrazovky sám znova pripojí. Keď sa stránka vráti do popredia (zapneš obrazovku, prepneš sa späť do prehliadača) alebo sa obnoví sieť, chat sa okamžite sám znova pripojí do tej istej izby
-    — heslo je stále len v pamäti, takže netreba nič zadávať a nič sa neukladá. Pridal som aj poistku proti dvojitému pripojeniu a po „Odísť" sa už späť nepripája.
-      Čo to vyrieši: najčastejší prípad — zhasla obrazovka / odskočil si z appky a po návrate si bol odpojený. Teraz naskočí spojenie hneď.
-      Po úplnom reloade stránky (alebo keď telefón pri nedostatku pamäte appku zabije) sa vrátiš na obrazovku so zadaním hesla a správy sú preč. To nie je chyba — to je presne sľub 
-      „žiadna história, žiadna stopa". Keby som to „opravil", musel by som správy alebo heslo niekam uložiť, a tým rozbijem to, čo robí chat výnimočným.<br>
-    • Celý web bez tretích strán (fonty aj knižnice lokálne)<br>
-    • Jednotná navigácia medzi nástrojmi
-  </div>
-</details>
+      <a href="/politika" style="display:block;text-align:center;margin-top:8px;font-size:12px;color:var(--muted);text-decoration:none;">Súkromie · Privacy</a>
+      <details style="margin-top:4px;text-align:center;">
+        <summary style="font-size:11px;color:var(--muted);cursor:pointer;list-style:none;">v1.2 · novinky</summary>
+        <div style="margin-top:8px;text-align:left;font-size:12px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.7;">
+          <b style="color:var(--accent)">v1.2</b><br>
+          • Nová hra: šach proti počítaču<br>
+          • Chat sa po zhasnutí obrazovky sám pripojí späť<br>
+          • Celý web bez tretích strán (fonty aj knižnice lokálne)<br>
+          • Jednotná navigácia medzi nástrojmi
+        </div>
+      </details>
     </div>
 
     <!-- CHAT -->
