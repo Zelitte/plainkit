@@ -257,7 +257,7 @@ function applyLang(){
 }
 
 // ---- state ----
-let ws=null, key=null, nick="", leaving=false, retry=0;
+let ws=null, key=null, nick="", leaving=false, retry=0, curRoom=null;
 
 function showErr(m){ $("err").textContent = m||""; }
 function setPeople(n){ $("people").textContent = "👥 " + (n==null ? "–" : n); }
@@ -277,13 +277,14 @@ async function enterRoom(){
     $("roomLabel").innerHTML = t.roomWord + " <b>"+roomId.slice(0,8)+"…</b>";
     setPeople(null);
     sysLine(t.sysJoined);
-    leaving=false; retry=0;
+    leaving=false; retry=0; curRoom=roomId;
     connect(roomId);
     $("text").focus();
   }catch(e){ showErr(t.errKey + e.message); }
 }
 
 function connect(roomId){
+  if(ws && (ws.readyState===0 || ws.readyState===1)) return; // už pripojené / pripája sa
   try{
     ws = new WebSocket(RELAY + "/room/" + roomId);
   }catch(e){ sysLine(T[lang].sysWsErr + e.message); return; }
@@ -312,6 +313,18 @@ function connect(roomId){
   ws.onerror = ()=>{ try{ws.close();}catch(_){} };
 }
 
+// Po návrate z pozadia (zhasnutá obrazovka, prepnutie appky) alebo obnove siete
+// sa hneď znova pripojíme do tej istej izby — nič sa neukladá, heslo je stále len v pamäti.
+function resumeConnect(){
+  if(!curRoom || leaving) return;
+  if(ws && (ws.readyState===0 || ws.readyState===1)) return; // spojenie ešte žije
+  retry=0;
+  connect(curRoom);
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") resumeConnect(); });
+window.addEventListener("online", resumeConnect);
+window.addEventListener("pageshow", resumeConnect);
+
 async function send(){
   const txt = $("text").value.trim();
   if(!txt || !ws || ws.readyState!==1){ if(ws && ws.readyState!==1) sysLine(T[lang].sysNotConnected); return; }
@@ -339,7 +352,7 @@ function sysLine(text){
 }
 
 function leave(){
-  leaving=true;
+  leaving=true; curRoom=null;
   try{ ws && ws.close(); }catch(_){}
   ws=null; key=null;
   $("log").innerHTML="";
