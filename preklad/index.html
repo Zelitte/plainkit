@@ -908,6 +908,7 @@ body::before {
       </div>
 
 
+      <div id="gemini-note" style="font-size:12px;line-height:1.55;color:#9aa7b3;background:rgba(255,198,41,.07);border:1px solid rgba(255,198,41,.22);border-radius:8px;padding:9px 12px;margin:0 0 12px;display:flex;gap:7px;align-items:flex-start;"><span style="flex:none">⚠</span><span id="gemini-note-txt">Obsah súboru sa pri preklade odošle do Google Gemini. Neprekladaj citlivé dokumenty.</span></div>
       <button class="translate-btn" id="translate-btn" onclick="doTranslate()" disabled>
         <span id="translate-icon">✦</span>
         <span id="translate-label">Preložiť</span>
@@ -1030,6 +1031,7 @@ const CONTENT = {
     dzTitle: 'Pretiahnite súbor sem',
     dzSub: 'alebo <strong>kliknite na výber</strong>',
     translateBtn: 'Preložiť',
+    geminiNote: 'Obsah súboru sa pri preklade odošle do Google Gemini. Neprekladaj citlivé dokumenty.',
     translating: 'Prekladám...',
     extracting: 'Spracovávam dokument...',
     rebuilding: 'Skladám preložený dokument...',
@@ -1074,6 +1076,7 @@ const CONTENT = {
     dzTitle: 'Drop file here',
     dzSub: 'or <strong>click to browse</strong>',
     translateBtn: 'Translate',
+    geminiNote: "The file's content is sent to Google Gemini to translate. Don't translate sensitive documents.",
     translating: 'Translating...',
     extracting: 'Processing document...',
     rebuilding: 'Building translated document...',
@@ -1118,6 +1121,7 @@ const CONTENT = {
     dzTitle: 'Déposez un fichier ici',
     dzSub: 'ou <strong>cliquez pour parcourir</strong>',
     translateBtn: 'Traduire',
+    geminiNote: 'Le contenu du fichier est envoyé à Google Gemini pour la traduction. Ne traduisez pas de documents sensibles.',
     translating: 'Traduction en cours...',
     extracting: 'Traitement du document...',
     rebuilding: 'Reconstruction du document...',
@@ -1234,6 +1238,7 @@ function applyLang() {
   document.getElementById('dz-title').textContent = c.dzTitle;
   document.getElementById('dz-sub').innerHTML = c.dzSub;
   document.getElementById('translate-label').textContent = c.translateBtn;
+  document.getElementById('gemini-note-txt').textContent = c.geminiNote;
   document.getElementById('dl-result-label').textContent = c.dlResult;
   document.getElementById('result-title').textContent = c.resultTitle;
   document.getElementById('result-body').textContent = c.resultBody;
