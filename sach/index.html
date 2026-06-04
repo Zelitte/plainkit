@@ -117,6 +117,11 @@
     <a class="home" href="/">← späť</a>
   </div>
 
+  <div class="seg" id="mode" style="margin-bottom:12px;">
+    <button id="modeCpu" class="on">Proti počítaču</button>
+    <button id="modeOnline">Dvaja online</button>
+  </div>
+
   <div class="tray" id="trayTop"><span class="lab">PC</span></div>
 
   <div class="status" id="status">
@@ -142,28 +147,38 @@
 
   <div class="tray" id="trayBot"><span class="lab">TY</span></div>
 
-  <div class="seglabel">Obťažnosť</div>
-  <div class="seg" id="diff">
-    <button data-d="1">Ľahký</button>
-    <button data-d="2" class="on">Stredný</button>
-    <button data-d="3">Ťažký</button>
+  <div id="cpuControls">
+    <div class="seglabel">Obťažnosť</div>
+    <div class="seg" id="diff">
+      <button data-d="1">Ľahký</button>
+      <button data-d="2" class="on">Stredný</button>
+      <button data-d="3">Ťažký</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="undoBtn">↶ Späť</button>
+      <button class="btn primary" onclick="newGame()">Nová partia</button>
+    </div>
   </div>
 
-  <div class="row">
-    <button class="btn" id="undoBtn">↶ Späť</button>
-    <button class="btn primary" onclick="newGame()">Nová partia</button>
+  <div id="onlinePanel" style="display:none;">
+    <div class="seglabel">Tajný kód partie</div>
+    <input id="code" placeholder="napr. zelený kôň utorok" autocomplete="off" autocapitalize="none" spellcheck="false"
+      style="width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:14px;padding:12px 14px;border-radius:10px;outline:none;">
+    <div style="font-size:11.5px;color:var(--muted);margin:8px 2px;line-height:1.6;">Obaja zadajte <b>rovnaký kód</b> a ocitnete sa v jednej partii. Kód si vymeňte súkromne — ťahy idú šifrované, server ich nevidí.</div>
+    <div class="row">
+      <button class="btn primary" id="connectBtn" style="flex:2">Pripojiť</button>
+      <button class="btn" id="newOnlineBtn" style="flex:1">Nová</button>
+    </div>
+    <div id="netInfo" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);text-align:center;margin-top:8px;min-height:14px;"></div>
   </div>
 
-  <div class="foot">
+  <div class="foot" id="foot">
     Hráš <b style="color:var(--cyan)">biele</b>, počítač <b style="color:var(--mag)">ružové</b>. Klikni na figúrku, potom na cieľ.<br>
     Pešiak na konci sa mení na dámu. Rošáda a en passant pribudnú neskôr.
   </div>
 </div>
 
 <script>
-"use strict";
-const $ = id => document.getElementById(id);
-
 /* ===== piece SVG (neón line-art, currentColor) ===== */
 const SVG = {
   p:`<svg viewBox="0 0 45 45"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
@@ -203,6 +218,10 @@ const PST = {
 
 /* ===== state ===== */
 let board, turn, sel, legalForSel, history, busy, depth=2, gameOver;
+let mode='cpu', myColor='w', flip=false, moveCount=0;
+let ws=null, netKey=null, netRoom=null, myTok=0, peerTok=null, peerHere=false, leaving=false, retry=0;
+const RELAY="wss://plainkit-chat-relay.4o2a11.workers.dev";
+const te=new TextEncoder(), td=new TextDecoder();
 
 function startBoard(){
   const b = Array.from({length:8},()=>Array(8).fill(null));
@@ -325,18 +344,23 @@ function bestMove(b, col, d){
   return pick[Math.floor(Math.random()*pick.length)];
 }
 
+
 /* ===== UI ===== */
 const FILES=['a','b','c','d','e','f','g','h'];
+
 function render(lastMove){
   const boardEl=$('board'); boardEl.innerHTML='';
+  const myCol = mode==='cpu' ? 'w' : myColor;
+  const myTurn = mode==='cpu' ? (turn==='w'&&!busy) : (turn===myColor && peerHere);
   const checkSide = inCheck(board,turn)?turn:null;
-  let kingSq = checkSide?findKing(board,checkSide):null;
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+  const kingSq = checkSide?findKing(board,checkSide):null;
+  for(let dr=0;dr<8;dr++)for(let dc=0;dc<8;dc++){
+    const r = flip?7-dr:dr, c = flip?7-dc:dc;
     const sq=document.createElement('div');
     sq.className='sq '+((r+c)%2===0?'l':'d');
     sq.dataset.r=r; sq.dataset.c=c;
-    if(c===0){ const co=document.createElement('span'); co.className='coord r'; co.textContent=8-r; sq.appendChild(co); }
-    if(r===7){ const co=document.createElement('span'); co.className='coord f'; co.textContent=FILES[c]; sq.appendChild(co); }
+    if(dc===0){ const co=document.createElement('span'); co.className='coord r'; co.textContent=8-r; sq.appendChild(co); }
+    if(dr===7){ const co=document.createElement('span'); co.className='coord f'; co.textContent=FILES[c]; sq.appendChild(co); }
     const p=board[r][c];
     if(p){ const span=document.createElement('span'); span.innerHTML=pieceSVG(p);
       if(lastMove&&lastMove.t[0]===r&&lastMove.t[1]===c) span.firstChild.classList.add('pop');
@@ -344,9 +368,8 @@ function render(lastMove){
     if(sel&&sel[0]===r&&sel[1]===c) sq.classList.add('sel');
     if(lastMove&&((lastMove.f[0]===r&&lastMove.f[1]===c)||(lastMove.t[0]===r&&lastMove.t[1]===c))) sq.classList.add('last');
     if(kingSq&&kingSq[0]===r&&kingSq[1]===c) sq.classList.add('check');
-    if(legalForSel){ const mv=legalForSel.find(m=>m.t[0]===r&&m.t[1]===c);
-      if(mv) sq.classList.add(mv.cap?'cancap':'canmove'); }
-    if(!busy&&!gameOver&&turn==='w'&&p&&p.c==='w') sq.classList.add('playable');
+    if(legalForSel){ const mv=legalForSel.find(m=>m.t[0]===r&&m.t[1]===c); if(mv) sq.classList.add(mv.cap?'cancap':'canmove'); }
+    if(myTurn&&!gameOver&&p&&p.c===myCol) sq.classList.add('playable');
     if(legalForSel&&legalForSel.some(m=>m.t[0]===r&&m.t[1]===c)) sq.classList.add('playable');
     sq.addEventListener('click',onSquare);
     boardEl.appendChild(sq);
@@ -355,40 +378,49 @@ function render(lastMove){
 }
 
 function onSquare(e){
-  if(busy||gameOver||turn!=='w') return;
+  const myCol = mode==='cpu' ? 'w' : myColor;
+  const myTurn = mode==='cpu' ? turn==='w' : (turn===myColor && peerHere);
+  if(busy||gameOver||!myTurn||!myCol) return;
   const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
-  // clicking a legal target?
   if(sel&&legalForSel){ const mv=legalForSel.find(m=>m.t[0]===r&&m.t[1]===c);
-    if(mv){ doMove(mv,'w'); sel=null; legalForSel=null; return; } }
+    if(mv){ sel=null; legalForSel=null;
+      if(mode==='online'){ const end=makeMove(mv); sendNet({t:'move', m:{f:mv.f, t:mv.t}}); if(!end) setStatus(); }
+      else doMove(mv,'w');
+      return; } }
   const p=board[r][c];
-  if(p&&p.c==='w'){ sel=[r,c]; legalForSel=legalMoves(board,'w').filter(m=>m.f[0]===r&&m.f[1]===c); render(); }
+  if(p&&p.c===myCol){ sel=[r,c]; legalForSel=legalMoves(board,myCol).filter(m=>m.f[0]===r&&m.f[1]===c); render(); }
   else { sel=null; legalForSel=null; render(); }
 }
 
-function doMove(m, col){
+function makeMove(m){
   history.push(clone(board));
   board=applyMove(board,m);
+  moveCount++;
   turn=opp(turn);
   render(m);
-  if(checkEnd()) return;
-  if(col==='w'){ // computer replies
-    busy=true; setStatus(); 
-    setTimeout(()=>{ const reply=bestMove(board, 'b', depth);
-      if(reply){ history.push(clone(board)); board=applyMove(board,reply); turn='w'; render(reply); }
-      busy=false; checkEnd()||setStatus();
+  return checkEnd();
+}
+
+function doMove(m, col){            // CPU mode
+  if(makeMove(m)) return;
+  if(col==='w'){
+    busy=true; setStatus();
+    setTimeout(()=>{ const reply=bestMove(board,'b',depth);
+      if(reply) makeMove(reply);
+      busy=false; if(!gameOver) setStatus();
     }, 220);
   } else setStatus();
 }
 
 function checkEnd(){
-  const mv=legalMoves(board,turn);
-  if(mv.length>0){ return false; }
+  if(legalMoves(board,turn).length>0) return false;
   gameOver=true;
-  const checked=inCheck(board,turn);
-  if(checked){
-    const youWon = turn==='b'; // turn has no moves & in check => that side is mated
-    showEnd(youWon?'🏆':'💀', youWon?'Mat — vyhral si!':'Mat — vyhral počítač', youWon?'Pekná partia. Dáš odvetu?':'Tentoraz to vyšlo počítaču. Skús znova!');
-  } else { showEnd('🤝','Pat — remíza','Súper nemá legálny ťah, ale nie je v šachu.'); }
+  if(inCheck(board,turn)){
+    const winner=opp(turn);
+    const iWon = mode==='cpu' ? winner==='w' : winner===myColor;
+    const lostMsg = mode==='cpu' ? 'Mat — vyhral počítač' : 'Mat — vyhral súper';
+    showEnd(iWon?'🏆':'💀', iWon?'Mat — vyhral si!':lostMsg, iWon?'Pekná partia!':'Tentoraz nie. Skús znova!');
+  } else { showEnd('🤝','Pat — remíza','Nikto nemá legálny ťah, ale nie je v šachu.'); }
   return true;
 }
 
@@ -398,47 +430,152 @@ function setStatus(){
   const st=$('status'); st.classList.toggle('thinking',busy);
   const chip=$('chip');
   if(gameOver){ chip.className='turnchip'; $('msg').textContent='Partia skončila'; $('sub').textContent='daj „Nová partia"'; return; }
-  if(busy){ chip.className='turnchip cpu'; $('msg').textContent='Počítač premýšľa…'; $('sub').textContent='hľadá najlepší ťah'; return; }
-  chip.className='turnchip '+(turn==='w'?'you':'cpu');
-  const chk = inCheck(board,turn);
-  $('msg').textContent = turn==='w' ? (chk?'Šach! Tvoj ťah':'Tvoj ťah') : 'Ťah počítača';
-  $('sub').textContent = chk?'musíš sa brániť':'hráš biele · ťahaj zdola nahor';
+  if(mode==='cpu'){
+    if(busy){ chip.className='turnchip cpu'; $('msg').textContent='Počítač premýšľa…'; $('sub').textContent='hľadá najlepší ťah'; return; }
+    chip.className='turnchip '+(turn==='w'?'you':'cpu');
+    const chk=inCheck(board,turn);
+    $('msg').textContent = turn==='w' ? (chk?'Šach! Tvoj ťah':'Tvoj ťah') : 'Ťah počítača';
+    $('sub').textContent = chk?'musíš sa brániť':'hráš biele · ťahaj zdola nahor';
+    return;
+  }
+  if(!netRoom){ chip.className='turnchip'; $('msg').textContent='Zadaj kód a pripoj sa'; $('sub').textContent='dvaja s rovnakým kódom = jedna partia'; return; }
+  if(!peerHere){ chip.className='turnchip'; $('msg').textContent='Čaká sa na súpera…'; $('sub').textContent='pošli mu rovnaký kód partie'; return; }
+  if(!myColor){ chip.className='turnchip'; $('msg').textContent='Spájam partiu…'; $('sub').textContent='moment'; return; }
+  const myTurn = turn===myColor;
+  chip.className='turnchip '+(myTurn?'you':'cpu');
+  const chk=inCheck(board,turn);
+  const colName = myColor==='w'?'biele':'ružové';
+  $('msg').textContent = myTurn ? (chk?'Šach! Tvoj ťah':'Tvoj ťah') : (chk?'Šach súperovi':'Ťah súpera');
+  $('sub').textContent = 'hráš '+colName;
 }
 
 function updateTrays(){
-  // count captured = starting minus on board
   const start={p:8,n:2,b:2,r:2,q:1};
   const on={w:{},b:{}};
   for(let r=0;r<8;r++)for(let c=0;c<8;c++){ const p=board[r][c]; if(p&&p.t!=='k') on[p.c][p.t]=(on[p.c][p.t]||0)+1; }
-  const capByWhite=[], capByBlack=[]; let matW=0,matB=0;
+  const myCol = mode==='cpu' ? 'w' : (myColor||'w');
+  const oppCol = opp(myCol);
+  const capByMe=[], capByOpp=[]; let matMe=0,matOpp=0;
   for(const t of ['q','r','b','n','p']){
-    const lostB=(start[t]||0)-(on.b[t]||0); for(let i=0;i<lostB;i++){ capByWhite.push(t); matW+=VAL[t]; }
-    const lostW=(start[t]||0)-(on.w[t]||0); for(let i=0;i<lostW;i++){ capByBlack.push(t); matB+=VAL[t]; }
+    const lo=(start[t]||0)-(on[oppCol][t]||0); for(let i=0;i<lo;i++){ capByMe.push(t); matMe+=VAL[t]; }
+    const lm=(start[t]||0)-(on[myCol][t]||0); for(let i=0;i<lm;i++){ capByOpp.push(t); matOpp+=VAL[t]; }
   }
-  const adv=Math.round((matW-matB)/100);
-  $('trayBot').innerHTML='<span class="lab">TY</span>'+capByWhite.map(t=>`<span class="pc-b">${SVG[t]}</span>`).join('')+(adv>0?`<span class="adv">+${adv}</span>`:'');
-  $('trayTop').innerHTML='<span class="lab">PC</span>'+capByBlack.map(t=>`<span class="pc-w">${SVG[t]}</span>`).join('')+(adv<0?`<span class="adv">+${-adv}</span>`:'');
+  const adv=Math.round((matMe-matOpp)/100);
+  const oppLab = mode==='cpu' ? 'PC' : 'SÚPER';
+  const myCls = myCol==='w'?'pc-w':'pc-b';
+  const oppCls = oppCol==='w'?'pc-w':'pc-b';
+  $('trayBot').innerHTML='<span class="lab">TY</span>'+capByMe.map(t=>`<span class="${oppCls}">${SVG[t]}</span>`).join('')+(adv>0?`<span class="adv">+${adv}</span>`:'');
+  $('trayTop').innerHTML=`<span class="lab">${oppLab}</span>`+capByOpp.map(t=>`<span class="${myCls}">${SVG[t]}</span>`).join('')+(adv<0?`<span class="adv">+${-adv}</span>`:'');
 }
 
 function undo(){
-  if(busy||history.length===0) return;
+  if(mode==='online'||busy||history.length===0) return;
   $('overlay').classList.remove('show'); gameOver=false;
-  // pop back to the player's previous turn (undo cpu + player ply if present)
   board=history.pop();
-  if(turn==='w'&&history.length>0){ board=history.pop(); } // also remove the player's own move pair
+  if(turn==='w'&&history.length>0){ board=history.pop(); }
   turn='w'; sel=null; legalForSel=null;
   render(); setStatus();
 }
 
 function newGame(){
-  board=startBoard(); turn='w'; sel=null; legalForSel=null; history=[]; busy=false; gameOver=false;
+  board=startBoard(); turn='w'; sel=null; legalForSel=null; history=[]; busy=false; gameOver=false; moveCount=0;
   $('overlay').classList.remove('show'); render(); setStatus();
+  if(mode==='online' && ws && ws.readyState===1) sendNet({t:'reset'});
 }
 
 /* difficulty */
 $('diff').addEventListener('click',e=>{ const btn=e.target.closest('button'); if(!btn)return;
   [...$('diff').children].forEach(b=>b.classList.remove('on')); btn.classList.add('on'); depth=+btn.dataset.d; });
 $('undoBtn').addEventListener('click',undo);
+
+/* ===== mode switching ===== */
+function setMode(m){
+  if(m===mode) return;
+  leaving=true; try{ ws&&ws.close(); }catch(_){} ws=null;
+  mode=m; peerHere=false; flip=false; netRoom=null; myColor=(m==='cpu'?'w':null);
+  $('modeCpu').classList.toggle('on', m==='cpu');
+  $('modeOnline').classList.toggle('on', m==='online');
+  $('cpuControls').style.display = m==='cpu'?'':'none';
+  $('onlinePanel').style.display = m==='online'?'':'none';
+  $('foot').style.display = m==='cpu'?'':'none';
+  board=startBoard(); turn='w'; moveCount=0; sel=null; legalForSel=null; history=[]; gameOver=false; busy=false;
+  $('overlay').classList.remove('show'); render(); setStatus();
+  if(m==='online') $('netInfo').textContent='';
+}
+$('modeCpu').addEventListener('click',()=>setMode('cpu'));
+$('modeOnline').addEventListener('click',()=>setMode('online'));
+
+/* ===== online (reuse chat relay; encrypted moves, no history) ===== */
+async function sha256hex(s){ const b=await crypto.subtle.digest('SHA-256', te.encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function deriveKey(code){
+  const base=await crypto.subtle.importKey('raw', te.encode(code), {name:'PBKDF2'}, false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt:te.encode('plainkit-sach-v1'), iterations:100000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function enc(obj){ const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, netKey, te.encode(JSON.stringify(obj))));
+  const out=new Uint8Array(12+ct.length); out.set(iv); out.set(ct,12); return btoa(String.fromCharCode.apply(null,out)); }
+async function dec(b64){ try{ const raw=Uint8Array.from(atob(b64),x=>x.charCodeAt(0));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv:raw.slice(0,12)}, netKey, raw.slice(12));
+  return JSON.parse(td.decode(pt)); }catch(_){ return null; } }
+function sendNet(o){ if(ws&&ws.readyState===1&&netKey) enc(o).then(s=>{ try{ws.send(s);}catch(_){}}); }
+
+async function connectOnline(){
+  const code=$('code').value.trim();
+  if(code.length<3){ $('netInfo').textContent='Zadaj kód aspoň 3 znaky.'; return; }
+  $('netInfo').textContent='Pripájam…';
+  netKey=await deriveKey(code);
+  netRoom=await sha256hex('plainkit-sach-v1:'+code);
+  myTok=Math.floor(Math.random()*1e9); peerTok=null; peerHere=false; myColor=null; flip=false;
+  board=startBoard(); turn='w'; moveCount=0; gameOver=false; sel=null; legalForSel=null; history=[];
+  leaving=false; retry=0;
+  $('overlay').classList.remove('show'); render(); wsConnect();
+}
+function wsConnect(){
+  if(!netRoom||(ws&&(ws.readyState===0||ws.readyState===1))) return;
+  try{ ws=new WebSocket(RELAY+'/room/'+netRoom); }catch(_){ return; }
+  ws.onopen=()=>{ retry=0; sendNet({t:'hello',tok:myTok}); $('netInfo').textContent = peerHere?'Súper pripojený.':'Čaká sa na súpera…'; setStatus(); };
+  ws.onmessage=async(e)=>{ const s=e.data;
+    if(typeof s==='string' && s.charAt(0)==='{'){ try{ const j=JSON.parse(s); if(j&&j._t==='count'){ onCount(j.n); return; } }catch(_){} }
+    const o=await dec(s); if(o) handleNet(o);
+  };
+  ws.onclose=()=>{ if(leaving) return; const w=Math.min(1000*Math.pow(1.7,retry++),8000); setTimeout(wsConnect,w); $('netInfo').textContent='Spojenie prerušené, skúšam znova…'; setStatus(); };
+  ws.onerror=()=>{ try{ws.close();}catch(_){} };
+}
+function onCount(n){ const was=peerHere; peerHere=(n>=2);
+  if(peerHere&&!was) sendNet({t:'hello',tok:myTok});
+  if(!peerHere) peerTok=null;
+  $('netInfo').textContent = peerHere?'Súper pripojený.':'Čaká sa na súpera…';
+  setStatus();
+}
+function resolveColor(){
+  if(peerTok==null) return;
+  if(myTok===peerTok){ myTok=Math.floor(Math.random()*1e9); sendNet({t:'hello',tok:myTok}); return; }
+  myColor = myTok>peerTok ? 'w':'b'; flip=(myColor==='b');
+  render(); setStatus();
+}
+function handleNet(o){
+  if(!o||!o.t) return;
+  if(o.t==='hello'){ peerHere=true; peerTok=o.tok; resolveColor();
+    if(moveCount>0) sendNet({t:'state', board:board, turn:turn, moveCount:moveCount}); return; }
+  if(o.t==='state'){ if((o.moveCount|0)>moveCount){ board=o.board; turn=o.turn; moveCount=o.moveCount|0; gameOver=false; sel=null; legalForSel=null; $('overlay').classList.remove('show'); render(); checkEnd(); setStatus(); } return; }
+  if(o.t==='state-req'){ if(moveCount>0) sendNet({t:'state', board:board, turn:turn, moveCount:moveCount}); return; }
+  if(o.t==='move'){ onPeerMove(o.m); return; }
+  if(o.t==='reset'){ board=startBoard(); turn='w'; moveCount=0; gameOver=false; sel=null; legalForSel=null; $('overlay').classList.remove('show'); render(); setStatus(); return; }
+}
+function onPeerMove(m){
+  if(gameOver||!m) return;
+  const legal=legalMoves(board,turn).some(x=>x.f[0]===m.f[0]&&x.f[1]===m.f[1]&&x.t[0]===m.t[0]&&x.t[1]===m.t[1]);
+  if(!legal){ sendNet({t:'state-req'}); return; }
+  makeMove({f:m.f,t:m.t}); setStatus();
+}
+$('connectBtn').addEventListener('click',connectOnline);
+$('newOnlineBtn').addEventListener('click',()=>newGame());
+$('code').addEventListener('keydown',e=>{ if(e.key==='Enter') connectOnline(); });
+
+/* reconnect on returning from background / network back */
+function resumeNet(){ if(mode==='online'&&netRoom&&!leaving&&!(ws&&(ws.readyState===0||ws.readyState===1))){ retry=0; wsConnect(); } }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') resumeNet(); });
+window.addEventListener('online',resumeNet);
 
 newGame();
 </script>
