@@ -36,6 +36,41 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Skokan (hra) -->
+  <url>
+    <loc>https://plainkit.app/skokan</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Chat -->
+  <url>
+    <loc>https://plainkit.app/chat</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Šach -->
+  <url>
+    <loc>https://plainkit.app/sach</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Tetris (hra) -->
+  <url>
+    <loc>https://plainkit.app/tetris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Súkromie a podmienky -->
+  <url>
+    <loc>https://plainkit.app/politika</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
   <!-- ↓↓↓ KEĎ PRIDÁŠ NOVÝ NÁSTROJ, SKOPÍRUJ BLOK <url>...</url> A ZMEŇ <loc> ↓↓↓ -->
 
 </urlset>
