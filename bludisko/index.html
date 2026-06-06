@@ -46,7 +46,7 @@
 <body>
 <header>
   <span class="brand">plainkit<span class="dot">.</span> bludisko</span>
-  <span class="tag">verzia DEBUG-3 · no ads · no tracking</span>
+  <span class="tag">verzia v4 · no ads · no tracking</span>
 </header>
 <div class="hud">
   <div><span class="lbl">SKÓRE</span><b id="score">0</b></div>
@@ -221,3 +221,6 @@ let _loggedFrame=false;
 function loop(now){if(!running)return;try{if(!_loggedFrame){_loggedFrame=true;dbg('loop: prvy snimok bezi');}let dt=(now-last)/1000;last=now;if(dt>0.05)dt=0.05;if(!paused)update(dt);draw();raf=requestAnimationFrame(loop);}catch(e){dbg('loop CHYBA: '+(e&&e.message?e.message:e));showErr(e);}}
 buildGrid();draw();
 })();
+</script>
+</body>
+</html>
