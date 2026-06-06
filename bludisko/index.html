@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>plainkit. — bludisko</title>
 <style>
-  @font-face{font-family:'JBM';src:url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
-  @font-face{font-family:'JBM';src:url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+  @font-face{font-family:'JBM';src:url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap;}
+  @font-face{font-family:'JBM';src:url('/fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap;}
   :root{--bg:#07090f;--bg2:#0a0f14;--cyan:#00d4e8;--yellow:#ffc629;--magenta:#ff3df2;--text:#cfe8f0;--dim:#5a7585;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;height:100%;background:var(--bg);}
@@ -74,9 +74,13 @@
   Vlastný klon — žiadna originálna IP. Beží len z plainkit.app, bez tretích strán.<br>
   <a href="/">← späť na plainkit.</a>
 </footer>
+<div id="dbg" style="max-width:560px;width:100%;margin-top:8px;font-size:11px;color:#ff5b5b;white-space:pre-wrap;font-family:monospace;"></div>
 <script>
 (function(){
 'use strict';
+function dbg(m){var d=document.getElementById('dbg');if(d)d.textContent+=m+'\n';}
+window.onerror=function(msg,src,ln,col){dbg('CHYBA: '+msg+' @'+ln+':'+col);};
+dbg('skript nacitany OK');
 const RAW=[
 "############################",
 "#............##............#",
@@ -155,8 +159,9 @@ document.getElementById('pad').addEventListener('click',e=>{const b=e.target.clo
 let tsx=0,tsy=0;
 cv.addEventListener('touchstart',e=>{const t=e.touches[0];tsx=t.clientX;tsy=t.clientY;},{passive:true});
 cv.addEventListener('touchend',e=>{const t=e.changedTouches[0];const dx=t.clientX-tsx,dy=t.clientY-tsy;if(Math.abs(dx)<20&&Math.abs(dy)<20)return;if(Math.abs(dx)>Math.abs(dy))setWant(dx>0?'right':'left');else setWant(dy>0?'down':'up');},{passive:true});
-function start(){try{audio();document.getElementById('overlay').classList.add('hidden');resetLevel(true);running=true;paused=false;gameOver=false;last=performance.now();if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}catch(e){showErr(e);}}
-document.getElementById('startBtn').addEventListener('click',start);
+function start(){try{dbg('start: volany');audio();dbg('start: audio ok');document.getElementById('overlay').classList.add('hidden');dbg('start: overlay skryty');resetLevel(true);dbg('start: resetLevel ok');running=true;paused=false;gameOver=false;last=performance.now();if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);dbg('start: hotovy, raf='+raf);}catch(e){dbg('start CHYBA: '+(e&&e.message?e.message:e));showErr(e);}}
+window.start=start;
+var _sb=document.getElementById('startBtn');dbg('startBtn najdeny: '+(_sb?'ano':'NIE'));if(_sb)_sb.addEventListener('click',function(){dbg('klik na HRAT zachyteny');start();});
 function showOverlay(html,btn){const ov=document.getElementById('overlay');ov.innerHTML=html;ov.classList.remove('hidden');const b=ov.querySelector('button');if(b)b.addEventListener('click',btn||start);}
 function playerSpeed(){return frightTimer>0?7.4:7.6;}
 function ghostSpeed(g){if(g.eaten)return 16;if(g.frightened>0)return 4.6;const tc=tileC(g),tr=tileR(g);if(tr===14&&(tc<6||tc>21))return 3.8;return 6.8+Math.min(level-1,4)*0.15;}
@@ -212,6 +217,7 @@ function draw(){
 function drawPlayer(){const x=player.c*T+T/2,y=player.r*T+T/2,R=T/2-1;const ang=player.mouth*0.32*Math.PI;let rot=0;if(player.dir==='right')rot=0;else if(player.dir==='down')rot=Math.PI/2;else if(player.dir==='left')rot=Math.PI;else if(player.dir==='up')rot=-Math.PI/2;cx.save();cx.translate(x,y);cx.rotate(rot);cx.fillStyle='#00d4e8';cx.shadowColor='rgba(0,212,232,.7)';cx.shadowBlur=10;cx.beginPath();cx.moveTo(0,0);cx.arc(0,0,R,ang,Math.PI*2-ang);cx.closePath();cx.fill();cx.shadowBlur=0;cx.restore();}
 function drawGhost(g){const x=g.c*T+T/2,y=g.r*T+T/2,R=T/2-1;cx.save();cx.translate(x,y);let body;if(g.eaten)body=null;else if(g.frightened>0)body=frightFlash?'#ffffff':'#2244ff';else body=g.col;if(body){cx.fillStyle=body;cx.shadowColor=body;cx.shadowBlur=8;cx.beginPath();cx.arc(0,-1,R,Math.PI,0);cx.lineTo(R,R-2);const n=3,w=2*R/n;for(let i=0;i<n;i++){const sx=R-i*w;cx.lineTo(sx-w/2,R-2+((i%2)?-3:3));}cx.lineTo(-R,R-2);cx.closePath();cx.fill();cx.shadowBlur=0;}const ed=DIR[g.dir]||DIR.none;for(const sgn of[-1,1]){cx.fillStyle='#fff';cx.beginPath();cx.arc(sgn*3.5,-1,2.6,0,7);cx.fill();cx.fillStyle=(g.frightened>0&&!g.eaten)?'#2244ff':'#0a1a3a';cx.beginPath();cx.arc(sgn*3.5+ed.x*1.6,-1+ed.y*1.6,1.3,0,7);cx.fill();}cx.restore();}
 function showErr(e){running=false;cx.fillStyle='#07090f';cx.fillRect(0,0,cv.width,cv.height);cx.fillStyle='#ff5b5b';cx.font='12px monospace';cx.textAlign='left';const msg=(e&&e.stack?e.stack:String(e)).split('\n');let y=30;for(const line of msg){cx.fillText(line.slice(0,52),12,y);y+=16;}document.getElementById('overlay').classList.add('hidden');}
-function loop(now){if(!running)return;try{let dt=(now-last)/1000;last=now;if(dt>0.05)dt=0.05;if(!paused)update(dt);draw();raf=requestAnimationFrame(loop);}catch(e){showErr(e);}}
+let _loggedFrame=false;
+function loop(now){if(!running)return;try{if(!_loggedFrame){_loggedFrame=true;dbg('loop: prvy snimok bezi');}let dt=(now-last)/1000;last=now;if(dt>0.05)dt=0.05;if(!paused)update(dt);draw();raf=requestAnimationFrame(loop);}catch(e){dbg('loop CHYBA: '+(e&&e.message?e.message:e));showErr(e);}}
 buildGrid();draw();
 })();
