@@ -64,6 +64,13 @@
     <priority>0.8</priority>
   </url>
 
+   <!-- Bludisko (hra) -->
+  <url>
+    <loc>https://plainkit.app/bludisko</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Súkromie a podmienky -->
   <url>
     <loc>https://plainkit.app/politika</loc>
