@@ -54,6 +54,18 @@ body{
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
   padding:24px 16px 48px;
+  position:relative;
+}
+/* jemná mriežka — cyan ladenie, takmer neviditeľná, fade do stredu */
+body::before{
+  content:"";
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,212,232,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,232,.035) 1px, transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 78%);
+          mask-image:radial-gradient(circle at 50% 30%, #000 0%, transparent 78%);
 }
 
 .wrap{max-width:760px;margin:0 auto}
@@ -99,12 +111,7 @@ h1{
 .search button:hover{filter:brightness(1.1)}
 .search button:disabled{opacity:.5;cursor:default}
 
-.geoloc{
-  background:none;border:none;color:var(--txt-dim);font-family:"JetBrains Mono",monospace;
-  font-size:12px;cursor:pointer;padding:4px 0;margin-bottom:18px;
-  text-decoration:underline;text-underline-offset:3px;
-}
-.geoloc:hover{color:var(--cyan)}
+.now .model{font-size:11px;color:var(--txt-faint);margin-top:4px;font-style:italic}
 
 /* ---- honest poznámka ---- */
 .note{
@@ -210,6 +217,33 @@ footer a{color:var(--txt-dim);text-decoration:none;border-bottom:1px solid var(-
 footer a:hover{color:var(--cyan)}
 footer .links{margin-top:8px}
 footer .links a{margin-right:14px;border:none}
+
+/* ---- mobil ---- */
+@media (max-width:560px){
+  body{padding:18px 12px 40px}
+  .head{margin-bottom:4px}
+  .brand{font-size:18px}
+  .banner{font-size:10px}
+  h1{margin:22px 0 12px}
+  .search{flex-direction:column}
+  .search input{font-size:16px;padding:13px 14px} /* 16px = bez auto-zoomu na iOS */
+  .search button{padding:13px;width:100%}
+  .now{gap:14px}
+  .now .ico{font-size:46px}
+  .now .temp{font-size:44px}
+  .card{padding:18px}
+  .metrics{grid-template-columns:repeat(3,1fr)}
+  .metric{padding:10px}
+  .metric .v{font-size:15px}
+  .forecast{
+    grid-template-columns:repeat(4,1fr);
+    /* horizontálny scroll pri 7 dňoch na úzkom displeji */
+  }
+}
+@media (max-width:380px){
+  .forecast{grid-template-columns:repeat(3,1fr)}
+  .now .temp{font-size:40px}
+}
 </style>
 </head>
 <body>
@@ -226,7 +260,6 @@ footer .links a{margin-right:14px;border:none}
     <input id="q" type="text" placeholder="Zadaj mesto, napr. Košice" autocomplete="off" spellcheck="false">
     <button id="go">Hľadať</button>
   </div>
-  <button class="geoloc" id="geo">↳ použiť moju polohu</button>
 
   <p class="note">
     Zadané miesto a súradnice sa posielajú na open-meteo.com, odkiaľ sa získava
@@ -249,6 +282,7 @@ footer .links a{margin-right:14px;border:none}
         <div>
           <div class="desc" id="nowDesc"></div>
           <div class="feels" id="nowFeels"></div>
+          <div class="model">modelová hodnota — lokálne sa môže mierne líšiť</div>
         </div>
       </div>
 
@@ -321,7 +355,7 @@ function windDir(deg){
 
 /* ---------- DOM ---------- */
 const $ = id => document.getElementById(id);
-const q=$("q"), go=$("go"), geo=$("geo");
+const q=$("q"), go=$("go");
 const choicesEl=$("choices"), statusEl=$("status"), resultEl=$("result");
 
 function showStatus(html,isErr){
@@ -434,26 +468,6 @@ function render(place,d){
 
   resultEl.classList.remove("hidden");
 }
-
-/* ---------- geolokácia (browser, bez tretej strany) ---------- */
-geo.onclick=()=>{
-  if(!navigator.geolocation){
-    showStatus("Prehliadač nepodporuje geolokáciu.",true); return;
-  }
-  showStatus('<span class="spinner"></span>Zisťujem polohu…',false);
-  navigator.geolocation.getCurrentPosition(
-    pos=>{
-      loadWeather({
-        name:"Moja poloha",
-        admin1:"",
-        country:"",
-        latitude:pos.coords.latitude.toFixed(4),
-        longitude:pos.coords.longitude.toFixed(4)
-      });
-    },
-    ()=>{ clearStatus(); showStatus("Polohu sa nepodarilo získať.",true); }
-  );
-};
 
 /* ---------- util ---------- */
 function escapeHtml(s){
