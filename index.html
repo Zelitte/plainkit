@@ -258,6 +258,25 @@ h3.section-title {
 .tool-link .label { font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
 .tool-link .url { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
 
+/* ═══ Rozbaľovacia ponuka (Hry) ═══ */
+.tool-group { margin-bottom: 8px; }
+.tool-group > summary {
+  display: block; list-style: none; cursor: pointer;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px;
+  color: var(--text); transition: all 0.15s; user-select: none;
+}
+.tool-group > summary::-webkit-details-marker { display: none; }
+.tool-group > summary:hover { border-color: var(--accent); background: var(--bg-elev-2); }
+.tool-group > summary .label { font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+.tool-group > summary .chev { color: var(--text-dim); transition: transform 0.18s; }
+.tool-group[open] > summary .chev { transform: rotate(90deg); }
+.tool-group > summary .url { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
+.tool-group[open] > summary { border-color: var(--border-strong); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.tool-group .group-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 8px 8px 4px; }
+.tool-group .group-body .tool-link { background: transparent; }
+.tool-group .group-body .tool-link:hover { background: var(--bg-elev-2); }
+
 .foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 20px; margin-top: 20px; line-height: 1.8; }
 </style>
 </head>
@@ -371,43 +390,52 @@ h3.section-title {
         <div class="url">plainkit.app/jednotky</div>
       </a>
 
-      <!-- NÁSTROJ: Hopko (hra) -->
-      <a href="/hopko" class="tool-link">
-        <div class="label"><span data-i18n="tHopko">Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/hopko</div>
-      </a>
-      
-      <!-- NÁSTROJ: Skokan (hra) -->
-      <a href="/skokan" class="tool-link">
-        <div class="label"><span data-i18n="tSkokan">Skokan · hra</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/skokan</div>
-      </a>
-
      <!-- NÁSTROJ: Chat bez stopy_Off the record -->
       <a href="/chat" class="tool-link">
         <div class="label"><span data-i18n="tChat">Chat</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/chat</div>
       </a>
 
-      <!-- NÁSTROJ: Prevodník jednotiek -->
-      <a href="/sach" class="tool-link">
-        <div class="label"><span data-i18n="tsach">Šach/Chess</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/sach</div>
-      </a>
+      <!-- ╔══════════════════════════════════════════════╗
+           ║  ROZBAĽOVACIA PONUKA: HRY                     ║
+           ║  Novú hru pridáš skopírovaním jedného         ║
+           ║  <a class="tool-link"> bloku vo vnútri.        ║
+           ╚══════════════════════════════════════════════╝ -->
+      <details class="tool-group">
+        <summary>
+          <div class="label"><span data-i18n="tGames">Hry</span><span class="chev">›</span></div>
+          <div class="url" data-i18n="tGamesSub">Hopko · Skokan · Tetris · Bludisko · Šach</div>
+        </summary>
+        <div class="group-body">
+          <!-- HRA: Hopko -->
+          <a href="/hopko" class="tool-link">
+            <div class="label"><span data-i18n="tHopko">Hopko · hra</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/hopko</div>
+          </a>
+          <!-- HRA: Skokan -->
+          <a href="/skokan" class="tool-link">
+            <div class="label"><span data-i18n="tSkokan">Skokan · hra</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/skokan</div>
+          </a>
+          <!-- HRA: Tetris -->
+          <a href="/tetris" class="tool-link">
+            <div class="label"><span data-i18n="ttetris">Tetris</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/tetris</div>
+          </a>
+          <!-- HRA: Bludisko -->
+          <a href="/bludisko" class="tool-link">
+            <div class="label"><span data-i18n="tbludisko">Bludisko</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/bludisko</div>
+          </a>
+          <!-- HRA: Šach -->
+          <a href="/sach" class="tool-link">
+            <div class="label"><span data-i18n="tsach">Šach</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/sach</div>
+          </a>
+        </div>
+      </details>
 
-      <!-- NÁSTROJ: Tetris -->
-      <a href="/tetris" class="tool-link">
-        <div class="label"><span data-i18n="ttetris">Tetris</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/tetris</div>
-      </a>
-
-      <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok vyššie) ↓↓↓ -->
-
-       <!-- NÁSTROJ: Bludisko -->
-      <a href="/bludisko" class="tool-link">
-        <div class="label"><span data-i18n="tbludisko">Bludisko</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/bludisko</div>
-      </a>
+      <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok .tool-link vyššie) ↓↓↓ -->
 
        <!-- NÁSTROJ: Počasie -->
       <a href="/pocasie" class="tool-link">
@@ -417,7 +445,7 @@ h3.section-title {
 
       <!-- NÁSTROJ: Súkromie a podmienky/Privacy & Terms -->
       <a href="/politika" class="tool-link">
-        <div class="label"><span data-i18n="tpolitika">Súkromie a podmienky/Privacy & Terms</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tpolitika">Súkromie a podmienky</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/politika</div>
       </a>
 
@@ -497,6 +525,8 @@ const I18N = {
     iosTitle:'Pridať na plochu', iosStep1:'Klepni na ikonu Zdieľať v Safari (štvorček so šípkou nahor).', iosStep2:'Vyber „Pridať na plochu".', iosStep3:'Potvrď „Pridať" vpravo hore.', iosClose:'Rozumiem',
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
+    tGames:'Hry', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Šach',
+    ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
@@ -512,6 +542,8 @@ const I18N = {
     iosTitle:'Add to Home Screen', iosStep1:'Tap the Share icon in Safari (a square with an up arrow).', iosStep2:'Choose "Add to Home Screen".', iosStep3:'Confirm with "Add" at the top right.', iosClose:'Got it',
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
+    tGames:'Games', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Chess',
+    ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
