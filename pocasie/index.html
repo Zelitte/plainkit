@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Počasie · plainkit.</title>
+<meta name="description" content="Počasie pre zadané miesto. Bez reklám, bez registrácie, bez sledovania.">
+
+<!-- ============================================================
+     FONTY — samohostené. Over názvy súborov v /fonts/ na repe!
+     Ak sa tvoje súbory volajú inak, uprav src nižšie.
+     ============================================================ -->
+<style>
+@font-face{
+  font-family:"Inter";
+  src:url("/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight:400; font-display:swap;
+}
+@font-face{
+  font-family:"Inter";
+  src:url("/fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight:600; font-display:swap;
+}
+@font-face{
+  font-family:"JetBrains Mono";
+  src:url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight:400; font-display:swap;
+}
+
+:root{
+  --bg:#07090f;
+  --bg-2:#0a0f14;
+  --panel:#0e141c;
+  --panel-2:#111923;
+  --line:#1c2733;
+  --txt:#e6edf3;
+  --txt-dim:#8a99a8;
+  --txt-faint:#5a6775;
+  --cyan:#00d4e8;
+  --yellow:#ffc629;
+  --radius:14px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:"Inter",system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(0,212,232,.06), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(255,198,41,.04), transparent 60%),
+    var(--bg);
+  color:var(--txt);
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding:24px 16px 48px;
+}
+
+.wrap{max-width:760px;margin:0 auto}
+
+/* ---- hlavička ---- */
+.head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;margin-bottom:6px;
+}
+.brand{
+  font-family:"JetBrains Mono",monospace;
+  font-size:20px;letter-spacing:-.5px;color:var(--txt);
+  text-decoration:none;
+}
+.brand b{color:var(--cyan);font-weight:400}
+.brand:hover{opacity:.85}
+.banner{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;color:var(--txt-faint);letter-spacing:.3px;
+}
+h1{
+  font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--txt-dim);margin:28px 0 14px;
+}
+
+/* ---- vyhľadávanie ---- */
+.search{
+  display:flex;gap:8px;margin-bottom:6px;
+}
+.search input{
+  flex:1;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px 16px;color:var(--txt);
+  font-family:inherit;font-size:16px;outline:none;
+  transition:border-color .15s;
+}
+.search input:focus{border-color:var(--cyan)}
+.search input::placeholder{color:var(--txt-faint)}
+.search button{
+  background:var(--cyan);color:#04222a;border:none;border-radius:var(--radius);
+  padding:0 22px;font-family:inherit;font-weight:600;font-size:15px;
+  cursor:pointer;transition:filter .15s;white-space:nowrap;
+}
+.search button:hover{filter:brightness(1.1)}
+.search button:disabled{opacity:.5;cursor:default}
+
+.geoloc{
+  background:none;border:none;color:var(--txt-dim);font-family:"JetBrains Mono",monospace;
+  font-size:12px;cursor:pointer;padding:4px 0;margin-bottom:18px;
+  text-decoration:underline;text-underline-offset:3px;
+}
+.geoloc:hover{color:var(--cyan)}
+
+/* ---- honest poznámka ---- */
+.note{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11.5px;line-height:1.6;color:var(--txt-faint);
+  border-left:2px solid var(--line);padding:2px 0 2px 12px;margin-bottom:22px;
+}
+
+/* ---- výber mesta (viacero zhôd) ---- */
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.choice{
+  text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;color:var(--txt);
+  font-family:inherit;font-size:14px;cursor:pointer;transition:border-color .15s;
+}
+.choice:hover{border-color:var(--cyan)}
+.choice .sub{color:var(--txt-dim);font-size:12.5px;margin-top:2px}
+
+/* ---- výsledok ---- */
+.card{
+  background:linear-gradient(160deg,var(--panel),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-bottom:16px;
+}
+.loc{
+  font-size:18px;font-weight:600;margin-bottom:2px;
+}
+.loc .country{color:var(--txt-dim);font-weight:400;font-size:14px}
+.updated{
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--txt-faint);
+  margin-bottom:18px;
+}
+
+.now{display:flex;align-items:center;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+.now .ico{font-size:54px;line-height:1}
+.now .temp{
+  font-family:"JetBrains Mono",monospace;font-size:52px;font-weight:400;
+  color:var(--cyan);letter-spacing:-2px;line-height:1;
+}
+.now .desc{font-size:15px;color:var(--txt)}
+.now .feels{font-size:13px;color:var(--txt-dim);margin-top:2px}
+
+.metrics{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;
+}
+.metric{background:var(--panel-2);padding:12px 14px}
+.metric .k{
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--txt-faint);margin-bottom:4px;
+}
+.metric .v{font-family:"JetBrains Mono",monospace;font-size:17px;color:var(--txt)}
+.metric .v small{color:var(--txt-dim);font-size:12px}
+
+/* ---- predpoveď ---- */
+.fc-title{
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--txt-dim);margin-bottom:10px;
+}
+.forecast{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;
+}
+.day{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:12px 8px;text-align:center;
+}
+.day .dname{
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--txt-dim);
+  text-transform:uppercase;margin-bottom:6px;
+}
+.day .dico{font-size:26px;line-height:1;margin-bottom:6px}
+.day .dtemp{font-family:"JetBrains Mono",monospace;font-size:13px}
+.day .dtemp .max{color:var(--txt)}
+.day .dtemp .min{color:var(--txt-faint)}
+.day .drain{
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--cyan);
+  margin-top:4px;min-height:13px;
+}
+
+/* ---- stavy ---- */
+.msg{
+  font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--txt-dim);
+  padding:18px 0;
+}
+.msg.err{color:var(--yellow)}
+.spinner{
+  display:inline-block;width:13px;height:13px;border:2px solid var(--line);
+  border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;
+  vertical-align:-2px;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.hidden{display:none}
+
+/* ---- pätička ---- */
+footer{
+  margin-top:36px;padding-top:18px;border-top:1px solid var(--line);
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--txt-faint);
+  line-height:1.7;
+}
+footer a{color:var(--txt-dim);text-decoration:none;border-bottom:1px solid var(--line)}
+footer a:hover{color:var(--cyan)}
+footer .links{margin-top:8px}
+footer .links a{margin-right:14px;border:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <a href="/" class="brand"><b>plainkit.</b></a>
+    <span class="banner">no ads · no signup · no tracking</span>
+  </div>
+
+  <h1>Počasie</h1>
+
+  <div class="search">
+    <input id="q" type="text" placeholder="Zadaj mesto, napr. Košice" autocomplete="off" spellcheck="false">
+    <button id="go">Hľadať</button>
+  </div>
+  <button class="geoloc" id="geo">↳ použiť moju polohu</button>
+
+  <p class="note">
+    Zadané miesto a súradnice sa posielajú na open-meteo.com, odkiaľ sa získava
+    predpoveď. Nič sa neukladá. Žiadne iné požiadavky na tretie strany.
+  </p>
+
+  <div id="choices" class="choices hidden"></div>
+  <div id="status" class="msg hidden"></div>
+
+  <div id="result" class="hidden">
+    <div class="card">
+      <div class="loc"><span id="locName"></span> <span class="country" id="locCountry"></span></div>
+      <div class="updated" id="updated"></div>
+
+      <div class="now">
+        <div class="ico" id="nowIco"></div>
+        <div>
+          <div class="temp" id="nowTemp"></div>
+        </div>
+        <div>
+          <div class="desc" id="nowDesc"></div>
+          <div class="feels" id="nowFeels"></div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="k">Vietor</div><div class="v" id="mWind"></div></div>
+        <div class="metric"><div class="k">Vlhkosť</div><div class="v" id="mHum"></div></div>
+        <div class="metric"><div class="k">Zrážky</div><div class="v" id="mPrec"></div></div>
+      </div>
+    </div>
+
+    <div class="fc-title">Predpoveď</div>
+    <div class="forecast" id="forecast"></div>
+  </div>
+
+  <footer>
+    Dáta: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+    · ako vždy: žiadne reklamy, žiadna registrácia, žiadne sledovanie.
+    <div class="links">
+      <a href="/preklad">preklad</a>
+      <a href="/qr">qr</a>
+      <a href="/jednotky">jednotky</a>
+      <a href="/chat">chat</a>
+      <a href="/politika">súkromie</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------- WMO kódy → SK popis + ikona ---------- */
+const WMO = {
+  0:["Jasno","☀️"],
+  1:["Skoro jasno","🌤️"],
+  2:["Polooblačno","⛅"],
+  3:["Oblačno","☁️"],
+  45:["Hmla","🌫️"],
+  48:["Mrznúca hmla","🌫️"],
+  51:["Slabé mrholenie","🌦️"],
+  53:["Mrholenie","🌦️"],
+  55:["Husté mrholenie","🌧️"],
+  56:["Mrznúce mrholenie","🌧️"],
+  57:["Husté mrznúce mrholenie","🌧️"],
+  61:["Slabý dážď","🌦️"],
+  63:["Dážď","🌧️"],
+  65:["Silný dážď","🌧️"],
+  66:["Mrznúci dážď","🌧️"],
+  67:["Silný mrznúci dážď","🌧️"],
+  71:["Slabé sneženie","🌨️"],
+  73:["Sneženie","🌨️"],
+  75:["Silné sneženie","❄️"],
+  77:["Snehové zrnká","🌨️"],
+  80:["Slabé prehánky","🌦️"],
+  81:["Prehánky","🌧️"],
+  82:["Silné prehánky","🌧️"],
+  85:["Snehové prehánky","🌨️"],
+  86:["Silné snehové prehánky","❄️"],
+  95:["Búrka","⛈️"],
+  96:["Búrka s krúpami","⛈️"],
+  99:["Silná búrka s krúpami","⛈️"]
+};
+function wmo(code){ return WMO[code] || ["—","❓"]; }
+
+/* ---------- vetor smer ---------- */
+function windDir(deg){
+  const d = ["S","SV","V","JV","J","JZ","Z","SZ"];
+  return d[Math.round(deg/45)%8];
+}
+
+/* ---------- DOM ---------- */
+const $ = id => document.getElementById(id);
+const q=$("q"), go=$("go"), geo=$("geo");
+const choicesEl=$("choices"), statusEl=$("status"), resultEl=$("result");
+
+function showStatus(html,isErr){
+  statusEl.className="msg"+(isErr?" err":"");
+  statusEl.innerHTML=html;
+  statusEl.classList.remove("hidden");
+}
+function clearStatus(){ statusEl.classList.add("hidden"); statusEl.innerHTML=""; }
+function hideChoices(){ choicesEl.classList.add("hidden"); choicesEl.innerHTML=""; }
+
+/* ---------- 1) geokódovanie: miesto → zoznam zhôd ---------- */
+async function searchPlace(name){
+  hideChoices(); resultEl.classList.add("hidden");
+  showStatus('<span class="spinner"></span>Hľadám miesto…',false);
+  try{
+    const url="https://geocoding-api.open-meteo.com/v1/search?name="
+      +encodeURIComponent(name)+"&count=5&language=sk&format=json";
+    const r=await fetch(url);
+    if(!r.ok) throw 0;
+    const data=await r.json();
+    clearStatus();
+    if(!data.results||!data.results.length){
+      showStatus("Miesto sa nenašlo. Skús inú formuláciu.",true);
+      return;
+    }
+    if(data.results.length===1){ loadWeather(data.results[0]); return; }
+    renderChoices(data.results);
+  }catch(e){
+    clearStatus();
+    showStatus("Nepodarilo sa spojiť s open-meteo.com. Skús znova.",true);
+  }
+}
+
+function renderChoices(results){
+  choicesEl.innerHTML="";
+  results.forEach(r=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    const sub=[r.admin1,r.country].filter(Boolean).join(", ");
+    b.innerHTML="<div>"+escapeHtml(r.name)+"</div>"
+      +(sub?'<div class="sub">'+escapeHtml(sub)+"</div>":"");
+    b.onclick=()=>{ hideChoices(); loadWeather(r); };
+    choicesEl.appendChild(b);
+  });
+  choicesEl.classList.remove("hidden");
+}
+
+/* ---------- 2) počasie pre súradnice ---------- */
+async function loadWeather(place){
+  hideChoices(); resultEl.classList.add("hidden");
+  showStatus('<span class="spinner"></span>Načítavam počasie…',false);
+  try{
+    const url="https://api.open-meteo.com/v1/forecast"
+      +"?latitude="+place.latitude+"&longitude="+place.longitude
+      +"&current=temperature_2m,relative_humidity_2m,apparent_temperature,"
+      +"precipitation,weather_code,wind_speed_10m,wind_direction_10m"
+      +"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum"
+      +"&timezone=auto";
+    const r=await fetch(url);
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    clearStatus();
+    render(place,d);
+  }catch(e){
+    clearStatus();
+    showStatus("Nepodarilo sa načítať počasie. Skús znova.",true);
+  }
+}
+
+function render(place,d){
+  const c=d.current;
+  const [desc,ico]=wmo(c.weather_code);
+
+  $("locName").textContent=place.name;
+  $("locCountry").textContent=[place.admin1,place.country].filter(Boolean).join(", ");
+
+  // čas aktualizácie v lokálnom čase miesta
+  const t=new Date(c.time);
+  $("updated").textContent="Aktuálne · "+t.toLocaleString("sk-SK",
+    {weekday:"short",hour:"2-digit",minute:"2-digit"});
+
+  $("nowIco").textContent=ico;
+  $("nowTemp").textContent=Math.round(c.temperature_2m)+"°";
+  $("nowDesc").textContent=desc;
+  $("nowFeels").textContent="Pocitovo "+Math.round(c.apparent_temperature)+"°";
+
+  $("mWind").innerHTML=Math.round(c.wind_speed_10m)
+    +' <small>km/h '+windDir(c.wind_direction_10m)+"</small>";
+  $("mHum").innerHTML=Math.round(c.relative_humidity_2m)+' <small>%</small>';
+  $("mPrec").innerHTML=(c.precipitation??0)+' <small>mm</small>';
+
+  // predpoveď
+  const fc=$("forecast"); fc.innerHTML="";
+  const dd=d.daily;
+  const days=["Ne","Po","Ut","St","Št","Pi","So"];
+  for(let i=0;i<dd.time.length;i++){
+    const date=new Date(dd.time[i]);
+    const [,dico]=wmo(dd.weather_code[i]);
+    const rain=dd.precipitation_sum[i];
+    const el=document.createElement("div");
+    el.className="day";
+    el.innerHTML=
+      '<div class="dname">'+(i===0?"Dnes":days[date.getDay()])+"</div>"
+      +'<div class="dico">'+dico+"</div>"
+      +'<div class="dtemp"><span class="max">'+Math.round(dd.temperature_2m_max[i])
+      +'°</span> <span class="min">'+Math.round(dd.temperature_2m_min[i])+'°</span></div>'
+      +'<div class="drain">'+(rain>0?rain+" mm":"")+"</div>";
+    fc.appendChild(el);
+  }
+
+  resultEl.classList.remove("hidden");
+}
+
+/* ---------- geolokácia (browser, bez tretej strany) ---------- */
+geo.onclick=()=>{
+  if(!navigator.geolocation){
+    showStatus("Prehliadač nepodporuje geolokáciu.",true); return;
+  }
+  showStatus('<span class="spinner"></span>Zisťujem polohu…',false);
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      loadWeather({
+        name:"Moja poloha",
+        admin1:"",
+        country:"",
+        latitude:pos.coords.latitude.toFixed(4),
+        longitude:pos.coords.longitude.toFixed(4)
+      });
+    },
+    ()=>{ clearStatus(); showStatus("Polohu sa nepodarilo získať.",true); }
+  );
+};
+
+/* ---------- util ---------- */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>(
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+/* ---------- spustenie ---------- */
+function submit(){
+  const v=q.value.trim();
+  if(v.length<2){ showStatus("Zadaj aspoň 2 znaky.",true); return; }
+  searchPlace(v);
+}
+go.onclick=submit;
+q.addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
+q.focus();
+</script>
+</body>
+</html>
