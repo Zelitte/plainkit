@@ -78,6 +78,13 @@
     <priority>0.8</priority>
   </url>
 
+   <!-- Počasie -->
+  <url>
+    <loc>https://plainkit.app/bomby</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Súkromie a podmienky -->
   <url>
     <loc>https://plainkit.app/politika</loc>
