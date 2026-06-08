@@ -75,13 +75,13 @@
   <div id="content-sk" class="content">
     <h1>Súkromie a podmienky</h1>
     <p class="lead">plainkit stojí na jednoduchej myšlienke: <strong>nechceme tvoje dáta.</strong> Tu je v obyčajnej reči, čo sa s tvojimi údajmi (ne)deje. Žiadny právnický žargón.</p>
-    <p class="updated">Posledná aktualizácia: máj 2026</p>
+    <p class="updated">Posledná aktualizácia: jún 2026</p>
 
     <h2><span class="n">01</span> Čo nerobíme</h2>
     <ul>
       <li>Žiadne kontá, žiadna registrácia, žiadne prihlasovanie.</li>
       <li>Žiadne reklamy, žiadna analytika, žiadne sledovanie, žiadne sledovacie cookies.</li>
-      <li>Žiadne skripty tretích strán — celý web sa načítava výlučne z <span class="accent">plainkit.app</span>. Žiadne Google fonty, žiadne CDN, nič nevolá „domov".</li>
+      <li>Žiadne skripty tretích strán — celý web sa <strong>načítava</strong> výlučne z <span class="accent">plainkit.app</span>. Žiadne Google fonty, žiadne CDN, nič nevolá „domov". (Niektoré nástroje pošlú tvoj vstup externej službe <em>až vtedy, keď to sám spustíš</em> — viac v sekcii 04.)</li>
       <li>Je to <strong>webová stránka, nie aplikácia</strong> — nepýta si a ani technicky nemá ako získať prístup k tvojim súborom, polohe, kontaktom, kamere či mikrofónu.</li>
     </ul>
 
@@ -92,8 +92,10 @@
     <p>Správy sa <strong>šifrujú priamo v tvojom prehliadači</strong> z hesla, na ktorom sa dohodnete. Náš server (relay) len preposiela nečitateľnú šifru a sám ju neprečíta. <strong>Žiadna história</strong> — nič sa neukladá; zavrieš kartu a je preč.</p>
     <p>Čestne o hraniciach: chat je presne taký súkromný, aké je vaše heslo a ako si ho vymeníte. Relay nevidí obsah, ale vidí, že nejaká izba je aktívna a kedy (metadáta). Je to nástroj na rýchly súkromný rozhovor medzi ľuďmi, čo si dôverujú — nie na použitie proti odhodlanému protivníkovi so zdrojmi.</p>
 
-    <h2><span class="n">04</span> Prekladač</h2>
-    <div class="note"><strong>Pozor:</strong> keď použiješ Prekladač, text, ktorý zadáš, sa <strong>odošle do Google Gemini API</strong>, ktoré ho preloží a vráti späť. My ho neukladáme, ale text <em>opúšťa</em> tvoj prehliadač a prechádza cez Google. <strong>Nevkladaj doň citlivé alebo osobné informácie.</strong></div>
+    <h2><span class="n">04</span> Nástroje, ktoré komunikujú s tretími stranami</h2>
+    <p>Väčšina nástrojov beží celá v tvojom prehliadači. Pri niektorých to nejde — musia tvoj vstup odoslať externej službe, aby vôbec fungovali. <strong>Vždy ťa na to upozorníme priamo v danom nástroji, skôr než to spustíš</strong>, a deje sa to len vtedy, keď to sám vyvoláš (nie pri otvorení stránky). Dnes sú to tieto:</p>
+    <div class="note"><strong>Prekladač:</strong> text, ktorý zadáš, sa <strong>odošle do Google Gemini API</strong>, ktoré ho preloží a vráti späť. My ho neukladáme, ale text <em>opúšťa</em> tvoj prehliadač a prechádza cez Google. <strong>Nevkladaj doň citlivé alebo osobné informácie.</strong></div>
+    <div class="note"><strong>Počasie:</strong> mesto, ktoré zadáš, a jeho súradnice sa <strong>odošlú na Open-Meteo</strong> (open-meteo.com), odkiaľ sa získa predpoveď. Nič sa neukladá a nepripája sa to k tebe; platia pravidlá súkromia Open-Meteo.</div>
 
     <h2><span class="n">05</span> Vyhľadávanie</h2>
     <p>Vyhľadávacie políčko pošle tvoj dopyt do vyhľadávača, ktorý si <strong>sám vyberieš</strong> (Google, Bing alebo DuckDuckGo), a to až vo chvíli, keď klikneš. Tieto služby majú vlastné pravidlá ochrany súkromia.</p>
@@ -119,13 +121,13 @@
   <div id="content-en" class="content" hidden>
     <h1>Privacy &amp; Terms</h1>
     <p class="lead">plainkit is built on a simple idea: <strong>we don't want your data.</strong> Here, in plain language, is what does and doesn't happen with your information. No legal jargon.</p>
-    <p class="updated">Last updated: May 2026</p>
+    <p class="updated">Last updated: June 2026</p>
 
     <h2><span class="n">01</span> What we don't do</h2>
     <ul>
       <li>No accounts, no signup, no login.</li>
       <li>No ads, no analytics, no tracking, no tracking cookies.</li>
-      <li>No third-party scripts — the whole site loads only from <span class="accent">plainkit.app</span>. No Google Fonts, no CDNs, nothing phoning home.</li>
+      <li>No third-party scripts — the whole site <strong>loads</strong> only from <span class="accent">plainkit.app</span>. No Google Fonts, no CDNs, nothing phoning home. (Some tools send your input to an external service <em>only when you trigger it yourself</em> — see section 04.)</li>
       <li>It's a <strong>website, not an app</strong> — it doesn't ask for, and technically cannot access, your files, location, contacts, camera or microphone.</li>
     </ul>
 
@@ -136,8 +138,10 @@
     <p>Messages are <strong>encrypted in your browser</strong> using the password you agree on. Our relay server only forwards scrambled text and cannot read it. <strong>No history</strong> — nothing is stored; close the tab and it's gone.</p>
     <p>Honest about the limits: the chat is only as private as your password and how you share it. The relay can't see the content, but it does see that a room is active and when (metadata). It's a tool for a quick private conversation between people who trust each other — not for standing up to a determined, well-resourced adversary.</p>
 
-    <h2><span class="n">04</span> The translator</h2>
-    <div class="note"><strong>Note:</strong> when you use the Translator, the text you enter is <strong>sent to Google's Gemini API</strong>, which translates it and sends it back. We don't store it, but the text <em>does leave</em> your browser and passes through Google. <strong>Don't paste sensitive or personal information into it.</strong></div>
+    <h2><span class="n">04</span> Tools that talk to third parties</h2>
+    <p>Most tools run entirely in your browser. A few can't — they have to send your input to an external service to work at all. <strong>We always flag this right inside the tool, before you trigger it</strong>, and it only happens when you actually do (never on page load). Today these are:</p>
+    <div class="note"><strong>Translator:</strong> the text you enter is <strong>sent to Google's Gemini API</strong>, which translates it and sends it back. We don't store it, but the text <em>does leave</em> your browser and passes through Google. <strong>Don't paste sensitive or personal information into it.</strong></div>
+    <div class="note"><strong>Weather:</strong> the city you enter and its coordinates are <strong>sent to Open-Meteo</strong> (open-meteo.com) to fetch the forecast. Nothing is stored or linked to you; Open-Meteo's own privacy terms apply.</div>
 
     <h2><span class="n">05</span> Search</h2>
     <p>The search box sends your query to the engine <strong>you choose</strong> (Google, Bing or DuckDuckGo), and only when you click. Those services have their own privacy policies.</p>
