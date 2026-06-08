@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>plainkit. — bomby</title>
+<style>
+  :root{
+    --bg:#07090f;
+    --panel:#0a0f14;
+    --cyan:#00d4e8;
+    --yellow:#ffc629;
+    --magenta:#ff3ea5;
+    --grid-line:rgba(0,212,232,0.06);
+    --txt:#cdd6e0;
+    --muted:#5b6772;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(900px 600px at 50% -10%, rgba(0,212,232,0.06), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    display:flex;flex-direction:column;align-items:center;
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    width:100%;max-width:560px;
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding:18px 16px 8px;
+  }
+  .brand{font-size:18px;letter-spacing:0.5px;}
+  .brand b{color:var(--cyan);font-weight:700;}
+  .brand .dot{color:var(--cyan);}
+  .tag{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+
+  .wrap{
+    width:100%;max-width:560px;padding:8px 16px 28px;
+    display:flex;flex-direction:column;gap:12px;align-items:center;
+  }
+
+  .hud{
+    width:100%;display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;color:var(--muted);letter-spacing:0.5px;
+    border:1px solid rgba(255,255,255,0.05);
+    background:rgba(255,255,255,0.012);
+    border-radius:10px;padding:10px 14px;
+  }
+  .hud .stat{display:flex;gap:6px;align-items:center;}
+  .hud .stat b{color:var(--txt);font-weight:600;}
+  .hud .you{color:var(--cyan);}
+  .hud .foes{color:var(--magenta);}
+
+  .stage{
+    position:relative;
+    border:1px solid rgba(0,212,232,0.18);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.5), 0 18px 50px -20px rgba(0,212,232,0.25);
+    background:#05070b;
+    touch-action:none;
+  }
+  canvas{display:block;width:100%;height:auto;image-rendering:pixelated;}
+
+  .overlay{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;text-align:center;padding:24px;
+    background:rgba(5,7,11,0.86);
+    backdrop-filter:blur(3px);
+    transition:opacity .2s;
+  }
+  .overlay.hidden{opacity:0;pointer-events:none;}
+  .overlay h1{font-size:22px;letter-spacing:1px;color:var(--cyan);font-weight:700;}
+  .overlay h1.lose{color:var(--magenta);}
+  .overlay p{font-size:12px;color:var(--muted);max-width:300px;line-height:1.6;}
+  .btn{
+    margin-top:4px;
+    border:1px solid var(--cyan);
+    background:rgba(0,212,232,0.08);
+    color:var(--cyan);
+    font-family:inherit;font-size:13px;letter-spacing:1px;
+    padding:11px 26px;border-radius:9px;cursor:pointer;
+    transition:background .15s, transform .05s;
+  }
+  .btn:hover{background:rgba(0,212,232,0.16);}
+  .btn:active{transform:translateY(1px);}
+
+  .hint{font-size:11px;color:var(--muted);text-align:center;line-height:1.7;letter-spacing:0.3px;}
+  .hint kbd{
+    color:var(--txt);background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);border-radius:4px;
+    padding:1px 6px;font-size:10px;
+  }
+
+  /* Mobilné ovládanie */
+  .pad{
+    display:none;
+    width:100%;max-width:360px;
+    margin-top:4px;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,56px);
+    gap:8px;
+  }
+  .pad button{
+    border:1px solid rgba(0,212,232,0.18);
+    background:rgba(0,212,232,0.05);
+    color:var(--cyan);
+    border-radius:10px;font-size:20px;
+    font-family:inherit;cursor:pointer;
+    -webkit-user-select:none;user-select:none;
+  }
+  .pad button:active{background:rgba(0,212,232,0.18);}
+  .pad .up{grid-area:1/2;}
+  .pad .left{grid-area:2/1;}
+  .pad .bomb{grid-area:2/2;border-color:var(--yellow);color:var(--yellow);background:rgba(255,198,41,0.06);font-size:13px;letter-spacing:1px;}
+  .pad .right{grid-area:2/3;}
+  .pad .down{grid-area:3/2;}
+  @media (hover:none) and (pointer:coarse){ .pad{display:grid;} .hint .keys{display:none;} }
+
+  footer{font-size:10px;color:var(--muted);padding:6px 16px 22px;text-align:center;letter-spacing:0.4px;line-height:1.6;}
+  footer a{color:var(--muted);text-decoration:underline;text-underline-offset:2px;}
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand"><b>plainkit</b><span class="dot">.</span> bomby</div>
+    <div class="tag">no ads · no signup · no tracking</div>
+  </header>
+
+  <div class="wrap">
+    <div class="hud">
+      <div class="stat you">ty <b id="hudYou">živý</b></div>
+      <div class="stat"><span style="color:var(--yellow)">◈</span> bomby <b id="hudBombs">1</b></div>
+      <div class="stat"><span style="color:var(--cyan)">↔</span> dosah <b id="hudRange">1</b></div>
+      <div class="stat foes">súperi <b id="hudFoes">3</b></div>
+    </div>
+
+    <div class="stage">
+      <canvas id="game" width="416" height="416"></canvas>
+      <div class="overlay" id="overlay">
+        <h1 id="ovTitle">bomby</h1>
+        <p id="ovText">Polož bombu, znič steny a posledného súpera. Vyhýbaj sa vlastnému výbuchu. Zbieraj power-upy spod stien.</p>
+        <button class="btn" id="startBtn">Štart</button>
+      </div>
+    </div>
+
+    <div class="pad" id="pad">
+      <button class="up" data-dir="up">▲</button>
+      <button class="left" data-dir="left">◀</button>
+      <button class="bomb" data-act="bomb">BOMBA</button>
+      <button class="right" data-dir="right">▶</button>
+      <button class="down" data-dir="down">▼</button>
+    </div>
+
+    <div class="hint">
+      <span class="keys"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> pohyb · <kbd>medzerník</kbd> bomba · <kbd>R</kbd> reštart</span>
+    </div>
+  </div>
+
+  <footer>
+    Vlastná hra · žiadne tretie strany, beží len z plainkit.app · pixel-art kreslený v prehliadači
+  </footer>
+
+<script>
+"use strict";
+(function(){
+  // ---------- Mriežka ----------
+  const COLS = 13, ROWS = 13, TILE = 32;
+  const W = COLS*TILE, H = ROWS*TILE;
+  const cv = document.getElementById('game');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  // typy buniek
+  const EMPTY=0, SOLID=1, BRICK=2;
+
+  // ---------- Stav ----------
+  let grid, players, bombs, blasts, powerups, running=false, gameOver=false, tick=0;
+
+  // power-up typy
+  const PU_BOMB=1, PU_RANGE=2, PU_SPEED=3;
+
+  function makeGrid(){
+    const g = [];
+    for(let y=0;y<ROWS;y++){
+      g[y]=[];
+      for(let x=0;x<COLS;x++){
+        if(x===0||y===0||x===COLS-1||y===ROWS-1){ g[y][x]=SOLID; }
+        else if(x%2===0 && y%2===0){ g[y][x]=SOLID; }
+        else { g[y][x]=EMPTY; }
+      }
+    }
+    // rozhádž ničiteľné tehly, nechaj rohy voľné pre spawn
+    const safe = new Set();
+    const corners = [[1,1],[COLS-2,1],[1,ROWS-2],[COLS-2,ROWS-2]];
+    corners.forEach(([cx,cy])=>{
+      [[0,0],[1,0],[0,1]].forEach(([dx,dy])=>{
+        const sx = cx + (cx<COLS/2?dx:-dx);
+        const sy = cy + (cy<ROWS/2?dy:-dy);
+        safe.add(sy*COLS+sx);
+      });
+    });
+    for(let y=1;y<ROWS-1;y++){
+      for(let x=1;x<COLS-1;x++){
+        if(g[y][x]===EMPTY && !(x%2===0&&y%2===0)){
+          if(!safe.has(y*COLS+x) && Math.random()<0.72){ g[y][x]=BRICK; }
+        }
+      }
+    }
+    return g;
+  }
+
+  function spawnPowerupMaybe(x,y){
+    if(Math.random()<0.30){
+      const r = Math.random();
+      const type = r<0.40?PU_BOMB : r<0.75?PU_RANGE : PU_SPEED;
+      powerups.push({x,y,type});
+    }
+  }
+
+  function makePlayer(id, col, row, isAI, color){
+    return {
+      id, isAI, color,
+      px:col*TILE, py:row*TILE,   // pixelová pozícia (ľavý-horný roh dlaždice)
+      col, row,
+      alive:true,
+      speed:1.6,                   // px za frame
+      maxBombs:1, bombsOut:0,
+      range:1,
+      moving:false, dir:null,
+      targetCol:col, targetRow:row,
+      aiCooldown:0, aiPath:null, aiThink:0
+    };
+  }
+
+  function reset(){
+    grid = makeGrid();
+    bombs=[]; blasts=[]; powerups=[];
+    players=[
+      makePlayer(0, 1, 1, false, '#00d4e8'),               // hráč — cyan, ľavý horný roh
+      makePlayer(1, COLS-2, 1, true, '#ff3ea5'),           // bot — magenta
+      makePlayer(2, 1, ROWS-2, true, '#ffc629'),           // bot — žltá
+      makePlayer(3, COLS-2, ROWS-2, true, '#9b8cff')       // bot — fialová
+    ];
+    gameOver=false; tick=0;
+    updateHud();
+  }
+
+  // ---------- Pomocné ----------
+  function cellAt(c,r){
+    if(c<0||r<0||c>=COLS||r>=ROWS) return SOLID;
+    return grid[r][c];
+  }
+  function bombAt(c,r){ return bombs.some(b=>b.col===c&&b.row===r); }
+  function walkable(c,r){
+    return cellAt(c,r)===EMPTY && !bombAt(c,r);
+  }
+  function aligned(p){ return p.px % TILE === 0 && p.py % TILE === 0; }
+
+  // ---------- Pohyb ----------
+  const DIRS = {up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+
+  function tryMove(p, dir){
+    if(!aligned(p)) return; // meníme smer iba na mriežke
+    const [dx,dy]=DIRS[dir];
+    const nc=p.col+dx, nr=p.row+dy;
+    if(walkable(nc,nr)){
+      p.dir=dir; p.moving=true;
+      p.targetCol=nc; p.targetRow=nr;
+    } else {
+      p.dir=dir; p.moving=false;
+    }
+  }
+
+  function stepMovement(p){
+    if(!p.moving) return;
+    const [dx,dy]=DIRS[p.dir];
+    p.px += dx*p.speed;
+    p.py += dy*p.speed;
+    // dorazili sme do cieľovej dlaždice?
+    const tx=p.targetCol*TILE, ty=p.targetRow*TILE;
+    if((dx!==0 && Math.abs(p.px-tx)<p.speed) || (dy!==0 && Math.abs(p.py-ty)<p.speed)){
+      p.px=tx; p.py=ty; p.col=p.targetCol; p.row=p.targetRow; p.moving=false;
+      collectPowerup(p);
+    }
+  }
+
+  function collectPowerup(p){
+    for(let i=powerups.length-1;i>=0;i--){
+      const pu=powerups[i];
+      if(pu.x===p.col && pu.y===p.row){
+        if(pu.type===PU_BOMB) p.maxBombs++;
+        else if(pu.type===PU_RANGE) p.range++;
+        else if(pu.type===PU_SPEED) p.speed=Math.min(p.speed+0.5,3.2);
+        powerups.splice(i,1);
+        if(p.id===0) updateHud();
+      }
+    }
+  }
+
+  // ---------- Bomby ----------
+  function placeBomb(p){
+    if(!aligned(p)) return;
+    if(p.bombsOut>=p.maxBombs) return;
+    if(bombAt(p.col,p.row)) return;
+    p.bombsOut++;
+    bombs.push({col:p.col, row:p.row, owner:p, timer:150, range:p.range}); // ~2.5s pri 60fps
+  }
+
+  function detonate(b){
+    b.exploded=true;
+    const cells=[{c:b.col,r:b.row}];
+    for(const dir in DIRS){
+      const [dx,dy]=DIRS[dir];
+      for(let i=1;i<=b.range;i++){
+        const c=b.col+dx*i, r=b.row+dy*i;
+        const cell=cellAt(c,r);
+        if(cell===SOLID) break;
+        cells.push({c,r});
+        if(cell===BRICK){
+          grid[r][c]=EMPTY;
+          spawnPowerupMaybe(c,r);
+          break;
+        }
+        // reťazová reakcia
+        const chain=bombs.find(bb=>!bb.exploded&&bb.col===c&&bb.row===r);
+        if(chain){ chain.timer=0; }
+      }
+    }
+    cells.forEach(({c,r})=>blasts.push({c,r,life:22}));
+    if(b.owner) b.owner.bombsOut=Math.max(0,b.owner.bombsOut-1);
+  }
+
+  function blastAt(c,r){ return blasts.some(bl=>bl.c===c&&bl.r===r); }
+
+  // ---------- AI ----------
+  // jednoduchá, čitateľná: BFS k najbližšiemu cieľu (tehla/hráč), kladie bomby, uteká z nebezpečia
+  function dangerMap(){
+    // bunky, ktoré čoskoro vybuchnú alebo práve horia
+    const danger = new Set();
+    blasts.forEach(bl=>danger.add(bl.r*COLS+bl.c));
+    bombs.forEach(b=>{
+      danger.add(b.row*COLS+b.col);
+      for(const dir in DIRS){
+        const [dx,dy]=DIRS[dir];
+        for(let i=1;i<=b.range;i++){
+          const c=b.col+dx*i, r=b.row+dy*i;
+          if(cellAt(c,r)===SOLID) break;
+          danger.add(r*COLS+c);
+          if(cellAt(c,r)===BRICK) break;
+        }
+      }
+    });
+    return danger;
+  }
+
+  function bfs(sc,sr, isGoal, danger, allowDanger){
+    const q=[[sc,sr]]; const prev={}; const seen=new Set([sr*COLS+sc]);
+    while(q.length){
+      const [c,r]=q.shift();
+      if(isGoal(c,r,c===sc&&r===sr)) return rebuild(prev,sc,sr,c,r);
+      for(const dir in DIRS){
+        const [dx,dy]=DIRS[dir];
+        const nc=c+dx, nr=r+dy; const key=nr*COLS+nc;
+        if(seen.has(key)) continue;
+        if(!walkable(nc,nr)) continue;
+        if(!allowDanger && danger.has(key)) continue;
+        seen.add(key); prev[key]=[c,r]; q.push([nc,nr]);
+      }
+    }
+    return null;
+  }
+  function rebuild(prev,sc,sr,c,r){
+    const path=[[c,r]]; let key=r*COLS+c;
+    while(!(c===sc&&r===sr)){
+      const p=prev[key]; if(!p) break; [c,r]=p; path.unshift([c,r]); key=r*COLS+c;
+    }
+    return path; // path[0] = aktuálna, path[1] = ďalší krok
+  }
+
+  function aiUpdate(p){
+    if(!aligned(p)) return; // rozhoduj len na mriežke
+    const danger=dangerMap();
+    const inDanger=danger.has(p.row*COLS+p.col);
+
+    // 1) ak stojím v nebezpečí — utekaj na najbližšiu bezpečnú bunku
+    if(inDanger){
+      const path=bfs(p.col,p.row,(c,r)=>!danger.has(r*COLS+c),danger,true);
+      if(path && path.length>1){ moveAlong(p,path); return; }
+      // ak niet bezpečnej cesty cez bezpečné bunky, skús aspoň hocikam von
+      const any=bfs(p.col,p.row,(c,r,start)=>!start&&!danger.has(r*COLS+c),danger,true);
+      if(any&&any.length>1){ moveAlong(p,any); return; }
+      return;
+    }
+
+    // 2) je hráč/tehla v dosahu na bombu? polož a hneď naplánuj útek
+    const nearBrickOrFoe = neighborsHaveTarget(p);
+    if(nearBrickOrFoe && p.bombsOut<p.maxBombs && Math.random()<0.9){
+      placeBomb(p);
+      return; // budúci frame ho dangerMap pošle utekať
+    }
+
+    // 3) inak choď k najbližšej tehle (bez vstupu do nebezpečia)
+    const path=bfs(p.col,p.row,(c,r)=>brickAdjacent(c,r),danger,false);
+    if(path && path.length>1){ moveAlong(p,path); return; }
+
+    // 4) nič — náhodný bezpečný krok občas, nech sa nezasekne
+    if(Math.random()<0.3){
+      const opts=Object.keys(DIRS).filter(d=>{
+        const [dx,dy]=DIRS[d]; const nc=p.col+dx,nr=p.row+dy;
+        return walkable(nc,nr)&&!danger.has(nr*COLS+nc);
+      });
+      if(opts.length) tryMove(p,opts[(Math.random()*opts.length)|0]);
+    }
+  }
+  function neighborsHaveTarget(p){
+    // tehla alebo iný hráč v rovnakej línii do range
+    for(const dir in DIRS){
+      const [dx,dy]=DIRS[dir];
+      for(let i=1;i<=p.range;i++){
+        const c=p.col+dx*i, r=p.row+dy*i;
+        const cell=cellAt(c,r);
+        if(cell===SOLID) break;
+        if(cell===BRICK) return true;
+        if(players.some(o=>o.alive&&o!==p&&o.col===c&&o.row===r)) return true;
+      }
+    }
+    return false;
+  }
+  function brickAdjacent(c,r){
+    for(const dir in DIRS){
+      const [dx,dy]=DIRS[dir];
+      if(cellAt(c+dx,r+dy)===BRICK) return true;
+    }
+    return false;
+  }
+  function moveAlong(p,path){
+    if(path.length<2) return;
+    const [nc,nr]=path[1];
+    const dx=nc-p.col, dy=nr-p.row;
+    let dir=null;
+    if(dx===1)dir='right'; else if(dx===-1)dir='left';
+    else if(dy===1)dir='down'; else if(dy===-1)dir='up';
+    if(dir) tryMove(p,dir);
+  }
+
+  // ---------- Smrť ----------
+  function checkDeaths(){
+    players.forEach(p=>{
+      if(p.alive && blastAt(p.col,p.row)){ p.alive=false; }
+    });
+  }
+
+  // ---------- Hlavná slučka ----------
+  function update(){
+    tick++;
+    // bomby
+    bombs.forEach(b=>{ if(!b.exploded){ b.timer--; if(b.timer<=0) detonate(b); }});
+    bombs = bombs.filter(b=>!b.exploded);
+    // výbuchy
+    blasts.forEach(bl=>bl.life--);
+    blasts = blasts.filter(bl=>bl.life>0);
+
+    // AI rozhodnutia (rozprestreté, nie každý bot každý frame)
+    players.forEach(p=>{
+      if(p.isAI && p.alive){
+        p.aiThink--;
+        if(p.aiThink<=0){ aiUpdate(p); p.aiThink = 6 + (Math.random()*6|0); }
+      }
+    });
+
+    // pohyb všetkých
+    players.forEach(p=>{ if(p.alive) stepMovement(p); });
+
+    checkDeaths();
+
+    // koniec?
+    const aliveFoes = players.filter(p=>p.isAI&&p.alive).length;
+    const you = players[0];
+    if(!gameOver){
+      if(!you.alive){ endGame(false); }
+      else if(aliveFoes===0){ endGame(true); }
+    }
+    updateHud();
+  }
+
+  // ---------- Vykreslenie ----------
+  function draw(){
+    // pozadie + jemná mriežka
+    ctx.fillStyle='#070b11';
+    ctx.fillRect(0,0,W,H);
+    for(let y=0;y<ROWS;y++){
+      for(let x=0;x<COLS;x++){
+        const cell=grid[y][x];
+        const px=x*TILE, py=y*TILE;
+        if(cell===EMPTY){
+          ctx.fillStyle = ((x+y)&1)?'#0a1118':'#0b131b';
+          ctx.fillRect(px,py,TILE,TILE);
+        } else if(cell===SOLID){
+          drawSolid(px,py);
+        } else if(cell===BRICK){
+          drawBrick(px,py);
+        }
+      }
+    }
+    powerups.forEach(drawPowerup);
+    bombs.forEach(drawBomb);
+    drawBlasts();
+    players.forEach(p=>{ if(p.alive) drawGuy(p); });
+  }
+
+  function drawSolid(px,py){
+    ctx.fillStyle='#1a2530';
+    ctx.fillRect(px,py,TILE,TILE);
+    ctx.fillStyle='#22323f';
+    ctx.fillRect(px+2,py+2,TILE-4,TILE-6);
+    ctx.fillStyle='rgba(0,212,232,0.10)';
+    ctx.fillRect(px+2,py+2,TILE-4,3);
+    ctx.fillStyle='#0d161d';
+    ctx.fillRect(px+2,py+TILE-5,TILE-4,3);
+  }
+  function drawBrick(px,py){
+    ctx.fillStyle='#2a2030';
+    ctx.fillRect(px+1,py+1,TILE-2,TILE-2);
+    ctx.fillStyle='#3a2c42';
+    // tehlový vzor
+    for(let r=0;r<4;r++){
+      const oy=py+2+r*7;
+      const off=(r&1)?7:0;
+      for(let c=-1;c<3;c++){
+        ctx.fillRect(px+3+c*14+off,oy,11,5);
+      }
+    }
+    ctx.strokeStyle='rgba(255,62,165,0.18)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(px+1.5,py+1.5,TILE-3,TILE-3);
+  }
+
+  function drawPowerup(pu){
+    const px=pu.x*TILE, py=pu.y*TILE;
+    const pulse = 0.5+0.5*Math.sin(tick*0.12);
+    let color, glyph;
+    if(pu.type===PU_BOMB){ color='#ffc629'; glyph='◈'; }
+    else if(pu.type===PU_RANGE){ color='#00d4e8'; glyph='✦'; }
+    else { color='#ff3ea5'; glyph='»'; }
+    ctx.fillStyle='rgba(0,0,0,0.35)';
+    ctx.fillRect(px+5,py+5,TILE-10,TILE-10);
+    ctx.globalAlpha=0.6+0.4*pulse;
+    ctx.strokeStyle=color; ctx.lineWidth=2;
+    ctx.strokeRect(px+5,py+5,TILE-10,TILE-10);
+    ctx.fillStyle=color;
+    ctx.font='bold 14px JetBrains Mono, monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(glyph,px+TILE/2,py+TILE/2+1);
+    ctx.globalAlpha=1;
+  }
+
+  function drawBomb(b){
+    const px=b.col*TILE, py=b.row*TILE;
+    const t = b.timer;
+    const blink = (t<60 && (Math.floor(tick/6)%2===0));
+    const r = TILE/2-5;
+    ctx.beginPath();
+    ctx.fillStyle = blink ? '#ff6a6a' : '#11161d';
+    ctx.arc(px+TILE/2, py+TILE/2+1, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.lineWidth=2;
+    ctx.strokeStyle= blink ? '#ffd0d0' : '#2a3540';
+    ctx.stroke();
+    // lesk
+    ctx.fillStyle='rgba(255,255,255,0.25)';
+    ctx.beginPath();
+    ctx.arc(px+TILE/2-4, py+TILE/2-3, 2.5, 0, Math.PI*2);
+    ctx.fill();
+    // knôt
+    ctx.strokeStyle='#ffc629'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(px+TILE/2+r*0.5, py+TILE/2-r*0.7);
+    ctx.lineTo(px+TILE/2+r*0.9, py+TILE/2-r*1.3);
+    ctx.stroke();
+    ctx.fillStyle='#ff6a00';
+    ctx.beginPath();
+    ctx.arc(px+TILE/2+r*0.9, py+TILE/2-r*1.3, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function drawBlasts(){
+    blasts.forEach(bl=>{
+      const px=bl.c*TILE, py=bl.r*TILE;
+      const a = bl.life/22;
+      ctx.fillStyle=`rgba(255,198,41,${0.85*a})`;
+      ctx.fillRect(px+2,py+2,TILE-4,TILE-4);
+      ctx.fillStyle=`rgba(255,106,0,${0.9*a})`;
+      ctx.fillRect(px+6,py+6,TILE-12,TILE-12);
+      ctx.fillStyle=`rgba(255,255,255,${0.9*a})`;
+      ctx.fillRect(px+TILE/2-3,py+TILE/2-3,6,6);
+    });
+  }
+
+  // retro pixel-panáčik, kreslený zo "štvorčekov"
+  function drawGuy(p){
+    const px=p.px, py=p.py;
+    const s=4; // veľkosť pixela
+    const ox=px+ (TILE-7*s)/2;
+    const oy=py+ (TILE-7*s)/2 -1;
+    const C=p.color;
+    const D='#05070b';
+    const skin='#f1c9a5';
+    // bob — animácia chôdze
+    const bob = (p.moving && Math.floor(tick/6)%2===0) ? s*0.5 : 0;
+    function rect(cx,cy,w,h,col){ ctx.fillStyle=col; ctx.fillRect(ox+cx*s, oy+cy*s-bob, w*s, h*s); }
+    // tieň
+    ctx.fillStyle='rgba(0,0,0,0.35)';
+    ctx.fillRect(px+6, py+TILE-6, TILE-12, 4);
+    // telo (farebný oblek)
+    rect(2,4,3,2,C);          // trup
+    rect(1,4,1,2,C);          // ľavá ruka
+    rect(5,4,1,2,C);          // pravá ruka
+    rect(2,6,1,1,D);          // nohy
+    rect(4,6,1,1,D);
+    // hlava
+    rect(2,1,3,3,skin);
+    // helma/čiapka vo farbe
+    rect(2,0,3,1,C);
+    rect(1,1,1,1,C);
+    rect(5,1,1,1,C);
+    // oči
+    rect(2,2,1,1,D);
+    rect(4,2,1,1,D);
+    // jemný obrys hlavy
+    ctx.strokeStyle='rgba(0,0,0,0.25)';
+  }
+
+  // ---------- HUD ----------
+  function updateHud(){
+    const you=players[0];
+    document.getElementById('hudYou').textContent = you.alive?'živý':'mŕtvy';
+    document.getElementById('hudYou').style.color = you.alive?'var(--cyan)':'var(--magenta)';
+    document.getElementById('hudBombs').textContent = you.maxBombs;
+    document.getElementById('hudRange').textContent = you.range;
+    document.getElementById('hudFoes').textContent = players.filter(p=>p.isAI&&p.alive).length;
+  }
+
+  // ---------- Koniec hry ----------
+  const overlay=document.getElementById('overlay');
+  const ovTitle=document.getElementById('ovTitle');
+  const ovText=document.getElementById('ovText');
+  const startBtn=document.getElementById('startBtn');
+
+  function endGame(win){
+    gameOver=true; running=false;
+    ovTitle.textContent = win?'Vyhral si':'Koniec';
+    ovTitle.className = win?'':'lose';
+    ovText.textContent = win
+      ? 'Posledný na mriežke. Daj odvetu?'
+      : 'Vybuchol si. Skús to znova — pozor na vlastné bomby aj na boty.';
+    startBtn.textContent = 'Hrať znova';
+    overlay.classList.remove('hidden');
+  }
+
+  function startGame(){
+    reset();
+    overlay.classList.add('hidden');
+    running=true;
+    if(!loopRunning){ loopRunning=true; requestAnimationFrame(loop); }
+  }
+
+  // ---------- Slučka s pevným krokom ----------
+  let loopRunning=false, acc=0, last=0;
+  const STEP=1000/60;
+  function loop(ts){
+    if(!last) last=ts;
+    let dt=ts-last; last=ts;
+    if(dt>200) dt=200; // ochrana po prepnutí karty
+    acc+=dt;
+    while(acc>=STEP){
+      if(running) update();
+      acc-=STEP;
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Ovládanie ----------
+  const held=new Set();
+  const KEYMAP={
+    ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+    w:'up', s:'down', a:'left', d:'right',
+    W:'up', S:'down', A:'left', D:'right'
+  };
+  window.addEventListener('keydown', e=>{
+    if(e.key===' '){ e.preventDefault(); if(running) placeBomb(players[0]); return; }
+    if(e.key==='r'||e.key==='R'){ startGame(); return; }
+    const dir=KEYMAP[e.key];
+    if(dir){ e.preventDefault(); held.add(dir); }
+  });
+  window.addEventListener('keyup', e=>{
+    const dir=KEYMAP[e.key];
+    if(dir) held.delete(dir);
+  });
+
+  // hráčov vstup spracujeme každý frame keď je zarovnaný
+  const _origUpdate = update;
+  // namiesto prepisovania: vlož vstup do update cez wrapper
+  function playerInput(){
+    const you=players[0];
+    if(!you.alive) return;
+    if(aligned(you) && !you.moving){
+      // priorita posledného stlačeného smeru
+      const order=['up','down','left','right'];
+      let chosen=null;
+      // preferuj smer, ktorý je voľný
+      for(const d of order){ if(held.has(d)){ chosen=d; } }
+      // vyber ľubovoľný držaný, uprednostni voľný
+      const heldArr=[...held];
+      if(heldArr.length){
+        const free=heldArr.find(d=>{
+          const [dx,dy]=DIRS[d]; return walkable(you.col+dx,you.row+dy);
+        });
+        chosen = free || heldArr[heldArr.length-1];
+      }
+      if(chosen) tryMove(you, chosen);
+    }
+  }
+  // zabal update tak, aby najprv vzal vstup hráča
+  update = function(){ playerInput(); _origUpdate(); };
+
+  // dotykové ovládanie
+  const pad=document.getElementById('pad');
+  pad.querySelectorAll('button[data-dir]').forEach(btn=>{
+    const dir=btn.dataset.dir;
+    const on=e=>{ e.preventDefault(); held.add(dir); };
+    const off=e=>{ e.preventDefault(); held.delete(dir); };
+    btn.addEventListener('touchstart',on,{passive:false});
+    btn.addEventListener('touchend',off,{passive:false});
+    btn.addEventListener('touchcancel',off,{passive:false});
+    btn.addEventListener('mousedown',on);
+    btn.addEventListener('mouseup',off);
+    btn.addEventListener('mouseleave',off);
+  });
+  pad.querySelector('button[data-act="bomb"]').addEventListener('touchstart',e=>{
+    e.preventDefault(); if(running) placeBomb(players[0]);
+  },{passive:false});
+  pad.querySelector('button[data-act="bomb"]').addEventListener('click',()=>{
+    if(running) placeBomb(players[0]);
+  });
+
+  startBtn.addEventListener('click', startGame);
+
+  // počiatočné vykreslenie pozadia za overlayom
+  reset();
+  draw();
+})();
+</script>
+</body>
+</html>
