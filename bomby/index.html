@@ -260,9 +260,15 @@
   function walkable(c,r){
     return cellAt(c,r)===EMPTY && !bombAt(c,r);
   }
-  // je v dlaždici živý panák (iný než self)? — panáci sa navzájom blokujú
+  // je dlaždica obsadená živým panákom (iným než self)? — panáci sa navzájom blokujú.
+  // Pohybujúci sa panák drží OBE dlaždice: tú, z ktorej odchádza, aj tú, kam mieri.
   function occupied(c,r,self){
-    return players.some(o=>o.alive && o!==self && o.col===c && o.row===r);
+    return players.some(o=>{
+      if(!o.alive || o===self) return false;
+      if(o.col===c && o.row===r) return true;                 // stojí tu / odchádza odtiaľ
+      if(o.moving && o.targetCol===c && o.targetRow===r) return true; // mieri sem
+      return false;
+    });
   }
   function aligned(p){ return p.px % TILE === 0 && p.py % TILE === 0; }
 
