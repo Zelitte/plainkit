@@ -260,6 +260,10 @@
   function walkable(c,r){
     return cellAt(c,r)===EMPTY && !bombAt(c,r);
   }
+  // je v dlaždici živý panák (iný než self)? — panáci sa navzájom blokujú
+  function occupied(c,r,self){
+    return players.some(o=>o.alive && o!==self && o.col===c && o.row===r);
+  }
   function aligned(p){ return p.px % TILE === 0 && p.py % TILE === 0; }
 
   // ---------- Pohyb ----------
@@ -269,7 +273,7 @@
     if(!aligned(p)) return; // meníme smer iba na mriežke
     const [dx,dy]=DIRS[dir];
     const nc=p.col+dx, nr=p.row+dy;
-    if(walkable(nc,nr)){
+    if(walkable(nc,nr) && !occupied(nc,nr,p)){
       p.dir=dir; p.moving=true;
       p.targetCol=nc; p.targetRow=nr;
     } else {
