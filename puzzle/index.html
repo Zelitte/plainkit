@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit. · puzzle</title>
+<style>
+  :root{
+    --bg:#07090f;
+    --bg2:#0a0f14;
+    --panel:#0d141c;
+    --line:#1a2730;
+    --cyan:#00d4e8;
+    --green:#00e676;
+    --green-dim:rgba(0,230,118,.22);
+    --green-line:rgba(0,230,118,.55);
+    --txt:#cfe3ea;
+    --muted:#5f7682;
+    --yellow:#ffc629;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      linear-gradient(transparent 0,transparent 23px,var(--green-dim) 24px),
+      linear-gradient(90deg,transparent 0,transparent 23px,var(--green-dim) 24px),
+      radial-gradient(circle at 50% 0,var(--bg2),var(--bg) 70%);
+    background-size:24px 24px,24px 24px,100% 100%;
+    color:var(--txt);
+    font-family:"JetBrains Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:24px 16px 48px;
+  }
+  /* ---- header ---- */
+  header{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+  .logo{font-size:20px;font-weight:700;letter-spacing:.5px;color:#fff}
+  .logo b{color:var(--cyan)}
+  .home{color:var(--cyan);text-decoration:none;font-size:13px;border:1px solid var(--line);padding:7px 12px;border-radius:8px;transition:.15s}
+  .home:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,232,.25)}
+  /* ---- title ---- */
+  .title{width:100%;max-width:760px;margin-bottom:18px}
+  h1{font-size:26px;font-weight:700;color:#fff;letter-spacing:.5px}
+  h1 .accent{color:var(--green);text-shadow:0 0 14px var(--green-line)}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.5}
+  .banner{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:8px}
+  /* ---- panel ---- */
+  .panel{width:100%;max-width:760px;background:rgba(13,20,28,.78);border:1px solid var(--line);border-radius:14px;padding:18px;backdrop-filter:blur(2px)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .row:last-child{margin-bottom:0}
+  label.btn,button{
+    font-family:inherit;font-size:13px;cursor:pointer;
+    background:transparent;color:var(--cyan);
+    border:1px solid var(--line);border-radius:9px;
+    padding:9px 14px;transition:.15s;user-select:none;
+  }
+  label.btn:hover,button:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,232,.22)}
+  button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;border-color:var(--line)}
+  button.primary{color:var(--green);border-color:var(--green-line)}
+  button.primary:hover{box-shadow:0 0 14px var(--green-line);border-color:var(--green)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--green-dim);color:var(--green)}
+  .meta{margin-left:auto;font-size:12px;color:var(--muted)}
+  .meta b{color:var(--green)}
+  #file{display:none}
+  /* ---- board ---- */
+  .stage{width:100%;max-width:760px;margin-top:18px;display:flex;justify-content:center}
+  #board{
+    position:relative;display:grid;gap:2px;background:var(--green-line);
+    border:1px solid var(--green-line);border-radius:6px;overflow:hidden;
+    box-shadow:0 0 30px rgba(0,230,118,.12);touch-action:none;
+    width:100%;max-width:560px;aspect-ratio:1/1;
+  }
+  .piece{
+    background-size:var(--bw) var(--bh);background-repeat:no-repeat;
+    cursor:pointer;position:relative;transition:outline .1s;
+    outline:0 solid transparent;
+  }
+  .piece.sel{outline:3px solid var(--green);outline-offset:-3px;z-index:2}
+  .piece.done{cursor:default}
+  .empty-hint{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;text-align:center;padding:30px}
+  .win{margin-top:14px;text-align:center;color:var(--green);font-size:15px;font-weight:700;letter-spacing:.5px;text-shadow:0 0 12px var(--green-line);display:none}
+  .win.show{display:block;animation:pop .4s ease}
+  @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+  footer{max-width:760px;width:100%;margin-top:26px;font-size:11px;color:var(--muted);line-height:1.6;text-align:center}
+  footer a{color:var(--cyan);text-decoration:none}
+  /* lang toggle */
+  .lang{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:10px}
+  .lang button{border:0;border-radius:0;padding:6px 10px;font-size:12px}
+  .lang button.on{background:var(--cyan);color:#04121a}
+  [data-en]{display:none}
+  body.en [data-sk]{display:none}
+  body.en [data-en]{display:initial}
+  body.en .sub[data-en]{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">plainkit<b>.</b></div>
+  <div style="display:flex;align-items:center">
+    <a class="home" href="/"><span data-sk>← Domov</span><span data-en>← Home</span></a>
+    <span class="lang">
+      <button id="sk" class="on" onclick="setLang('sk')">SK</button>
+      <button id="en" onclick="setLang('en')">EN</button>
+    </span>
+  </div>
+</header>
+
+<div class="title">
+  <h1>puzzle<span class="accent">.</span></h1>
+  <p class="sub" data-sk>Nahraj vlastnú fotku, rozsekaj ju na dieliky a poskladaj. Všetko beží v tvojom prehliadači — obrázok nikam neodchádza.</p>
+  <p class="sub" data-en>Upload your own photo, scramble it into pieces and solve it. Everything runs in your browser — the image never leaves your device.</p>
+  <div class="banner">no ads · no signup · no tracking</div>
+</div>
+
+<div class="panel">
+  <div class="row">
+    <label class="btn" for="file"><span data-sk>📷 Vybrať fotku</span><span data-en>📷 Choose photo</span></label>
+    <input type="file" id="file" accept="image/*">
+    <span class="seg" id="grid">
+      <button data-n="3">3×3</button>
+      <button data-n="4" class="on">4×4</button>
+      <button data-n="5">5×5</button>
+      <button data-n="6">6×6</button>
+    </span>
+    <span class="meta"><span data-sk>ťahy:</span><span data-en>moves:</span> <b id="moves">0</b></span>
+  </div>
+  <div class="row">
+    <button id="shuffle" disabled><span data-sk>🔀 Zamiešať</span><span data-en>🔀 Shuffle</span></button>
+    <button id="solve" disabled><span data-sk>👁 Ukázať predlohu</span><span data-en>👁 Show original</span></button>
+    <button id="download" class="primary" disabled><span data-sk>⬇ Stiahnuť obrázok (PNG)</span><span data-en>⬇ Download image (PNG)</span></button>
+  </div>
+</div>
+
+<div class="stage">
+  <div id="board">
+    <div class="empty-hint">
+      <span data-sk>Začni nahraním fotky ↑<br>klikni na dva dieliky a vymeň ich miesto</span>
+      <span data-en>Start by uploading a photo ↑<br>click two pieces to swap them</span>
+    </div>
+  </div>
+</div>
+<div class="win" id="win"><span data-sk>✓ Hotovo! Krásne poskladané.</span><span data-en>✓ Solved! Nicely done.</span></div>
+
+<footer>
+  <span data-sk>Žiadny obrázok sa nikam nenahráva — všetko prebieha lokálne v prehliadači. Stiahnutý PNG je tvoj zložený výsledok.</span>
+  <span data-en>No image is uploaded anywhere — everything runs locally in your browser. The downloaded PNG is your solved result.</span>
+  <br>plainkit<b style="color:var(--cyan)">.</b> · <a href="/politika" data-sk>súkromie</a><a href="/politika" data-en>privacy</a>
+</footer>
+
+<script>
+"use strict";
+
+// ---------- jazyk ----------
+function setLang(l){
+  document.body.classList.toggle('en', l==='en');
+  document.documentElement.lang = l;
+  document.getElementById('sk').classList.toggle('on', l==='sk');
+  document.getElementById('en').classList.toggle('on', l==='en');
+}
+
+// ---------- stav ----------
+var img = null;          // načítaný Image
+var N = 4;               // mriežka N×N
+var order = [];          // order[pozícia] = index dielika (0..N*N-1)
+var sel = -1;            // vybraný dielik (index pozície)
+var moves = 0;
+var board = document.getElementById('board');
+var movesEl = document.getElementById('moves');
+var winEl = document.getElementById('win');
+
+// rozmery výrezu na bunku (počítané po načítaní)
+var bw = 0, bh = 0;
+
+// ---------- načítanie fotky ----------
+document.getElementById('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  if(!f) return;
+  var url = URL.createObjectURL(f);
+  var im = new Image();
+  im.onload = function(){
+    img = im;
+    URL.revokeObjectURL(url);
+    enable(true);
+    buildSolved();   // najprv zobraz zloženú predlohu
+  };
+  im.onerror = function(){
+    URL.revokeObjectURL(url);
+    alert(document.body.classList.contains('en') ? 'Could not load this image.' : 'Tento obrázok sa nepodarilo načítať.');
+  };
+  im.src = url;
+});
+
+function enable(on){
+  document.getElementById('shuffle').disabled = !on;
+  document.getElementById('solve').disabled = !on;
+  document.getElementById('download').disabled = !on;
+}
+
+// ---------- mriežka ----------
+document.getElementById('grid').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  [].forEach.call(this.querySelectorAll('button'), function(x){x.classList.remove('on');});
+  b.classList.add('on');
+  N = parseInt(b.dataset.n,10);
+  if(img){ buildSolved(); }
+});
+
+// background-size: celá doska sa škáluje na N×N, takže pozadie = (N*100%)
+function styleCommon(el){
+  el.style.backgroundImage = 'url('+img.src+')';
+  el.style.backgroundSize = (N*100)+'% '+(N*100)+'%';
+}
+
+// vykreslí dieliky podľa poľa `order`
+function render(){
+  board.style.gridTemplateColumns = 'repeat('+N+',1fr)';
+  board.style.gridTemplateRows = 'repeat('+N+',1fr)';
+  board.innerHTML = '';
+  for(var pos=0; pos<order.length; pos++){
+    var pieceIndex = order[pos];
+    var r = Math.floor(pieceIndex / N);
+    var c = pieceIndex % N;
+    var d = document.createElement('div');
+    d.className = 'piece';
+    styleCommon(d);
+    // pozícia výrezu: pri size N*100% sa pozícia ráta v percentách (0..100)
+    var px = N>1 ? (c*100/(N-1)) : 0;
+    var py = N>1 ? (r*100/(N-1)) : 0;
+    d.style.backgroundPosition = px+'% '+py+'%';
+    d.dataset.pos = pos;
+    d.addEventListener('click', onPieceClick);
+    board.appendChild(d);
+  }
+}
+
+// zložená predloha (order = identita)
+function buildSolved(){
+  order = [];
+  for(var i=0;i<N*N;i++) order.push(i);
+  sel = -1; moves = 0; movesEl.textContent = '0';
+  winEl.classList.remove('show');
+  render();
+}
+
+// ---------- zamiešanie (Fisher-Yates, garantovane neidentické) ----------
+document.getElementById('shuffle').addEventListener('click', function(){
+  if(!img) return;
+  do {
+    for(var i=order.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=order[i]; order[i]=order[j]; order[j]=t;
+    }
+  } while(isSolved() && order.length>1);
+  sel=-1; moves=0; movesEl.textContent='0';
+  winEl.classList.remove('show');
+  render();
+});
+
+// dočasne ukáž predlohu (drž tlačidlo / klik prepne)
+var peeking=false, peekBackup=null;
+document.getElementById('solve').addEventListener('click', function(){
+  if(!img) return;
+  if(!peeking){
+    peekBackup = order.slice();
+    var ident=[]; for(var i=0;i<N*N;i++) ident.push(i);
+    order=ident; render(); peeking=true;
+    this.querySelector('[data-sk]').textContent='↩ Späť do hry';
+    this.querySelector('[data-en]').textContent='↩ Back to game';
+  } else {
+    order = peekBackup; render(); peeking=false;
+    this.querySelector('[data-sk]').textContent='👁 Ukázať predlohu';
+    this.querySelector('[data-en]').textContent='👁 Show original';
+  }
+});
+
+// ---------- klik / swap ----------
+function onPieceClick(e){
+  if(peeking) return;
+  var pos = parseInt(e.currentTarget.dataset.pos,10);
+  if(sel===-1){
+    sel=pos;
+    e.currentTarget.classList.add('sel');
+  } else if(sel===pos){
+    sel=-1;
+    e.currentTarget.classList.remove('sel');
+  } else {
+    var t=order[sel]; order[sel]=order[pos]; order[pos]=t;
+    moves++; movesEl.textContent=String(moves);
+    sel=-1;
+    render();
+    if(isSolved()) win();
+  }
+}
+
+function isSolved(){
+  for(var i=0;i<order.length;i++) if(order[i]!==i) return false;
+  return true;
+}
+
+function win(){
+  [].forEach.call(board.querySelectorAll('.piece'), function(p){p.classList.add('done');});
+  winEl.classList.add('show');
+}
+
+// ---------- stiahnutie zloženého PNG ----------
+document.getElementById('download').addEventListener('click', function(){
+  if(!img) return;
+  // vykreslíme aktuálny stav dosky podľa `order` v plnom rozlíšení
+  var iw=img.naturalWidth, ih=img.naturalHeight;
+  var cellW=iw/N, cellH=ih/N;
+  var cv=document.createElement('canvas');
+  cv.width=iw; cv.height=ih;
+  var ctx=cv.getContext('2d');
+  for(var pos=0;pos<order.length;pos++){
+    var pieceIndex=order[pos];
+    var sr=Math.floor(pieceIndex/N), sc=pieceIndex%N;     // odkiaľ v obrázku
+    var dr=Math.floor(pos/N), dc=pos%N;                   // kam na doske
+    ctx.drawImage(img, sc*cellW, sr*cellH, cellW, cellH,
+                       dc*cellW, dr*cellH, cellW, cellH);
+  }
+  cv.toBlob(function(blob){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='plainkit-puzzle.png';
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  },'image/png');
+});
+</script>
+</body>
+</html>
