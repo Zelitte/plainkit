@@ -68,11 +68,12 @@
   /* ---- board ---- */
   .stage{width:100%;max-width:760px;margin-top:18px;display:flex;justify-content:center}
   #board{
-    position:relative;display:grid;gap:2px;background:var(--green-line);
+    position:relative;display:grid;gap:2px;background:var(--bg2);
     border:1px solid var(--green-line);border-radius:6px;overflow:hidden;
     box-shadow:0 0 30px rgba(0,230,118,.12);touch-action:none;
     width:100%;max-width:560px;aspect-ratio:1/1;
   }
+  #board.loaded{background:var(--green-line)}
   .piece{
     background-size:var(--bw) var(--bh);background-repeat:no-repeat;
     cursor:pointer;position:relative;transition:outline .1s;
@@ -181,10 +182,37 @@ document.getElementById('file').addEventListener('change', function(e){
   var url = URL.createObjectURL(f);
   var im = new Image();
   im.onload = function(){
-    img = im;
     URL.revokeObjectURL(url);
-    enable(true);
-    buildSolved();   // najprv zobraz zloženú predlohu
+    // veľké fotky z telefónu prekračujú mobilný limit canvasu
+    // (toDataURL potom vráti prázdno) → zmenšíme na bezpečný strop
+    var MAX = 1600;
+    var w = im.naturalWidth, h = im.naturalHeight;
+    if(w > MAX || h > MAX){
+      var s = MAX / Math.max(w, h);
+      w = Math.round(w * s); h = Math.round(h * s);
+    }
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    cv.getContext('2d').drawImage(im, 0, 0, w, h);
+    var holder = new Image();
+    holder.onload = function(){
+      img = holder;
+      enable(true);
+      buildSolved();
+    };
+    holder.onerror = function(){
+      alert(document.body.classList.contains('en')
+        ? 'This image could not be processed. Try a smaller photo.'
+        : 'Túto fotku sa nepodarilo spracovať. Skús menšiu fotku.');
+    };
+    var data = cv.toDataURL('image/jpeg', 0.9);
+    if(!data || data.length < 100){
+      alert(document.body.classList.contains('en')
+        ? 'This image could not be processed. Try a smaller photo.'
+        : 'Túto fotku sa nepodarilo spracovať. Skús menšiu fotku.');
+      return;
+    }
+    holder.src = data;
   };
   im.onerror = function(){
     URL.revokeObjectURL(url);
@@ -216,6 +244,7 @@ function styleCommon(el){
 
 // vykreslí dieliky podľa poľa `order`
 function render(){
+  board.classList.add('loaded');
   board.style.gridTemplateColumns = 'repeat('+N+',1fr)';
   board.style.gridTemplateRows = 'repeat('+N+',1fr)';
   board.innerHTML = '';
