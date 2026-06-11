@@ -17,13 +17,22 @@
     --lcd-bg2:#8a924a;
     --lcd-px:#1a1f12;      /* tmavé pixely */
     --lcd-dim:rgba(26,31,18,0.12); /* mriežka "vypnutých" pixelov */
-    /* telefón */
-    --phone:#3a4a7a;
-    --phone2:#2b3860;
-    --phone-edge:#1d2742;
-    --key:#cdd2e0;
-    --key-shadow:#9aa0b4;
-    --key-edge:#7d8296;
+    /* telo 3310 — tmavomodro-čierne */
+    --body:#23272e;
+    --body2:#171a20;
+    --body-edge:#0d0f13;
+    /* strieborný/chrómový rám */
+    --chrome:#d6d9de;
+    --chrome2:#a7acb4;
+    --chrome3:#7d828c;
+    --chrome-dark:#5a5e66;
+    /* tlačidlá */
+    --key:#2b2f37;
+    --key2:#1c2026;
+    --key-line:#3d424b;
+    --green:#2f6b3a;     /* zelené volacie tlačidlo */
+    --green2:#1f4d28;
+    --green-glow:#4caf50;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -47,8 +56,11 @@
     padding:16px 12px 6px;
   }
   .brand{
+    display:inline-block;
     font-size:20px;letter-spacing:.5px;font-weight:700;color:#eaf6f8;
+    text-decoration:none;transition:opacity .15s;
   }
+  .brand:hover{opacity:.8}
   .brand b{color:var(--cyan)}
   .tag{
     margin-top:4px;font-size:11px;letter-spacing:1px;color:#5a6b72;text-transform:lowercase;
@@ -64,94 +76,158 @@
     padding:14px 10px 24px;
     width:100%;
   }
+  /* ---- TELEFÓN: strieborný rám okolo tmavého tela ---- */
   .phone{
-    width:300px;
-    max-width:92vw;
-    background:linear-gradient(160deg,var(--phone) 0%,var(--phone2) 55%,var(--phone-edge) 100%);
-    border-radius:38px 38px 60px 60px / 46px 46px 90px 90px;
-    padding:22px 20px 26px;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.12) inset,
-      0 -2px 6px rgba(0,0,0,.4) inset,
-      0 18px 40px rgba(0,0,0,.55),
-      0 4px 10px rgba(0,0,0,.4);
+    width:268px;
+    max-width:90vw;
     position:relative;
+    /* chrómový vonkajší rám */
+    background:linear-gradient(150deg,var(--chrome) 0%,var(--chrome2) 30%,var(--chrome3) 60%,var(--chrome-dark) 100%);
+    padding:7px;
+    /* silueta 3310: užšie zaoblené ramená hore, jemné zúženie, plnšie dole */
+    clip-path:polygon(
+      32% 0%, 68% 0%,            /* horná hrana medzi ramenami */
+      88% 4%, 97% 13%,           /* pravé rameno */
+      100% 26%, 97% 40%,         /* pravý bok hore */
+      95% 52%, 97% 64%,          /* mierne zúženie v páse vpravo */
+      100% 80%, 96% 93%, 86% 99%,/* pravý dolný oblúk */
+      68% 100%, 32% 100%,        /* dolná hrana */
+      14% 99%, 4% 93%, 0% 80%,   /* ľavý dolný oblúk */
+      3% 64%, 5% 52%,            /* zúženie v páse vľavo */
+      3% 40%, 0% 26%,            /* ľavý bok hore */
+      3% 13%, 12% 4%             /* ľavé rameno */
+    );
+    box-shadow:
+      0 20px 45px rgba(0,0,0,.6),
+      0 5px 14px rgba(0,0,0,.45);
     user-select:none;
   }
-  /* slúchadlo */
-  .speaker{
-    width:46px;height:6px;border-radius:4px;
-    background:linear-gradient(#11162a,#222c4d);
-    margin:0 auto 12px;
-    box-shadow:0 1px 0 rgba(255,255,255,.08);
-  }
-  .nokia-word{
-    text-align:center;color:#aeb8da;font-size:11px;letter-spacing:3px;
-    font-weight:700;margin-bottom:10px;opacity:.8;
+  .body{
+    background:linear-gradient(160deg,var(--body) 0%,var(--body2) 55%,var(--body-edge) 100%);
+    /* rovnaká silueta, mierne menšia */
+    clip-path:polygon(
+      32% 0%, 68% 0%,
+      88% 4%, 97% 13%,
+      100% 26%, 97% 40%,
+      95% 52%, 97% 64%,
+      100% 80%, 96% 93%, 86% 99%,
+      68% 100%, 32% 100%,
+      14% 99%, 4% 93%, 0% 80%,
+      3% 64%, 5% 52%,
+      3% 40%, 0% 26%,
+      3% 13%, 12% 4%
+    );
+    padding:24px 22px 30px;
   }
 
-  /* ---- LCD displej ---- */
+  /* slúchadlo: zvislé štrbiny */
+  .speaker{
+    display:flex;justify-content:center;gap:3px;margin:2px auto 12px;height:14px;
+  }
+  .speaker i{
+    width:2px;height:100%;border-radius:2px;
+    background:linear-gradient(#0a0c10,#33373f);
+    box-shadow:0 1px 0 rgba(255,255,255,.06);
+  }
+
+  /* NOKIA v striebornom reliéfe */
+  .nokia-word{
+    text-align:center;font-size:14px;letter-spacing:2px;font-weight:800;
+    color:#c6cad2;
+    text-shadow:0 1px 0 rgba(255,255,255,.25),0 -1px 0 rgba(0,0,0,.5);
+    margin-bottom:14px;
+    font-family:Arial,Helvetica,sans-serif;
+  }
+
+  /* ---- LCD displej: zapustený, tmavý rámček ---- */
   .screen-bezel{
-    background:#11162a;
-    border-radius:10px;
-    padding:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,.5) inset, 0 1px 0 rgba(255,255,255,.06);
+    background:linear-gradient(#0a0c10,#1a1d23);
+    border-radius:8px;
+    padding:9px 10px;
+    box-shadow:
+      0 3px 7px rgba(0,0,0,.7) inset,
+      0 1px 0 rgba(255,255,255,.06);
   }
   .screen{
     position:relative;
     background:linear-gradient(170deg,var(--lcd-bg) 0%,var(--lcd-bg2) 100%);
-    border-radius:4px;
+    border-radius:3px;
     overflow:hidden;
-    aspect-ratio:84/48;          /* pomer Nokia 3310 LCD */
-    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
+    aspect-ratio:100/64;
+    box-shadow:0 0 0 1px rgba(0,0,0,.35) inset;
   }
   canvas{
     display:block;width:100%;height:100%;
     image-rendering:pixelated;
     image-rendering:crisp-edges;
   }
-  /* jemný LCD lesk */
   .screen::after{
     content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(120deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 35%);
+    background:linear-gradient(125deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%);
   }
 
-  /* ---- ovládacie tlačidlá pod displejom ---- */
-  .softrow{
-    display:flex;justify-content:space-between;margin:14px 6px 6px;
+  /* ---- KLÁVESNICA 3310 ---- */
+  .keypad{
+    margin-top:16px;
   }
-  .soft{
-    width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;
+  /* horný rad: C  |  navi  |  zelená šípka */
+  .toprow{
+    display:grid;
+    grid-template-columns:1fr 1.5fr 1fr;
+    align-items:center;
+    gap:10px;
   }
-  .soft.l{border-bottom:14px solid #aeb8da;transform:skewX(0)}
-  .soft.r{border-bottom:14px solid #aeb8da}
-  .navwrap{
-    display:flex;align-items:center;justify-content:center;margin:6px 0 4px;
-  }
-
-  /* D-pad */
-  .dpad{
-    position:relative;width:150px;height:150px;
-  }
-  .dbtn{
-    position:absolute;
-    background:linear-gradient(160deg,var(--key) 0%,var(--key-shadow) 100%);
-    border:none;border-radius:8px;
-    box-shadow:0 2px 0 #6f7290,0 3px 4px rgba(0,0,0,.4);
-    color:#3a4068;font-size:18px;font-weight:700;
+  /* soft-key C (vľavo) a šípka späť (vpravo) — zahnuté tvary */
+  .softkey{
+    height:34px;border:none;cursor:pointer;
+    background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
+    box-shadow:0 2px 0 #0c0e12,0 3px 5px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06) inset;
     display:flex;align-items:center;justify-content:center;
-    cursor:pointer;touch-action:none;
+    color:#aeb2bb;font-size:15px;font-weight:700;
+    touch-action:none;
   }
-  .dbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #6f7290}
-  .up{top:0;left:50px;width:50px;height:52px;border-radius:10px 10px 4px 4px}
-  .down{bottom:0;left:50px;width:50px;height:52px;border-radius:4px 4px 10px 10px}
-  .left{left:0;top:50px;width:52px;height:50px;border-radius:10px 4px 4px 10px}
-  .right{right:0;top:50px;width:52px;height:50px;border-radius:4px 10px 10px 4px}
-  .center{
-    left:52px;top:52px;width:46px;height:46px;border-radius:50%;
-    background:radial-gradient(circle at 35% 30%,#e6eaf4,#aab0c6);
-    box-shadow:0 2px 4px rgba(0,0,0,.4),0 0 0 2px rgba(0,0,0,.15) inset;
-    font-size:11px;color:#4a5078;
+  .softkey:active{transform:translateY(2px);box-shadow:0 1px 0 #0c0e12}
+  .softkey.c{border-radius:20px 8px 16px 8px}
+  .softkey.back{border-radius:8px 20px 8px 16px;color:#5fbf6a}
+
+  /* navi blok v strede — funkčný 4-smer + zelený volací stred */
+  .navi{
+    position:relative;height:78px;width:100%;
+    border-radius:14px;
+    background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
+    box-shadow:0 2px 0 #0c0e12,0 3px 6px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.05) inset;
+  }
+  .nbtn{
+    position:absolute;border:none;background:transparent;cursor:pointer;
+    color:#9498a1;font-size:13px;display:flex;align-items:center;justify-content:center;
+    touch-action:none;padding:0;
+  }
+  .nbtn:active{color:#fff}
+  .n-up{top:0;left:25%;width:50%;height:34%}
+  .n-down{bottom:0;left:25%;width:50%;height:34%}
+  .n-left{left:0;top:30%;width:30%;height:40%}
+  .n-right{right:0;top:30%;width:30%;height:40%}
+  /* zelené volacie tlačidlo v strede */
+  .ok-call{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:46px;height:26px;border-radius:14px;border:none;cursor:pointer;
+    background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%);
+    box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 6px rgba(76,175,80,.25),0 1px 0 rgba(255,255,255,.12) inset;
+    color:#bfeac4;font-size:10px;font-weight:700;letter-spacing:.5px;
+    touch-action:none;
+  }
+  .ok-call:active{transform:translate(-50%,-50%) translateY(1px)}
+
+  /* dolné numerické rady — len dekorácia pre vernosť */
+  .numpad{
+    margin-top:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  }
+  .num{
+    height:24px;border-radius:11px;
+    background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
+    box-shadow:0 2px 0 #0c0e12,0 1px 0 rgba(255,255,255,.05) inset;
+    display:flex;align-items:center;justify-content:center;
+    color:#7a7e87;font-size:11px;font-weight:600;
   }
 
   /* ---- pätička pod telefónom ---- */
@@ -172,36 +248,48 @@
 </head>
 <body>
   <header>
-    <div class="brand">plainkit<b>.</b></div>
+    <a class="brand" href="/">plainkit<b>.</b></a>
     <div class="tag">no ads <span>·</span> no signup <span>·</span> no tracking</div>
   </header>
 
   <div class="stage">
     <div class="phone" id="phone">
-      <div class="speaker"></div>
-      <div class="nokia-word">NOKIA</div>
+      <div class="body">
+        <div class="speaker"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="nokia-word">NOKIA</div>
 
-      <div class="screen-bezel">
-        <div class="screen">
-          <canvas id="lcd" width="84" height="48"></canvas>
+        <div class="screen-bezel">
+          <div class="screen">
+            <canvas id="lcd" width="100" height="64"></canvas>
+          </div>
         </div>
-      </div>
 
-      <div class="navwrap">
-        <div class="dpad">
-          <button class="dbtn up"    data-dir="up"   aria-label="hore">▲</button>
-          <button class="dbtn down"  data-dir="down" aria-label="dole">▼</button>
-          <button class="dbtn left"  data-dir="left" aria-label="vľavo">◀</button>
-          <button class="dbtn right" data-dir="right" aria-label="vpravo">▶</button>
-          <button class="dbtn center" data-dir="ok" aria-label="ok">OK</button>
+        <div class="keypad">
+          <div class="toprow">
+            <button class="softkey c" data-dir="pause" aria-label="pauza (C)">C</button>
+            <div class="navi">
+              <button class="nbtn n-up"    data-dir="up"    aria-label="hore">▲</button>
+              <button class="nbtn n-down"  data-dir="down"  aria-label="dole">▼</button>
+              <button class="nbtn n-left"  data-dir="left"  aria-label="vľavo">◀</button>
+              <button class="nbtn n-right" data-dir="right" aria-label="vpravo">▶</button>
+              <button class="ok-call" data-dir="ok" aria-label="štart / OK">OK</button>
+            </div>
+            <button class="softkey back" data-dir="ok" aria-label="späť / OK">↩</button>
+          </div>
+          <div class="numpad" aria-hidden="true">
+            <div class="num">1</div><div class="num">2</div><div class="num">3</div>
+            <div class="num">4</div><div class="num">5</div><div class="num">6</div>
+            <div class="num">7</div><div class="num">8</div><div class="num">9</div>
+            <div class="num">*</div><div class="num">0</div><div class="num">#</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="below">
-    <div class="hint"><b>OK</b> alebo <span class="keys">medzerník</span> = štart · znova po prehre to isté</div>
-    Šípky alebo <span class="keys">W A S D</span> · na mobile D-pad alebo ťahaj prstom po displeji
+    <div class="hint">zelené <b>OK</b> alebo <span class="keys">medzerník</span> = štart · <b>C</b> = pauza</div>
+    Šípky alebo <span class="keys">W A S D</span> · na mobile navi tlačidlá alebo ťahaj prstom po displeji
   </div>
 
   <footer>
@@ -211,13 +299,23 @@
 <script>
 "use strict";
 (function(){
-  // ---- LCD ako Nokia 3310: 84 × 48 px ----
-  // Horný pruh = skóre (7 px). Hracie pole pod linkou.
-  var W = 84, H = 48;
+  // ---- LCD ako Nokia 3310 ----
+  // Skóre vľavo hore. Pod ním tenký rámik okolo hracieho poľa (ako na origináli).
+  // Rozlíšenie 96×64 (viac priestoru než 84×48, ostrejšia mriežka).
+  var W = 100, H = 64;
   var CELL = 4;
-  var PLAY_TOP = 9;                          // y, kde začína hracie pole
-  var COLS = Math.floor(W / CELL);           // 21
-  var ROWS = Math.floor((H - PLAY_TOP) / CELL); // 9
+  var SCORE_TOP = 1;                          // y pásu skóre
+  var FRAME_TOP = 9;                          // y horného rámika poľa
+  var FRAME_L = 1;                            // x ľavého rámika
+  var FRAME_R = W - 2;                        // x pravého rámika
+  var FRAME_B = H - 2;                        // y dolného rámika
+  // hracie pole vnútri rámika (rámik = 1px + 1px medzera)
+  var PLAY_X = FRAME_L + 2;                   // ľavý okraj buniek v px
+  var PLAY_Y = FRAME_TOP + 2;                 // horný okraj buniek v px
+  var PLAY_W = (FRAME_R - 1) - PLAY_X;        // šírka v px
+  var PLAY_H = (FRAME_B - 1) - PLAY_Y;        // výška v px
+  var COLS = Math.floor(PLAY_W / CELL);
+  var ROWS = Math.floor(PLAY_H / CELL);
   var TICK = 140;                            // konštantná rýchlosť (verné 3310)
 
   var cv = document.getElementById('lcd');
@@ -260,7 +358,8 @@
   var snake, dir, nextDir, food, score, alive, started, paused, loopId, blink;
 
   function reset(){
-    snake = [{x:5,y:4},{x:4,y:4},{x:3,y:4}]; // dĺžka 3, doprava, v strede poľa
+    var my=Math.floor(ROWS/2);
+    snake = [{x:5,y:my},{x:4,y:my},{x:3,y:my}]; // dĺžka 3, doprava, v strede
     dir = {x:1,y:0};
     nextDir = {x:1,y:0};
     score = 0;
@@ -282,6 +381,7 @@
   }
 
   function setDir(d){
+    if(d==='pause'){ if(started && alive) togglePause(); return; }
     if(!started){ start(); return; }
     if(d==='ok'){ togglePause(); return; }
     var nd;
@@ -316,10 +416,10 @@
   }
 
   // ---- kreslenie ----
-  // bunka hracieho poľa
+  // bunka hracieho poľa (vnútri rámika)
   function cell(cx,cy,color){
     ctx.fillStyle=color;
-    ctx.fillRect(cx*CELL, PLAY_TOP+cy*CELL, CELL-1, CELL-1);
+    ctx.fillRect(PLAY_X+cx*CELL, PLAY_Y+cy*CELL, CELL-1, CELL-1);
   }
   // 1px pixel (pre skóre a nápisy v hornom pruhu)
   function dot(x,y,color){
@@ -352,19 +452,28 @@
 
   function clearLCD(){
     ctx.clearRect(0,0,W,H);
-    // mriežka "vypnutých" pixelov len v hracom poli
+    // mriežka "vypnutých" pixelov v hracom poli
     for(var y=0;y<ROWS;y++)
       for(var x=0;x<COLS;x++)
         cell(x,y,COL_DIM);
+    drawFrame();
+  }
+
+  // tenký rámik okolo hracieho poľa (verné originálu)
+  function drawFrame(){
+    ctx.fillStyle=COL_PX;
+    var x0=FRAME_L, y0=FRAME_TOP, x1=FRAME_R, y1=FRAME_B;
+    ctx.fillRect(x0, y0, x1-x0+1, 1);   // horná
+    ctx.fillRect(x0, y1, x1-x0+1, 1);   // dolná
+    ctx.fillRect(x0, y0, 1, y1-y0+1);   // ľavá
+    ctx.fillRect(x1, y0, 1, y1-y0+1);   // pravá
   }
 
   function drawScoreBar(){
+    // skóre vľavo hore, doplnené nulami na 4 miesta (ako "0009" na origináli)
     var s=String(score);
-    var sx=W - s.length*4 - 1;
-    for(var i=0;i<s.length;i++) glyphAt(s[i], sx+i*4, 1, COL_PX);
-    // oddeľovacia linka pod pruhom
-    ctx.fillStyle=COL_DIM;
-    ctx.fillRect(0, PLAY_TOP-2, W, 1);
+    while(s.length<4) s='0'+s;
+    for(var i=0;i<s.length;i++) glyphAt(s[i], FRAME_L+1+i*4, SCORE_TOP, COL_PX);
   }
 
   function draw(){
@@ -382,7 +491,7 @@
 
   function drawGameOver(){
     clearLCD();
-    cellTextCenter('KONEC', 1, COL_PX);
+    cellTextCenter('KONIEC', 1, COL_PX);
     if(blink) cellTextCenter(String(score), 6, COL_PX);
     drawScoreBar();
   }
@@ -419,8 +528,8 @@
     else if(k===' '){ setDir('ok'); e.preventDefault(); }
   });
 
-  // ---- D-pad ----
-  Array.prototype.forEach.call(document.querySelectorAll('.dbtn'), function(b){
+  // ---- tlačidlá telefónu (navi, C, zelené volacie, späť) ----
+  Array.prototype.forEach.call(document.querySelectorAll('[data-dir]'), function(b){
     var d=b.getAttribute('data-dir');
     b.addEventListener('click', function(ev){ ev.preventDefault(); setDir(d); });
     b.addEventListener('touchstart', function(ev){ ev.preventDefault(); setDir(d); }, {passive:false});
@@ -443,7 +552,8 @@
 
   // init — titulná obrazovka
   started=false; alive=true; paused=false; score=0; blink=true;
-  snake=[{x:5,y:4},{x:4,y:4},{x:3,y:4}]; food={x:14,y:4};
+  var _my=Math.floor(ROWS/2);
+  snake=[{x:5,y:_my},{x:4,y:_my},{x:3,y:_my}]; food={x:Math.floor(COLS/2),y:_my};
   drawTitle();
 })();
 </script>
