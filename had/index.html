@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>had — plainkit.</title>
+<meta name="description" content="Klasický had ako na Nokii 3310. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+  /* ---- plainkit základ ---- */
+  :root{
+    --bg:#0a0f14;
+    --bg2:#07090f;
+    --cyan:#00d4e8;
+    --yellow:#ffc629;
+    /* LCD farby Nokia 3310 */
+    --lcd-bg:#9ca34b;      /* zeleno-šedé pozadie displeja */
+    --lcd-bg2:#8a924a;
+    --lcd-px:#1a1f12;      /* tmavé pixely */
+    --lcd-dim:rgba(26,31,18,0.12); /* mriežka "vypnutých" pixelov */
+    /* telefón */
+    --phone:#3a4a7a;
+    --phone2:#2b3860;
+    --phone-edge:#1d2742;
+    --key:#cdd2e0;
+    --key-shadow:#9aa0b4;
+    --key-edge:#7d8296;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(120% 120% at 50% 0%, var(--bg) 0%, var(--bg2) 100%);
+    color:#cfe8ec;
+    font-family:'JetBrains Mono',ui-monospace,'Courier New',monospace;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    -webkit-tap-highlight-color:transparent;
+    overflow-x:hidden;
+  }
+  a{color:var(--cyan);text-decoration:none}
+
+  /* ---- horný banner / značka ---- */
+  header{
+    width:100%;
+    text-align:center;
+    padding:16px 12px 6px;
+  }
+  .brand{
+    font-size:20px;letter-spacing:.5px;font-weight:700;color:#eaf6f8;
+  }
+  .brand b{color:var(--cyan)}
+  .tag{
+    margin-top:4px;font-size:11px;letter-spacing:1px;color:#5a6b72;text-transform:lowercase;
+  }
+  .tag span{color:#7c8a90}
+
+  /* ---- telefón ---- */
+  .stage{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 10px 24px;
+    width:100%;
+  }
+  .phone{
+    width:300px;
+    max-width:92vw;
+    background:linear-gradient(160deg,var(--phone) 0%,var(--phone2) 55%,var(--phone-edge) 100%);
+    border-radius:38px 38px 60px 60px / 46px 46px 90px 90px;
+    padding:22px 20px 26px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.12) inset,
+      0 -2px 6px rgba(0,0,0,.4) inset,
+      0 18px 40px rgba(0,0,0,.55),
+      0 4px 10px rgba(0,0,0,.4);
+    position:relative;
+    user-select:none;
+  }
+  /* slúchadlo */
+  .speaker{
+    width:46px;height:6px;border-radius:4px;
+    background:linear-gradient(#11162a,#222c4d);
+    margin:0 auto 12px;
+    box-shadow:0 1px 0 rgba(255,255,255,.08);
+  }
+  .nokia-word{
+    text-align:center;color:#aeb8da;font-size:11px;letter-spacing:3px;
+    font-weight:700;margin-bottom:10px;opacity:.8;
+  }
+
+  /* ---- LCD displej ---- */
+  .screen-bezel{
+    background:#11162a;
+    border-radius:10px;
+    padding:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,.5) inset, 0 1px 0 rgba(255,255,255,.06);
+  }
+  .screen{
+    position:relative;
+    background:linear-gradient(170deg,var(--lcd-bg) 0%,var(--lcd-bg2) 100%);
+    border-radius:4px;
+    overflow:hidden;
+    aspect-ratio:84/48;          /* pomer Nokia 3310 LCD */
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
+  }
+  canvas{
+    display:block;width:100%;height:100%;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+  }
+  /* jemný LCD lesk */
+  .screen::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,0) 35%);
+  }
+
+  /* ---- ovládacie tlačidlá pod displejom ---- */
+  .softrow{
+    display:flex;justify-content:space-between;margin:14px 6px 6px;
+  }
+  .soft{
+    width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;
+  }
+  .soft.l{border-bottom:14px solid #aeb8da;transform:skewX(0)}
+  .soft.r{border-bottom:14px solid #aeb8da}
+  .navwrap{
+    display:flex;align-items:center;justify-content:center;margin:6px 0 4px;
+  }
+
+  /* D-pad */
+  .dpad{
+    position:relative;width:150px;height:150px;
+  }
+  .dbtn{
+    position:absolute;
+    background:linear-gradient(160deg,var(--key) 0%,var(--key-shadow) 100%);
+    border:none;border-radius:8px;
+    box-shadow:0 2px 0 #6f7290,0 3px 4px rgba(0,0,0,.4);
+    color:#3a4068;font-size:18px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;touch-action:none;
+  }
+  .dbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #6f7290}
+  .up{top:0;left:50px;width:50px;height:52px;border-radius:10px 10px 4px 4px}
+  .down{bottom:0;left:50px;width:50px;height:52px;border-radius:4px 4px 10px 10px}
+  .left{left:0;top:50px;width:52px;height:50px;border-radius:10px 4px 4px 10px}
+  .right{right:0;top:50px;width:52px;height:50px;border-radius:4px 10px 10px 4px}
+  .center{
+    left:52px;top:52px;width:46px;height:46px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#e6eaf4,#aab0c6);
+    box-shadow:0 2px 4px rgba(0,0,0,.4),0 0 0 2px rgba(0,0,0,.15) inset;
+    font-size:11px;color:#4a5078;
+  }
+
+  /* ---- pätička pod telefónom ---- */
+  .below{
+    text-align:center;margin-top:18px;font-size:12px;color:#5a6b72;line-height:1.7;
+  }
+  .below a{border-bottom:1px solid rgba(0,212,232,.3)}
+  .hint{
+    margin-top:10px;font-size:11px;color:#46555c;
+  }
+  .keys{color:#7c8a90}
+
+  footer{
+    width:100%;text-align:center;padding:18px 12px 26px;font-size:11px;color:#3f4d54;
+  }
+  footer a{color:#5a6b72}
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">plainkit<b>.</b></div>
+    <div class="tag">no ads <span>·</span> no signup <span>·</span> no tracking</div>
+  </header>
+
+  <div class="stage">
+    <div class="phone" id="phone">
+      <div class="speaker"></div>
+      <div class="nokia-word">NOKIA</div>
+
+      <div class="screen-bezel">
+        <div class="screen">
+          <canvas id="lcd" width="84" height="48"></canvas>
+        </div>
+      </div>
+
+      <div class="navwrap">
+        <div class="dpad">
+          <button class="dbtn up"    data-dir="up"   aria-label="hore">▲</button>
+          <button class="dbtn down"  data-dir="down" aria-label="dole">▼</button>
+          <button class="dbtn left"  data-dir="left" aria-label="vľavo">◀</button>
+          <button class="dbtn right" data-dir="right" aria-label="vpravo">▶</button>
+          <button class="dbtn center" data-dir="ok" aria-label="ok">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="below">
+    <div class="hint"><b>OK</b> alebo <span class="keys">medzerník</span> = štart · znova po prehre to isté</div>
+    Šípky alebo <span class="keys">W A S D</span> · na mobile D-pad alebo ťahaj prstom po displeji
+  </div>
+
+  <footer>
+    <a href="/">← späť na plainkit.</a>
+  </footer>
+
+<script>
+"use strict";
+(function(){
+  // ---- LCD ako Nokia 3310: 84 × 48 px ----
+  // Horný pruh = skóre (7 px). Hracie pole pod linkou.
+  var W = 84, H = 48;
+  var CELL = 4;
+  var PLAY_TOP = 9;                          // y, kde začína hracie pole
+  var COLS = Math.floor(W / CELL);           // 21
+  var ROWS = Math.floor((H - PLAY_TOP) / CELL); // 9
+  var TICK = 140;                            // konštantná rýchlosť (verné 3310)
+
+  var cv = document.getElementById('lcd');
+  var ctx = cv.getContext('2d');
+
+  var COL_PX  = '#1a1f12';
+  var COL_DIM = 'rgba(26,31,18,0.10)';
+
+  // 3×5 pixelový font (číslice + písmená pre nápisy)
+  var GLYPH = {
+    '0':[1,1,1,1,0,1,1,0,1,1,0,1,1,1,1],
+    '1':[0,1,0,1,1,0,0,1,0,0,1,0,1,1,1],
+    '2':[1,1,1,0,0,1,1,1,1,1,0,0,1,1,1],
+    '3':[1,1,1,0,0,1,1,1,1,0,0,1,1,1,1],
+    '4':[1,0,1,1,0,1,1,1,1,0,0,1,0,0,1],
+    '5':[1,1,1,1,0,0,1,1,1,0,0,1,1,1,1],
+    '6':[1,1,1,1,0,0,1,1,1,1,0,1,1,1,1],
+    '7':[1,1,1,0,0,1,0,1,0,0,1,0,0,1,0],
+    '8':[1,1,1,1,0,1,1,1,1,1,0,1,1,1,1],
+    '9':[1,1,1,1,0,1,1,1,1,0,0,1,1,1,1],
+    'H':[1,0,1,1,0,1,1,1,1,1,0,1,1,0,1],
+    'A':[1,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+    'D':[1,1,0,1,0,1,1,0,1,1,0,1,1,1,0],
+    'O':[1,1,1,1,0,1,1,0,1,1,0,1,1,1,1],
+    'K':[1,0,1,1,1,0,1,0,0,1,1,0,1,0,1],
+    'S':[1,1,1,1,0,0,1,1,1,0,0,1,1,1,1],
+    'T':[1,1,1,0,1,0,0,1,0,0,1,0,0,1,0],
+    'R':[1,1,0,1,0,1,1,1,0,1,1,0,1,0,1],
+    'N':[1,0,1,1,1,1,1,1,1,1,0,1,1,0,1],
+    'E':[1,1,1,1,0,0,1,1,0,1,0,0,1,1,1],
+    'C':[1,1,1,1,0,0,1,0,0,1,0,0,1,1,1],
+    'Z':[1,1,1,0,0,1,0,1,0,1,0,0,1,1,1],
+    'V':[1,0,1,1,0,1,1,0,1,1,0,1,0,1,0],
+    'P':[1,1,1,1,0,1,1,1,1,1,0,0,1,0,0],
+    'U':[1,0,1,1,0,1,1,0,1,1,0,1,1,1,1],
+    'I':[1,1,1,0,1,0,0,1,0,0,1,0,1,1,1],
+    ' ':[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  };
+
+  var snake, dir, nextDir, food, score, alive, started, paused, loopId, blink;
+
+  function reset(){
+    snake = [{x:5,y:4},{x:4,y:4},{x:3,y:4}]; // dĺžka 3, doprava, v strede poľa
+    dir = {x:1,y:0};
+    nextDir = {x:1,y:0};
+    score = 0;
+    alive = true;
+    placeFood();
+  }
+
+  function placeFood(){
+    var fx,fy,ok,guard=0;
+    do{
+      ok=true;
+      fx=(Math.random()*COLS)|0;
+      fy=(Math.random()*ROWS)|0;
+      for(var i=0;i<snake.length;i++){
+        if(snake[i].x===fx && snake[i].y===fy){ok=false;break;}
+      }
+    }while(!ok && guard++<500);
+    food={x:fx,y:fy};
+  }
+
+  function setDir(d){
+    if(!started){ start(); return; }
+    if(d==='ok'){ togglePause(); return; }
+    var nd;
+    if(d==='up')        nd={x:0,y:-1};
+    else if(d==='down') nd={x:0,y:1};
+    else if(d==='left') nd={x:-1,y:0};
+    else if(d==='right')nd={x:1,y:0};
+    else return;
+    if(nd.x===-dir.x && nd.y===-dir.y) return; // zákaz 180°
+    nextDir=nd;
+  }
+
+  function step(){
+    if(paused || !alive) return;
+    dir=nextDir;
+    var head={x:snake[0].x+dir.x, y:snake[0].y+dir.y};
+    // pevné steny = smrť (verné 3310)
+    if(head.x<0 || head.x>=COLS || head.y<0 || head.y>=ROWS){ die(); return; }
+    for(var i=0;i<snake.length;i++){
+      if(snake[i].x===head.x && snake[i].y===head.y){ die(); return; }
+    }
+    snake.unshift(head);
+    if(head.x===food.x && head.y===food.y){ score++; placeFood(); }
+    else snake.pop();
+    draw();
+  }
+
+  function die(){
+    alive=false;
+    clearInterval(loopId);
+    drawGameOver();
+  }
+
+  // ---- kreslenie ----
+  // bunka hracieho poľa
+  function cell(cx,cy,color){
+    ctx.fillStyle=color;
+    ctx.fillRect(cx*CELL, PLAY_TOP+cy*CELL, CELL-1, CELL-1);
+  }
+  // 1px pixel (pre skóre a nápisy v hornom pruhu)
+  function dot(x,y,color){
+    ctx.fillStyle=color;
+    ctx.fillRect(x,y,1,1);
+  }
+  function glyphAt(ch,ox,oy,color){
+    var g=GLYPH[ch]||GLYPH[' '];
+    for(var i=0;i<15;i++){
+      if(g[i]) dot(ox+(i%3), oy+((i/3)|0), color);
+    }
+  }
+  // nápis číslicovými bunkami priamo v hracom poli (pre KONIEC/HAD)
+  function cellGlyph(ch,ox,oy,color){
+    var g=GLYPH[ch]||GLYPH[' '];
+    for(var i=0;i<15;i++){
+      if(g[i]) cell(ox+(i%3), oy+((i/3)|0), color);
+    }
+  }
+  function cellText(str,ox,oy,color){
+    var cx=ox;
+    for(var c=0;c<str.length;c++){ cellGlyph(str[c],cx,oy,color); cx+=4; }
+  }
+  // vycentrovaný nápis na šírku poľa
+  function cellTextCenter(str,oy,color){
+    var w=str.length*4-1;
+    var ox=Math.floor((COLS-w)/2);
+    cellText(str,ox,oy,color);
+  }
+
+  function clearLCD(){
+    ctx.clearRect(0,0,W,H);
+    // mriežka "vypnutých" pixelov len v hracom poli
+    for(var y=0;y<ROWS;y++)
+      for(var x=0;x<COLS;x++)
+        cell(x,y,COL_DIM);
+  }
+
+  function drawScoreBar(){
+    var s=String(score);
+    var sx=W - s.length*4 - 1;
+    for(var i=0;i<s.length;i++) glyphAt(s[i], sx+i*4, 1, COL_PX);
+    // oddeľovacia linka pod pruhom
+    ctx.fillStyle=COL_DIM;
+    ctx.fillRect(0, PLAY_TOP-2, W, 1);
+  }
+
+  function draw(){
+    clearLCD();
+    if(blink) cell(food.x, food.y, COL_PX);
+    for(var i=0;i<snake.length;i++) cell(snake[i].x, snake[i].y, COL_PX);
+    drawScoreBar();
+  }
+
+  function drawTitle(){
+    clearLCD();
+    cellTextCenter('HAD', 2, COL_PX);
+    drawScoreBar();
+  }
+
+  function drawGameOver(){
+    clearLCD();
+    cellTextCenter('KONEC', 1, COL_PX);
+    if(blink) cellTextCenter(String(score), 6, COL_PX);
+    drawScoreBar();
+  }
+
+  // ---- riadenie ----
+  function start(){
+    reset();
+    started=true; paused=false;
+    clearInterval(loopId);
+    loopId=setInterval(step, TICK);
+    draw();
+  }
+  function togglePause(){
+    if(!started || !alive){ start(); return; }
+    paused=!paused;
+    draw();
+  }
+
+  // blikanie nezávislé od ticku
+  setInterval(function(){
+    blink=!blink;
+    if(!started) drawTitle();
+    else if(!alive) drawGameOver();
+    else if(!paused) draw();
+  }, 350);
+
+  // ---- klávesnica ----
+  window.addEventListener('keydown', function(e){
+    var k=e.key.toLowerCase();
+    if(k==='arrowup'||k==='w'){ setDir('up'); e.preventDefault(); }
+    else if(k==='arrowdown'||k==='s'){ setDir('down'); e.preventDefault(); }
+    else if(k==='arrowleft'||k==='a'){ setDir('left'); e.preventDefault(); }
+    else if(k==='arrowright'||k==='d'){ setDir('right'); e.preventDefault(); }
+    else if(k===' '){ setDir('ok'); e.preventDefault(); }
+  });
+
+  // ---- D-pad ----
+  Array.prototype.forEach.call(document.querySelectorAll('.dbtn'), function(b){
+    var d=b.getAttribute('data-dir');
+    b.addEventListener('click', function(ev){ ev.preventDefault(); setDir(d); });
+    b.addEventListener('touchstart', function(ev){ ev.preventDefault(); setDir(d); }, {passive:false});
+  });
+
+  // ---- swipe na displeji ----
+  var sx=0, sy=0, swiping=false;
+  var scr=document.querySelector('.screen');
+  scr.addEventListener('touchstart', function(e){
+    var t=e.touches[0]; sx=t.clientX; sy=t.clientY; swiping=true;
+  }, {passive:true});
+  scr.addEventListener('touchend', function(e){
+    if(!swiping) return; swiping=false;
+    var t=e.changedTouches[0];
+    var dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)<18 && Math.abs(dy)<18){ setDir('ok'); return; }
+    if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?'right':'left');
+    else setDir(dy>0?'down':'up');
+  }, {passive:true});
+
+  // init — titulná obrazovka
+  started=false; alive=true; paused=false; score=0; blink=true;
+  snake=[{x:5,y:4},{x:4,y:4},{x:3,y:4}]; food={x:14,y:4};
+  drawTitle();
+})();
+</script>
+</body>
+</html>
