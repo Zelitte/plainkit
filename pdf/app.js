@@ -16,7 +16,7 @@ function ensureLibs(){
     return false;
   }
   ({ PDFDocument, degrees } = PDFLib);
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
   libsReady=true;
   return true;
 }
