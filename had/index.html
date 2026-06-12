@@ -40,71 +40,53 @@
     background:radial-gradient(120% 120% at 50% 0%, var(--bg) 0%, var(--bg2) 100%);
     color:#cfe8ec;
     font-family:'JetBrains Mono',ui-monospace,'Courier New',monospace;
-    min-height:100%;
+    height:100dvh;
     display:flex;
     flex-direction:column;
     align-items:center;
     -webkit-tap-highlight-color:transparent;
-    overflow-x:hidden;
+    overflow:hidden;
   }
   a{color:var(--cyan);text-decoration:none}
 
-  /* ---- horný banner / značka ---- */
+  /* ---- horný banner / značka (kompaktný) ---- */
   header{
     width:100%;
     text-align:center;
-    padding:16px 12px 6px;
+    padding:6px 12px 2px;
+    flex:0 0 auto;
   }
   .brand{
     display:inline-block;
-    font-size:20px;letter-spacing:.5px;font-weight:700;color:#eaf6f8;
+    font-size:16px;letter-spacing:.5px;font-weight:700;color:#eaf6f8;
     text-decoration:none;transition:opacity .15s;
   }
   .brand:hover{opacity:.8}
   .brand b{color:var(--cyan)}
   .tag{
-    margin-top:4px;font-size:11px;letter-spacing:1px;color:#5a6b72;text-transform:lowercase;
+    margin-top:1px;font-size:9px;letter-spacing:1px;color:#5a6b72;text-transform:lowercase;
   }
   .tag span{color:#7c8a90}
 
-  /* ---- telefón ---- */
+  /* ---- telefón vyplní zvyšok výšky ---- */
   .stage{
-    flex:1;
+    flex:1 1 auto;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:14px 10px 24px;
     width:100%;
+    min-height:0;
+    padding:4px 6px;
   }
-  /* ---- TELEFÓN: strieborný rám okolo tmavého tela ---- */
+  /* TELEFÓN: výška diktuje veľkosť, šírka z pomeru ~0.5 */
   .phone{
-    width:268px;
-    max-width:90vw;
+    height:100%;
+    aspect-ratio:0.52;            /* pomer šírka:výška ako 3310 */
+    max-width:100%;
     position:relative;
-    /* chrómový vonkajší rám */
+    container-type:size;          /* aby vnútro mohlo škálovať cez cqh/cqw */
     background:linear-gradient(150deg,var(--chrome) 0%,var(--chrome2) 30%,var(--chrome3) 60%,var(--chrome-dark) 100%);
-    padding:7px;
-    /* silueta 3310: užšie zaoblené ramená hore, jemné zúženie, plnšie dole */
-    clip-path:polygon(
-      32% 0%, 68% 0%,            /* horná hrana medzi ramenami */
-      88% 4%, 97% 13%,           /* pravé rameno */
-      100% 26%, 97% 40%,         /* pravý bok hore */
-      95% 52%, 97% 64%,          /* mierne zúženie v páse vpravo */
-      100% 80%, 96% 93%, 86% 99%,/* pravý dolný oblúk */
-      68% 100%, 32% 100%,        /* dolná hrana */
-      14% 99%, 4% 93%, 0% 80%,   /* ľavý dolný oblúk */
-      3% 64%, 5% 52%,            /* zúženie v páse vľavo */
-      3% 40%, 0% 26%,            /* ľavý bok hore */
-      3% 13%, 12% 4%             /* ľavé rameno */
-    );
-    box-shadow:
-      0 20px 45px rgba(0,0,0,.6),
-      0 5px 14px rgba(0,0,0,.45);
-    user-select:none;
-  }
-  .body{
-    background:linear-gradient(160deg,var(--body) 0%,var(--body2) 55%,var(--body-edge) 100%);
-    /* rovnaká silueta, mierne menšia */
+    padding:1.2cqw;
     clip-path:polygon(
       32% 0%, 68% 0%,
       88% 4%, 97% 13%,
@@ -117,36 +99,57 @@
       3% 40%, 0% 26%,
       3% 13%, 12% 4%
     );
-    padding:24px 22px 30px;
+    box-shadow:0 14px 40px rgba(0,0,0,.6),0 4px 12px rgba(0,0,0,.45);
+    user-select:none;
+  }
+  .body{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(160deg,var(--body) 0%,var(--body2) 55%,var(--body-edge) 100%);
+    clip-path:polygon(
+      32% 0%, 68% 0%,
+      88% 4%, 97% 13%,
+      100% 26%, 97% 40%,
+      95% 52%, 97% 64%,
+      100% 80%, 96% 93%, 86% 99%,
+      68% 100%, 32% 100%,
+      14% 99%, 4% 93%, 0% 80%,
+      3% 64%, 5% 52%,
+      3% 40%, 0% 26%,
+      3% 13%, 12% 4%
+    );
+    padding:3.5cqh 7cqw 3cqh;
   }
 
   /* slúchadlo: zvislé štrbiny */
   .speaker{
-    display:flex;justify-content:center;gap:3px;margin:2px auto 12px;height:14px;
+    display:flex;justify-content:center;gap:0.7cqw;height:1.6cqh;margin:0.5cqh auto 1.4cqh;
+    flex:0 0 auto;
   }
   .speaker i{
-    width:2px;height:100%;border-radius:2px;
+    width:0.6cqw;height:100%;border-radius:2px;
     background:linear-gradient(#0a0c10,#33373f);
     box-shadow:0 1px 0 rgba(255,255,255,.06);
   }
 
-  /* NOKIA v striebornom reliéfe */
+  /* NOKIA */
   .nokia-word{
-    text-align:center;font-size:14px;letter-spacing:2px;font-weight:800;
+    text-align:center;font-size:3.4cqw;letter-spacing:0.6cqw;font-weight:800;
     color:#c6cad2;
     text-shadow:0 1px 0 rgba(255,255,255,.25),0 -1px 0 rgba(0,0,0,.5);
-    margin-bottom:14px;
+    margin-bottom:2cqh;
     font-family:Arial,Helvetica,sans-serif;
+    flex:0 0 auto;
   }
 
-  /* ---- LCD displej: zapustený, tmavý rámček ---- */
+  /* ---- LCD ---- */
   .screen-bezel{
     background:linear-gradient(#0a0c10,#1a1d23);
-    border-radius:8px;
-    padding:9px 10px;
-    box-shadow:
-      0 3px 7px rgba(0,0,0,.7) inset,
-      0 1px 0 rgba(255,255,255,.06);
+    border-radius:2cqw;
+    padding:2cqw 2.2cqw;
+    box-shadow:0 3px 7px rgba(0,0,0,.7) inset,0 1px 0 rgba(255,255,255,.06);
+    flex:0 0 auto;
   }
   .screen{
     position:relative;
@@ -166,82 +169,88 @@
     background:linear-gradient(125deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 40%);
   }
 
-  /* ---- KLÁVESNICA 3310 ---- */
+  /* ---- KLÁVESNICA — vyplní zvyšok tela ---- */
   .keypad{
-    margin-top:16px;
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:2.2cqh;
+    margin-top:2.5cqh;
+    min-height:0;
   }
-  /* horný rad: C  |  navi  |  zelená šípka */
   .toprow{
     display:grid;
     grid-template-columns:1fr 1.5fr 1fr;
     align-items:center;
-    gap:10px;
+    gap:2.5cqw;
+    flex:0 0 auto;
   }
-  /* soft-key C (vľavo) a šípka späť (vpravo) — zahnuté tvary */
   .softkey{
-    height:34px;border:none;cursor:pointer;
+    height:9cqh;min-height:42px;border:none;cursor:pointer;
     background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
-    box-shadow:0 2px 0 #0c0e12,0 3px 5px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06) inset;
+    box-shadow:0 3px 0 #0c0e12,0 4px 6px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.06) inset;
     display:flex;align-items:center;justify-content:center;
-    color:#aeb2bb;font-size:15px;font-weight:700;
+    color:#aeb2bb;font-size:4.5cqw;font-weight:700;
     touch-action:none;
   }
   .softkey:active{transform:translateY(2px);box-shadow:0 1px 0 #0c0e12}
-  .softkey.c{border-radius:20px 8px 16px 8px}
-  .softkey.back{border-radius:8px 20px 8px 16px;color:#5fbf6a}
+  .softkey.c{border-radius:6cqw 2.5cqw 5cqw 2.5cqw}
+  .softkey.back{border-radius:2.5cqw 6cqw 2.5cqw 5cqw;color:#5fbf6a}
 
-  /* navi blok v strede — funkčný 4-smer + zelený volací stred */
   .navi{
-    position:relative;height:78px;width:100%;
-    border-radius:14px;
+    position:relative;height:20cqh;min-height:96px;width:100%;
+    border-radius:4cqw;
     background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
-    box-shadow:0 2px 0 #0c0e12,0 3px 6px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.05) inset;
+    box-shadow:0 3px 0 #0c0e12,0 4px 7px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.05) inset;
   }
   .nbtn{
     position:absolute;border:none;background:transparent;cursor:pointer;
-    color:#9498a1;font-size:13px;display:flex;align-items:center;justify-content:center;
+    color:#9498a1;font-size:4cqw;display:flex;align-items:center;justify-content:center;
     touch-action:none;padding:0;
   }
   .nbtn:active{color:#fff}
-  .n-up{top:0;left:25%;width:50%;height:34%}
-  .n-down{bottom:0;left:25%;width:50%;height:34%}
-  .n-left{left:0;top:30%;width:30%;height:40%}
-  .n-right{right:0;top:30%;width:30%;height:40%}
-  /* zelené volacie tlačidlo v strede */
+  .n-up{top:0;left:25%;width:50%;height:36%}
+  .n-down{bottom:0;left:25%;width:50%;height:36%}
+  .n-left{left:0;top:28%;width:32%;height:44%}
+  .n-right{right:0;top:28%;width:32%;height:44%}
   .ok-call{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:46px;height:26px;border-radius:14px;border:none;cursor:pointer;
+    width:42%;height:38%;border-radius:8cqw;border:none;cursor:pointer;
     background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%);
-    box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 6px rgba(76,175,80,.25),0 1px 0 rgba(255,255,255,.12) inset;
-    color:#bfeac4;font-size:10px;font-weight:700;letter-spacing:.5px;
+    box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 8px rgba(76,175,80,.3),0 1px 0 rgba(255,255,255,.12) inset;
+    color:#bfeac4;font-size:3.6cqw;font-weight:700;letter-spacing:.5px;
     touch-action:none;
   }
   .ok-call:active{transform:translate(-50%,-50%) translateY(1px)}
 
-  /* dolné numerické rady — len dekorácia pre vernosť */
+  /* numpad — TERAZ FUNKČNÝ (2/4/6/8 = smer, 5 = OK) */
   .numpad{
-    margin-top:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:2cqw;
+    flex:0 0 auto;
   }
   .num{
-    height:24px;border-radius:11px;
+    height:7.5cqh;min-height:38px;border:none;cursor:pointer;
+    border-radius:5cqw;
     background:linear-gradient(160deg,var(--key) 0%,var(--key2) 100%);
-    box-shadow:0 2px 0 #0c0e12,0 1px 0 rgba(255,255,255,.05) inset;
+    box-shadow:0 3px 0 #0c0e12,0 1px 0 rgba(255,255,255,.05) inset;
     display:flex;align-items:center;justify-content:center;
-    color:#7a7e87;font-size:11px;font-weight:600;
+    color:#9499a3;font-size:4.2cqw;font-weight:600;
+    touch-action:none;
   }
+  .num:active{transform:translateY(2px);box-shadow:0 1px 0 #0c0e12}
+  /* zvýrazni smerové čísla jemne */
+  .num.dir{color:#c2c7d0}
 
-  /* ---- pätička pod telefónom ---- */
-  .below{
-    text-align:center;margin-top:18px;font-size:12px;color:#5a6b72;line-height:1.7;
-  }
+  /* ---- pätička pod telefónom (skrytá na malých, ovládanie je v telefóne) ---- */
+  .below{display:none}
   .below a{border-bottom:1px solid rgba(0,212,232,.3)}
-  .hint{
-    margin-top:10px;font-size:11px;color:#46555c;
-  }
+  .hint{display:none}
   .keys{color:#7c8a90}
 
   footer{
-    width:100%;text-align:center;padding:18px 12px 26px;font-size:11px;color:#3f4d54;
+    flex:0 0 auto;
+    width:100%;text-align:center;padding:4px 12px 8px;font-size:10px;color:#3f4d54;
   }
   footer a{color:#5a6b72}
 </style>
@@ -276,11 +285,19 @@
             </div>
             <button class="softkey back" data-dir="ok" aria-label="späť / OK">↩</button>
           </div>
-          <div class="numpad" aria-hidden="true">
-            <div class="num">1</div><div class="num">2</div><div class="num">3</div>
-            <div class="num">4</div><div class="num">5</div><div class="num">6</div>
-            <div class="num">7</div><div class="num">8</div><div class="num">9</div>
-            <div class="num">*</div><div class="num">0</div><div class="num">#</div>
+          <div class="numpad">
+            <button class="num">1</button>
+            <button class="num dir" data-dir="up" aria-label="hore (2)">2</button>
+            <button class="num">3</button>
+            <button class="num dir" data-dir="left" aria-label="vľavo (4)">4</button>
+            <button class="num dir" data-dir="ok" aria-label="OK (5)">5</button>
+            <button class="num dir" data-dir="right" aria-label="vpravo (6)">6</button>
+            <button class="num">7</button>
+            <button class="num dir" data-dir="down" aria-label="dole (8)">8</button>
+            <button class="num">9</button>
+            <button class="num">*</button>
+            <button class="num">0</button>
+            <button class="num">#</button>
           </div>
         </div>
       </div>
@@ -521,11 +538,12 @@
   // ---- klávesnica ----
   window.addEventListener('keydown', function(e){
     var k=e.key.toLowerCase();
-    if(k==='arrowup'||k==='w'){ setDir('up'); e.preventDefault(); }
-    else if(k==='arrowdown'||k==='s'){ setDir('down'); e.preventDefault(); }
-    else if(k==='arrowleft'||k==='a'){ setDir('left'); e.preventDefault(); }
-    else if(k==='arrowright'||k==='d'){ setDir('right'); e.preventDefault(); }
-    else if(k===' '){ setDir('ok'); e.preventDefault(); }
+    if(k==='arrowup'||k==='w'||k==='2'){ setDir('up'); e.preventDefault(); }
+    else if(k==='arrowdown'||k==='s'||k==='8'){ setDir('down'); e.preventDefault(); }
+    else if(k==='arrowleft'||k==='a'||k==='4'){ setDir('left'); e.preventDefault(); }
+    else if(k==='arrowright'||k==='d'||k==='6'){ setDir('right'); e.preventDefault(); }
+    else if(k===' '||k==='5'||k==='enter'){ setDir('ok'); e.preventDefault(); }
+    else if(k==='c'){ setDir('pause'); e.preventDefault(); }
   });
 
   // ---- tlačidlá telefónu (navi, C, zelené volacie, späť) ----
