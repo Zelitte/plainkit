@@ -2,8 +2,24 @@
    Model: zoznam "page" položiek, každá ukazuje na zdrojový dokument (srcIndex)
    + index strany v ňom (origPage) + rotácia navyše (rot). Poradie v poli = poradie vo výstupe. */
 
-const { PDFDocument, degrees } = PDFLib;
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+/* Knižnice beriem lenivo — keby sa niektorá nenačítala (napr. v náhľade
+   bez vedľajších súborov), appka nepadne na vrchu a UI ostane živé. */
+let PDFDocument, degrees, libsReady=false;
+function ensureLibs(){
+  if(libsReady) return true;
+  const missing=[];
+  if(typeof PDFLib==='undefined') missing.push('pdf-lib.min.js');
+  if(typeof pdfjsLib==='undefined') missing.push('pdf.min.js');
+  if(typeof JSZip==='undefined') missing.push('jszip.min.js');
+  if(missing.length){
+    toast('Chýbajú knižnice: <b>'+missing.join(', ')+'</b>. Otvor stránku cez plainkit.app, nie ako samostatný súbor.','err');
+    return false;
+  }
+  ({ PDFDocument, degrees } = PDFLib);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+  libsReady=true;
+  return true;
+}
 
 const $ = s => document.querySelector(s);
 const grid = $('#grid');
@@ -25,6 +41,7 @@ function busy(on,lbl){ $('#busy').classList.toggle('on',on); if(lbl)$('#busyLbl'
 
 /* ---------- načítanie súborov ---------- */
 async function addFiles(fileList){
+  if(!ensureLibs()) return;
   const files=[...fileList].filter(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));
   if(!files.length){ toast('Vyber prosím PDF súbory.','err'); return; }
   busy(true,'Načítavam súbory…');
@@ -230,6 +247,7 @@ function parseRanges(str,max){
 }
 
 async function doSplit(){
+  if(!ensureLibs()) return;
   const raw=$('#splitInput').value.trim();
   let ranges;
   try{ranges=parseRanges(raw,pages.length);}
@@ -259,19 +277,24 @@ function closeSplit(){$('#splitModal').classList.remove('on');}
 
 /* ---------- naviazanie ---------- */
 $('#drop').addEventListener('click',()=>$('#file').click());
-$('#drop').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')$('#file').click();});
+$('#drop').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#file').click();}});
 $('#addMore').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',e=>{addFiles(e.target.files);e.target.value='';});
 
-['dragenter','dragover'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.add('hot');}));
-['dragleave','drop'].forEach(ev=>$('#drop').addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.remove('hot');}));
-$('#drop').addEventListener('drop',e=>{addFiles(e.dataTransfer.files);});
-// drop kdekoľvek na workspace pridá súbory
-window.addEventListener('dragover',e=>e.preventDefault());
+// dropzóna
+const dz=$('#drop');
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.add('hot');}));
+['dragleave'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('hot');}));
+dz.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('hot');if(e.dataTransfer.files&&e.dataTransfer.files.length)addFiles(e.dataTransfer.files);});
+
+// celé okno: zabráni prehliadaču otvoriť PDF v karte pri minutí dropzóny;
+// a ak je workspace otvorený, pustený súbor mimo strany pridá ďalšie PDF.
+window.addEventListener('dragover',e=>{e.preventDefault();});
 window.addEventListener('drop',e=>{
-  if(e.target.closest('.page'))return; // to rieši poradie strán
-  if($('#workspace').hidden)return;
+  if(e.target.closest('#drop'))return;      // už ošetrené dropzónou
+  if(e.target.closest('.page'))return;      // poradie strán rieši grid
   e.preventDefault();
+  if($('#workspace').hidden)return;
   if(e.dataTransfer.files&&e.dataTransfer.files.length)addFiles(e.dataTransfer.files);
 });
 
