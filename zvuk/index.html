@@ -432,7 +432,7 @@ import { FFmpeg } from "./index.js";
 
     loadingPromise = (async () => {
       ffmpeg = new FFmpeg();
-      ffmpeg.on("log", ({ message }) => { plog.textContent = message.slice(0,120); });
+      ffmpeg.on("log", ({ message }) => { console.log("[ffmpeg]", message); plog.textContent = message.slice(0,120); });
       ffmpeg.on("progress", ({ progress: p }) => {
         // p je 0..1 počas spracovania
         if(p>=0 && p<=1){ pstage.textContent = "Spracúvam zvuk…"; setPct(p*100); }
@@ -454,11 +454,12 @@ import { FFmpeg } from "./index.js";
       const wasmBlob = new Blob(buffers, { type: "application/wasm" });
       const wasmURL = URL.createObjectURL(wasmBlob);
 
-      const coreURL = await toBlobURL("ffmpeg-core.js", "text/javascript");
+      // coreURL ako priama cesta (nie blob): importScripts vo workeri ju spoľahlivo načíta.
+      // Všetko je na rovnakej doméne, takže blob na obídenie CORS netreba.
+      const coreURL = new URL("/zvuk/ffmpeg-core.js", location.origin).href;
 
       // Vlastný worker (spojený const+errors+worker), zadaný explicitne ako classWorkerURL.
-      // Tým sa vyhneme tomu, aby ffmpeg hádal, ktorý súbor je worker. Klasický worker
-      // (nie module) → core sa načíta cez importScripts. Dokumentovaný postup pre single-thread.
+      // Klasický worker (nie module) → core sa načíta cez importScripts.
       const classWorkerURL = await toBlobURL("ffmpeg-core.worker.js", "text/javascript");
 
       pstage.textContent = "Inicializujem…";
