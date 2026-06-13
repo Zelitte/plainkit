@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit. — Zvuk z videa</title>
+<style>
+:root{
+  --bg:#07090f;
+  --panel:#0a0f14;
+  --panel-2:#0e141b;
+  --line:#1a232e;
+  --line-bright:#27343f;
+  --ink:#e6edf3;
+  --ink-dim:#8b9aa7;
+  --ink-faint:#5a6b78;
+  --cyan:#00d4e8;
+  --yellow:#ffc629;
+  --danger:#ff5c6c;
+  --ok:#3ddc84;
+  --r:6px;
+  --glow-cyan:0 0 0 1px rgba(0,212,232,.4), 0 0 18px -2px rgba(0,212,232,.5);
+  --glow-yellow:0 0 0 1px rgba(255,198,41,.4), 0 0 18px -2px rgba(255,198,41,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 500px at 50% -200px, rgba(0,212,232,.06), transparent 70%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-size:15px;line-height:1.5;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+
+/* ---- shell ---- */
+header.top{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding:18px 22px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:rgba(7,9,15,.86);backdrop-filter:blur(8px);z-index:40;
+}
+.brand{font-weight:700;font-size:20px;letter-spacing:-.5px}
+.brand .dot{color:var(--cyan)}
+.brand a{color:inherit;text-decoration:none}
+.tagline{font-size:12px;color:var(--ink-faint);letter-spacing:.04em}
+.tagline b{color:var(--ink-dim);font-weight:500}
+.spacer{flex:1}
+.toolname{font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:9px}
+.toolname .pill{
+  display:inline-block;border:1px solid var(--line-bright);border-radius:100px;
+  padding:2px 10px;color:var(--cyan);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  box-shadow:inset 0 0 12px -6px rgba(0,212,232,.6);
+}
+
+main{max-width:920px;margin:0 auto;padding:26px 22px 80px}
+
+/* ---- bilingválne upozornenie ---- */
+.notice{
+  border:1px solid var(--line);border-left:2px solid var(--yellow);
+  background:linear-gradient(90deg,rgba(255,198,41,.05),transparent 60%);
+  border-radius:var(--r);padding:15px 18px;margin-bottom:26px;
+}
+.notice .row{display:flex;gap:12px;align-items:flex-start}
+.notice .ico{color:var(--yellow);font-size:17px;line-height:1.3;margin-top:1px;flex-shrink:0}
+.notice p{margin:0;font-size:13.5px;color:var(--ink-dim)}
+.notice p b{color:var(--ink)}
+.notice .en{
+  margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
+  font-size:12.5px;color:var(--ink-faint);
+}
+.notice .en b{color:var(--ink-dim)}
+
+/* ---- dropzóna ---- */
+.drop{
+  position:relative;border:1.5px dashed var(--line-bright);border-radius:10px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), transparent),
+    var(--panel);
+  padding:46px 26px;text-align:center;cursor:pointer;
+  transition:border-color .18s, box-shadow .18s, background .18s;
+}
+.drop:hover{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+.drop.over{border-color:var(--cyan);box-shadow:var(--glow-cyan);background:var(--panel-2)}
+.drop .big{font-size:17px;font-weight:600;margin:0 0 6px}
+.drop .small{font-size:13px;color:var(--ink-faint);margin:0}
+.drop .plus{
+  font-size:30px;color:var(--cyan);line-height:1;margin-bottom:14px;display:inline-block;
+  filter:drop-shadow(0 0 10px rgba(0,212,232,.5));
+}
+.drop input[type=file]{display:none}
+
+/* ---- info o súbore + nastavenia ---- */
+.card{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  padding:20px 22px;margin-top:22px;
+}
+.card.hidden{display:none}
+.fileline{display:flex;align-items:center;gap:13px;margin-bottom:4px}
+.fileline .fname{font-weight:600;font-size:15px;word-break:break-all}
+.fileline .fmeta{font-size:12.5px;color:var(--ink-faint);margin-left:auto;white-space:nowrap}
+.warn-size{
+  margin:12px 0 0;font-size:12.5px;color:var(--yellow);
+  display:none;align-items:flex-start;gap:7px;
+}
+.warn-size.show{display:flex}
+
+.settings{margin-top:20px;display:grid;gap:18px}
+.field label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:9px}
+
+/* segmentové prepínače */
+.seg{display:inline-flex;border:1px solid var(--line-bright);border-radius:8px;overflow:hidden;background:var(--panel-2)}
+.seg button{
+  appearance:none;border:0;background:transparent;color:var(--ink-dim);
+  font:inherit;font-size:13.5px;padding:9px 16px;cursor:pointer;
+  border-right:1px solid var(--line);transition:color .15s,background .15s;
+}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--ink)}
+.seg button.on{
+  color:#03222a;background:var(--cyan);font-weight:600;
+  box-shadow:inset 0 0 14px -4px rgba(255,255,255,.5);
+}
+.seg.yellow button.on{color:#2a2100;background:var(--yellow)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+
+.bitrate-wrap{transition:opacity .2s}
+.bitrate-wrap.off{opacity:.3;pointer-events:none}
+.hint{font-size:12px;color:var(--ink-faint);margin-top:9px}
+.hint .mono{color:var(--ink-dim)}
+
+/* ---- akčné tlačidlo ---- */
+.go{
+  margin-top:22px;width:100%;appearance:none;border:1px solid var(--cyan);
+  background:linear-gradient(180deg, rgba(0,212,232,.16), rgba(0,212,232,.06));
+  color:var(--cyan);font:inherit;font-weight:700;font-size:15px;letter-spacing:.02em;
+  padding:14px;border-radius:9px;cursor:pointer;
+  transition:box-shadow .18s, background .18s, transform .05s;
+}
+.go:hover{box-shadow:var(--glow-cyan);background:linear-gradient(180deg, rgba(0,212,232,.24), rgba(0,212,232,.1))}
+.go:active{transform:translateY(1px)}
+.go:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* ---- progres ---- */
+.progress{margin-top:22px;display:none}
+.progress.show{display:block}
+.pbar{height:8px;border-radius:100px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden}
+.pfill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),#5ef0ff);box-shadow:0 0 12px rgba(0,212,232,.6);transition:width .25s}
+.pmeta{display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px;color:var(--ink-dim)}
+.pmeta .stage{color:var(--ink)}
+.plog{margin-top:8px;font-size:11.5px;color:var(--ink-faint);min-height:1.3em}
+
+/* ---- výsledok ---- */
+.result{margin-top:22px;display:none}
+.result.show{display:block}
+.result.card{border-left:2px solid var(--ok)}
+.result .rtop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.result .rtop .ok{color:var(--ok);font-size:18px}
+.result .rtop .rt{font-weight:600}
+.result audio{width:100%;margin:4px 0 16px;filter:saturate(.9)}
+.dl{
+  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  border:1px solid var(--ok);color:var(--ok);font-weight:600;font-size:14px;
+  padding:11px 18px;border-radius:9px;
+  background:linear-gradient(180deg, rgba(61,220,132,.14), rgba(61,220,132,.05));
+  transition:box-shadow .18s;
+}
+.dl:hover{box-shadow:0 0 0 1px rgba(61,220,132,.4), 0 0 18px -2px rgba(61,220,132,.45)}
+.reset{
+  margin-left:12px;background:transparent;border:1px solid var(--line-bright);
+  color:var(--ink-dim);font:inherit;font-size:14px;padding:11px 16px;border-radius:9px;cursor:pointer;
+  transition:color .15s,border-color .15s;
+}
+.reset:hover{color:var(--ink);border-color:var(--ink-faint)}
+
+/* ---- chyba ---- */
+.error{
+  margin-top:18px;display:none;border:1px solid var(--danger);border-left:2px solid var(--danger);
+  background:rgba(255,92,108,.06);border-radius:var(--r);padding:13px 16px;
+  font-size:13.5px;color:#ffb3bb;
+}
+.error.show{display:block}
+.error b{color:var(--danger)}
+
+/* ---- pätička ---- */
+footer{
+  max-width:920px;margin:0 auto;padding:0 22px 60px;
+  font-size:12px;color:var(--ink-faint);line-height:1.7;
+}
+footer .sep{border-top:1px solid var(--line);margin-bottom:18px}
+footer a{color:var(--ink-dim);text-decoration:none;border-bottom:1px solid var(--line-bright)}
+footer a:hover{color:var(--cyan);border-color:var(--cyan)}
+footer .attrib{margin-top:10px;color:var(--ink-faint)}
+
+@media (max-width:560px){
+  main{padding:20px 16px 64px}
+  .fileline{flex-wrap:wrap}
+  .fileline .fmeta{margin-left:0;width:100%}
+  .seg button{padding:9px 12px;font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><a href="/">plainkit<span class="dot">.</span></a></div>
+  <div class="tagline"><b>no ads</b> · <b>no signup</b> · <b>no tracking</b></div>
+  <div class="spacer"></div>
+  <div class="toolname">Zvuk z videa <span class="pill">beta</span></div>
+</header>
+
+<main>
+
+  <!-- bilingválne upozornenie: SK hore, EN pod -->
+  <div class="notice">
+    <div class="row">
+      <span class="ico">▲</span>
+      <p>
+        <b>Všetko beží vo vašom prehliadači</b> — video sa nikam nenahráva, zvuk sa vytiahne priamo u vás.
+        Pri prvom použití sa musí jednorazovo stiahnuť spracovacie jadro (<b>~32 MB</b>), na pomalšom pripojení to chvíľu trvá.
+        Rýchlosť konverzie závisí od výkonu vášho zariadenia. Stavané na <b>krátke klipy</b> (do ~5 min).
+      </p>
+    </div>
+    <p class="en">
+      <b>Everything runs in your browser</b> — the video is never uploaded; audio is extracted locally.
+      On first use a one-time processing core (<b>~32 MB</b>) is downloaded, which can take a moment on slower connections.
+      Conversion speed depends on your device. Built for <b>short clips</b> (up to ~5 min).
+    </p>
+  </div>
+
+  <!-- dropzóna -->
+  <label class="drop" id="drop">
+    <span class="plus">+</span>
+    <p class="big">Pretiahnite sem video alebo kliknite</p>
+    <p class="small">MP4 · WebM · MKV · MOV · AVI — <span class="mono">drag &amp; drop / click</span></p>
+    <input type="file" id="file" accept="video/*,.mkv,.mov,.avi,.webm,.mp4">
+  </label>
+
+  <!-- info o súbore + nastavenia -->
+  <div class="card hidden" id="setup">
+    <div class="fileline">
+      <span class="mono" style="color:var(--cyan)">♪</span>
+      <span class="fname" id="fname">—</span>
+      <span class="fmeta mono" id="fmeta"></span>
+    </div>
+    <p class="warn-size" id="warnSize">
+      <span>▲</span>
+      <span>Veľký súbor — na slabšom zariadení môže spracovanie trvať dlho alebo zlyhať. / Large file — may be slow or fail on weaker devices.</span>
+    </p>
+
+    <div class="settings">
+      <div class="field">
+        <label>Výstup / Output</label>
+        <div class="seg" id="modeSeg">
+          <button data-mode="copy" class="on">Zachovať originál</button>
+          <button data-mode="mp3">Prekódovať na MP3</button>
+        </div>
+        <p class="hint" id="modeHint">Vytiahne pôvodnú zvukovú stopu bez straty kvality (rýchle). Prípona podľa zdroja: <span class="mono">.m4a</span> / <span class="mono">.opus</span>.</p>
+      </div>
+
+      <div class="field bitrate-wrap off" id="bitrateWrap">
+        <label>Kvalita MP3 / MP3 quality</label>
+        <div class="seg yellow" id="brSeg">
+          <button data-br="128">128 kbps</button>
+          <button data-br="192" class="on">192 kbps</button>
+          <button data-br="320">320 kbps</button>
+        </div>
+        <p class="hint">192 kbps je dobrý kompromis pre hudbu. 320 = najvyššia kvalita, väčší súbor.</p>
+      </div>
+    </div>
+
+    <button class="go" id="go">Vybrať zvuk</button>
+
+    <!-- progres -->
+    <div class="progress" id="progress">
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="pmeta">
+        <span class="stage" id="pstage">Pripravujem…</span>
+        <span class="mono" id="ppct">0 %</span>
+      </div>
+      <div class="plog mono" id="plog"></div>
+    </div>
+
+    <!-- chyba -->
+    <div class="error" id="error"></div>
+  </div>
+
+  <!-- výsledok -->
+  <div class="card result" id="result">
+    <div class="rtop">
+      <span class="ok">●</span>
+      <span class="rt">Hotovo / Done</span>
+      <span class="fmeta mono" id="rmeta" style="margin-left:auto"></span>
+    </div>
+    <audio controls id="audio"></audio>
+    <div>
+      <a class="dl" id="dl" download>↓ Stiahnuť / Download</a>
+      <button class="reset" id="reset">Ďalšie video / New file</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="sep"></div>
+  <p>
+    Žiadne nahrávanie na server · spracovanie v prehliadači cez WebAssembly ·
+    žiadne ukladanie. Over v <span class="mono">DevTools → Network</span>.
+    <br>No server upload · processed in-browser via WebAssembly · nothing stored.
+  </p>
+  <p class="attrib">
+    Poháňané <a href="https://ffmpegwasm.netlify.app/" target="_blank" rel="noopener">ffmpeg.wasm</a>
+    (FFmpeg, licencia LGPL/GPL). · <a href="/politika">Súkromie</a> · <a href="/">plainkit.</a>
+  </p>
+</footer>
+
+<script src="ffmpeg-util.js"></script>
+<script src="ffmpeg.js"></script>
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const { FFmpeg } = window.FFmpegWASM;
+  const { toBlobURL, fetchFile } = window.FFmpegUtil;
+
+  // ---- stav ----
+  let ffmpeg = null;        // inštancia
+  let loaded = false;       // jadro načítané?
+  let loadingPromise = null;
+  let currentFile = null;
+  let mode = "copy";        // "copy" | "mp3"
+  let bitrate = "192";
+  let lastBlobUrl = null;   // na revoke
+
+  const SIZE_WARN = 100 * 1024 * 1024; // 100 MB mäkký strop
+
+  // ---- elementy ----
+  const drop = $("#drop"), fileInput = $("#file");
+  const setup = $("#setup"), fname = $("#fname"), fmeta = $("#fmeta"), warnSize = $("#warnSize");
+  const modeSeg = $("#modeSeg"), modeHint = $("#modeHint");
+  const bitrateWrap = $("#bitrateWrap"), brSeg = $("#brSeg");
+  const goBtn = $("#go");
+  const progress = $("#progress"), pfill = $("#pfill"), pstage = $("#pstage"), ppct = $("#ppct"), plog = $("#plog");
+  const result = $("#result"), audioEl = $("#audio"), dl = $("#dl"), rmeta = $("#rmeta"), resetBtn = $("#reset");
+  const errBox = $("#error");
+
+  // ---- pomôcky ----
+  const fmtBytes = b => {
+    if(b < 1024) return b+" B";
+    if(b < 1024*1024) return (b/1024).toFixed(0)+" kB";
+    return (b/1024/1024).toFixed(1)+" MB";
+  };
+  const setPct = p => { p = Math.max(0, Math.min(100, p)); pfill.style.width = p+"%"; ppct.textContent = Math.round(p)+" %"; };
+  const showErr = msg => { errBox.innerHTML = "<b>Chyba:</b> "+msg; errBox.classList.add("show"); };
+  const clearErr = () => { errBox.classList.remove("show"); errBox.textContent=""; };
+
+  // prípona výstupu pri "copy" podľa zdrojového kontajnera/typu
+  function copyExtFor(name){
+    const n = (name||"").toLowerCase();
+    if(n.endsWith(".webm") || n.endsWith(".mkv")) return "opus"; // typicky Opus/Vorbis
+    if(n.endsWith(".mov") || n.endsWith(".mp4") || n.endsWith(".m4v")) return "m4a"; // typicky AAC
+    return "m4a"; // rozumný default
+  }
+
+  // ---- výber súboru ----
+  function pickFile(f){
+    if(!f) return;
+    currentFile = f;
+    clearErr();
+    result.classList.remove("show");
+    progress.classList.remove("show");
+    fname.textContent = f.name || "video";
+    fmeta.textContent = fmtBytes(f.size);
+    warnSize.classList.toggle("show", f.size > SIZE_WARN);
+    setup.classList.remove("hidden");
+    goBtn.disabled = false;
+    updateModeHint();
+  }
+
+  fileInput.addEventListener("change", e => pickFile(e.target.files[0]));
+
+  // drag & drop
+  ["dragenter","dragover"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) pickFile(f);
+  });
+
+  // ---- prepínače ----
+  modeSeg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    mode = b.dataset.mode;
+    [...modeSeg.children].forEach(x => x.classList.toggle("on", x===b));
+    bitrateWrap.classList.toggle("off", mode!=="mp3");
+    updateModeHint();
+  });
+  function updateModeHint(){
+    if(mode==="mp3"){
+      modeHint.innerHTML = 'Prekóduje zvuk do <span class="mono">.mp3</span> (univerzálne). Pri už komprimovanom zdroji ide o ďalšiu kompresiu.';
+    } else {
+      const ext = currentFile ? copyExtFor(currentFile.name) : "m4a/opus";
+      modeHint.innerHTML = 'Vytiahne pôvodnú zvukovú stopu bez straty kvality (rýchle). Prípona podľa zdroja: <span class="mono">.'+ext+'</span>.';
+    }
+  }
+  brSeg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    bitrate = b.dataset.br;
+    [...brSeg.children].forEach(x => x.classList.toggle("on", x===b));
+  });
+
+  // ---- lazy-load jadra ----
+  async function ensureLoaded(){
+    if(loaded) return;
+    if(loadingPromise) return loadingPromise;
+
+    loadingPromise = (async () => {
+      ffmpeg = new FFmpeg();
+      ffmpeg.on("log", ({ message }) => { plog.textContent = message.slice(0,120); });
+      ffmpeg.on("progress", ({ progress: p }) => {
+        // p je 0..1 počas spracovania
+        if(p>=0 && p<=1){ pstage.textContent = "Spracúvam zvuk…"; setPct(p*100); }
+      });
+
+      pstage.textContent = "Sťahujem jadro (~32 MB, jednorazovo)…";
+      setPct(0);
+
+      // sledovanie progresu sťahovania .wasm
+      const wasmURL = await toBlobURL("ffmpeg-core.wasm", "application/wasm", true, ({ received, total }) => {
+        if(total) setPct((received/total)*100);
+      });
+      const coreURL = await toBlobURL("ffmpeg-core.js", "text/javascript");
+      // worker pre triedu = samotný ffmpeg.js (UMD obsahuje worker logiku)
+      const classWorkerURL = await toBlobURL("ffmpeg.js", "text/javascript");
+
+      pstage.textContent = "Inicializujem…";
+      await ffmpeg.load({ coreURL, wasmURL, classWorkerURL });
+      loaded = true;
+    })();
+
+    return loadingPromise;
+  }
+
+  // ---- konverzia ----
+  async function run(){
+    if(!currentFile) return;
+    clearErr();
+    result.classList.remove("show");
+    goBtn.disabled = true;
+    progress.classList.add("show");
+    setPct(0);
+    plog.textContent = "";
+
+    try{
+      await ensureLoaded();
+
+      const inName = "in_" + (currentFile.name.replace(/[^\w.\-]/g,"_") || "video");
+      await ffmpeg.writeFile(inName, await fetchFile(currentFile));
+
+      let outName, mime, args;
+      if(mode==="mp3"){
+        outName = "out.mp3";
+        mime = "audio/mpeg";
+        // -vn bez videa, -ar 44100, -b:a bitrate
+        args = ["-i", inName, "-vn", "-ar", "44100", "-b:a", bitrate+"k", "-f", "mp3", outName];
+      } else {
+        const ext = copyExtFor(currentFile.name);
+        outName = "out." + ext;
+        mime = ext==="opus" ? "audio/ogg" : "audio/mp4";
+        // bezstratový extrakt: kopíruj audio stopu, zahoď video
+        args = ["-i", inName, "-vn", "-acodec", "copy", outName];
+      }
+
+      pstage.textContent = "Spracúvam zvuk…";
+      const code = await ffmpeg.exec(args);
+      if(code !== 0 && mode==="copy"){
+        // fallback: niektoré kontajnery sa nedajú priamo skopírovať -> skús m4a/aac prekód
+        plog.textContent = "Priame kopírovanie zlyhalo, skúšam prekódovať…";
+        outName = "out.m4a"; mime = "audio/mp4";
+        const c2 = await ffmpeg.exec(["-i", inName, "-vn", "-c:a", "aac", "-b:a", "192k", outName]);
+        if(c2 !== 0) throw new Error("nepodarilo sa vytiahnuť zvuk z tohto súboru");
+      } else if(code !== 0){
+        throw new Error("prekódovanie zlyhalo (kód "+code+")");
+      }
+
+      const data = await ffmpeg.readFile(outName);
+      const blob = new Blob([data.buffer], { type: mime });
+      if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+      lastBlobUrl = URL.createObjectURL(blob);
+
+      // download názov: pôvodné meno bez prípony + nová prípona
+      const base = (currentFile.name.replace(/\.[^.]+$/,"") || "zvuk");
+      const outExt = outName.split(".").pop();
+      dl.href = lastBlobUrl;
+      dl.download = base + "." + outExt;
+      audioEl.src = lastBlobUrl;
+      rmeta.textContent = fmtBytes(blob.size) + " · ." + outExt;
+
+      // upratovanie vo virtuálnom FS
+      try{ await ffmpeg.deleteFile(inName); await ffmpeg.deleteFile(outName); }catch(_){}
+
+      setPct(100);
+      progress.classList.remove("show");
+      result.classList.add("show");
+    }catch(err){
+      progress.classList.remove("show");
+      showErr((err && err.message ? err.message : String(err)) +
+        ". Skúste iný súbor alebo režim MP3.");
+    }finally{
+      goBtn.disabled = false;
+    }
+  }
+
+  goBtn.addEventListener("click", run);
+
+  // ---- reset ----
+  resetBtn.addEventListener("click", () => {
+    currentFile = null;
+    fileInput.value = "";
+    result.classList.remove("show");
+    setup.classList.add("hidden");
+    if(lastBlobUrl){ URL.revokeObjectURL(lastBlobUrl); lastBlobUrl = null; }
+    audioEl.src = "";
+    window.scrollTo({ top:0, behavior:"smooth" });
+  });
+
+})();
+</script>
+
+</body>
+</html>
