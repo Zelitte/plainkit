@@ -432,10 +432,19 @@ footer .attrib{margin-top:10px;color:var(--ink-faint)}
       pstage.textContent = "Sťahujem jadro (~32 MB, jednorazovo)…";
       setPct(0);
 
-      // sledovanie progresu sťahovania .wasm
-      const wasmURL = await toBlobURL("ffmpeg-core.wasm", "application/wasm", true, ({ received, total }) => {
-        if(total) setPct((received/total)*100);
-      });
+      // .wasm je rozdelený na 2 časti (kvôli limitu hostingu 25 MB/súbor),
+      // stiahnu sa obe a spoja späť do jedného blobu.
+      const parts = ["ffmpeg-core.wasm.part00", "ffmpeg-core.wasm.part01"];
+      const buffers = [];
+      for(let i=0; i<parts.length; i++){
+        const res = await fetch(parts[i]);
+        if(!res.ok) throw new Error("nepodarilo sa stiahnuť jadro ("+parts[i]+")");
+        buffers.push(await res.arrayBuffer());
+        setPct(((i+1)/parts.length)*100); // hrubý progres po častiach
+      }
+      const wasmBlob = new Blob(buffers, { type: "application/wasm" });
+      const wasmURL = URL.createObjectURL(wasmBlob);
+
       const coreURL = await toBlobURL("ffmpeg-core.js", "text/javascript");
       // worker pre triedu = samotný ffmpeg.js (UMD obsahuje worker logiku)
       const classWorkerURL = await toBlobURL("ffmpeg.js", "text/javascript");
