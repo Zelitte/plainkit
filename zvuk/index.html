@@ -319,14 +319,23 @@ footer .attrib{margin-top:10px;color:var(--ink-faint)}
   </p>
 </footer>
 
-<script src="ffmpeg-util.js"></script>
 <script src="ffmpeg.js"></script>
 <script>
 (function(){
   "use strict";
   const $ = s => document.querySelector(s);
   const { FFmpeg } = window.FFmpegWASM;
-  const { toBlobURL, fetchFile } = window.FFmpegUtil;
+
+  // vlastné náhrady za @ffmpeg/util (browser build bol rozbitý: závisel na require/exports).
+  // toBlobURL: stiahne súbor a vyrobí blob URL so správnym MIME typom.
+  async function toBlobURL(url, mimeType){
+    const buf = await (await fetch(url)).arrayBuffer();
+    return URL.createObjectURL(new Blob([buf], { type: mimeType }));
+  }
+  // fetchFile: prevedie File/Blob na Uint8Array pre ffmpeg.writeFile.
+  async function fetchFile(file){
+    return new Uint8Array(await file.arrayBuffer());
+  }
 
   // ---- stav ----
   let ffmpeg = null;        // inštancia
