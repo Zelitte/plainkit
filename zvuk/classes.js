@@ -103,7 +103,7 @@ export class FFmpeg {
         if (!this.#worker) {
             this.#worker = classWorkerURL ?
                 new Worker(new URL(classWorkerURL, import.meta.url), {
-                    type: "module",
+                    type: "classic",
                 }) :
                 // We need to duplicated the code here to enable webpack
                 // to bundle worekr.js here.
