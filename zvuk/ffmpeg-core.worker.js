@@ -36,13 +36,17 @@ const load = async ({ coreURL: _coreURL, wasmURL: _wasmURL, workerURL: _workerUR
             _coreURL = CORE_URL;
         // when web worker type is `classic`.
         importScripts(_coreURL);
+        if (!self.createFFmpegCore) {
+            self.postMessage({ type: "LOG", data: { type: "info", message: "importScripts prebehol, ale createFFmpegCore nie je nastavený" } });
+        }
     }
-    catch {
-        if (!_coreURL || _coreURL === CORE_URL)
-            _coreURL = CORE_URL.replace('/umd/', '/esm/');
-        // when web worker type is `module`.
-        self.createFFmpegCore = (await import(
-        /* @vite-ignore */ _coreURL)).default;
+    catch (e1) {
+        self.postMessage({ type: "LOG", data: { type: "info", message: "importScripts zlyhal: " + (e1 && e1.message ? e1.message : e1) } });
+        try {
+            self.createFFmpegCore = (await import(/* @vite-ignore */ _coreURL)).default;
+        } catch (e2) {
+            self.postMessage({ type: "LOG", data: { type: "info", message: "import() tiež zlyhal: " + (e2 && e2.message ? e2.message : e2) } });
+        }
         if (!self.createFFmpegCore) {
             throw ERROR_IMPORT_FAILURE;
         }
