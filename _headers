@@ -4,8 +4,17 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Cache-Control: public, max-age=600, no-transform
 
-/*.js
+/zvuk/ffmpeg.js
   Content-Type: text/javascript; charset=utf-8
 
-/*.wasm
+/zvuk/814.ffmpeg.js
+  Content-Type: text/javascript; charset=utf-8
+
+/zvuk/ffmpeg-util.js
+  Content-Type: text/javascript; charset=utf-8
+
+/zvuk/ffmpeg-core.js
+  Content-Type: text/javascript; charset=utf-8
+
+/zvuk/ffmpeg-core.wasm
   Content-Type: application/wasm
