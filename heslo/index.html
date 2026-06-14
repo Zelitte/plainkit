@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit. — sila hesla</title>
+<meta name="description" content="Offline audit sily hesla. Nič sa nikam neposiela — celý výpočet beží v tvojom prehliadači.">
+
+<!-- Samohostené fonty. Cesty over po nahratí do repa; názvy a fallbacky držia plainkit štandard. -->
+<style>
+@font-face{
+  font-family:'Inter';
+  src:url('/fonts/Inter-Variable.woff2') format('woff2');
+  font-weight:100 900;font-display:swap;font-style:normal;
+}
+@font-face{
+  font-family:'JetBrains Mono';
+  src:url('/fonts/JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight:100 800;font-display:swap;font-style:normal;
+}
+
+:root{
+  --bg:#07090f;
+  --bg-2:#0a0f14;
+  --panel:#0d141c;
+  --line:#1b2733;
+  --line-2:#243443;
+  --ink:#e6edf3;
+  --ink-dim:#7d93a6;
+  --ink-faint:#4a5b6b;
+  --cyan:#00d4e8;
+  --yellow:#ffc629;
+  --red:#ff4d5e;
+  --orange:#ff8a3d;
+  --green:#34e29b;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.5;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 78% -8%, rgba(0,212,232,.06), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  background-attachment:fixed;
+}
+
+.wrap{max-width:760px;margin:0 auto;padding:24px 18px 80px}
+
+/* ── hlavička ───────────────────────────── */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+a.brand{
+  font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:-.5px;
+  color:var(--ink);text-decoration:none;transition:opacity .15s;
+}
+a.brand:hover{opacity:.8}
+a.brand b{color:var(--cyan)}
+a.brand:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:3px}
+
+.head-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.banner{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-faint)}
+.banner span{color:var(--ink-dim)}
+
+.lang{display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--bg-2)}
+.lang button{
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  background:transparent;border:none;color:var(--ink-faint);
+  padding:5px 10px;border-radius:999px;cursor:pointer;transition:color .15s,background .15s;
+}
+.lang button:hover{color:var(--ink-dim)}
+.lang button.on{background:var(--cyan);color:#04141a;font-weight:700}
+.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+
+h1{font-size:clamp(27px,7vw,42px);font-weight:800;letter-spacing:-.03em;margin:24px 0 8px;line-height:1.05}
+h1 .accent{color:var(--cyan)}
+.lede{color:var(--ink-dim);font-size:15px;max-width:54ch;margin-bottom:6px}
+
+.offline-proof{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--mono);font-size:12px;color:var(--green);
+  border:1px solid rgba(52,226,155,.28);border-radius:999px;
+  padding:6px 13px;margin:18px 0 4px;background:rgba(52,226,155,.05);
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+
+/* ── vstup ──────────────────────────────── */
+.field{margin-top:24px;position:relative}
+.field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:9px}
+.input-row{display:flex;border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--bg-2);transition:border-color .18s,box-shadow .18s}
+.input-row:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,232,.1)}
+#pw{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-family:var(--mono);font-size:18px;padding:16px;letter-spacing:.02em;min-width:0}
+#pw::placeholder{color:var(--ink-faint)}
+.reveal{background:transparent;border:none;border-left:1px solid var(--line);color:var(--ink-dim);font-family:var(--mono);font-size:12px;padding:0 16px;cursor:pointer;letter-spacing:.05em;transition:color .15s;white-space:nowrap}
+.reveal:hover{color:var(--cyan)}
+.reveal:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+
+/* ── meter ──────────────────────────────── */
+.meter-card{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),var(--bg-2));padding:22px;opacity:.4;transition:opacity .3s}
+.meter-card.live{opacity:1}
+.meter-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.verdict{font-size:24px;font-weight:800;letter-spacing:-.02em;transition:color .25s}
+.verdict-sub{font-family:var(--mono);font-size:12px;color:var(--ink-dim);margin-top:3px}
+.score-badge{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);text-align:right;white-space:nowrap}
+.score-badge b{display:block;font-size:13px}
+.bar{display:flex;gap:5px;margin-bottom:20px}
+.seg{flex:1;height:7px;border-radius:3px;background:var(--line);transition:background .25s,box-shadow .25s}
+.crack{font-family:var(--mono);border-top:1px solid var(--line);padding-top:16px}
+.crack-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px}
+.crack-time{font-size:clamp(22px,6vw,32px);font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.crack-ctx{font-size:11px;color:var(--ink-faint);margin-top:6px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:18px}
+.fact{background:var(--bg-2);padding:14px 13px}
+.fact .k{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+.fact .v{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink)}
+.fact .v small{font-size:11px;color:var(--ink-dim);font-weight:400}
+.findings{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.finding{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg-2)}
+.finding .ic{font-family:var(--mono);font-weight:700;flex-shrink:0;line-height:1.5}
+.finding.warn{border-color:rgba(255,77,94,.3);background:rgba(255,77,94,.06)}
+.finding.warn .ic{color:var(--red)}
+.finding.note{border-color:rgba(255,198,41,.28);background:rgba(255,198,41,.05)}
+.finding.note .ic{color:var(--yellow)}
+.finding.good{border-color:rgba(52,226,155,.28);background:rgba(52,226,155,.05)}
+.finding.good .ic{color:var(--green)}
+.finding b{color:var(--ink)}
+
+.notes{margin-top:34px;border-top:1px solid var(--line);padding-top:22px}
+.notes h2{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin-bottom:14px}
+.notes p{font-size:13px;color:var(--ink-dim);margin-bottom:12px;max-width:62ch}
+.notes p b{color:var(--ink)}
+.notes code{font-family:var(--mono);font-size:12px;color:var(--cyan);background:var(--bg-2);padding:1px 6px;border-radius:5px;border:1px solid var(--line)}
+.notes a{color:var(--cyan);text-decoration:none}
+.notes a:hover{text-decoration:underline}
+
+footer{margin-top:40px;font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-align:center;line-height:1.8}
+footer a{color:var(--ink-dim);text-decoration:none}
+footer a:hover{color:var(--cyan)}
+
+@media (max-width:560px){
+  .wrap{padding:18px 14px 70px}
+  .head-right{width:100%;margin-left:0;justify-content:space-between;order:3}
+  .banner{display:none}
+  header{gap:10px}
+  .facts{grid-template-columns:1fr 1fr}
+  .meter-top{flex-direction:column;align-items:flex-start;gap:8px}
+  .score-badge{text-align:left}
+  .meter-card{padding:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="brand" href="/">plainkit<b>.</b></a>
+    <div class="head-right">
+      <div class="banner"><span>no ads</span> · <span>no signup</span> · <span>no tracking</span></div>
+      <div class="lang" role="group" aria-label="Jazyk / Language">
+        <button data-lang="sk" class="on">SK</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="fr">FR</button>
+      </div>
+    </div>
+  </header>
+
+  <h1></h1>
+  <p class="lede" data-i="lede"></p>
+
+  <div class="offline-proof"><span class="dot"></span> <span data-i="proof"></span></div>
+
+  <div class="field">
+    <label for="pw" data-i="inLabel"></label>
+    <div class="input-row">
+      <input id="pw" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="">
+      <button class="reveal" id="reveal" type="button" aria-pressed="false"></button>
+    </div>
+  </div>
+
+  <div class="meter-card" id="card">
+    <div class="meter-top">
+      <div>
+        <div class="verdict" id="verdict" style="color:var(--ink-faint)">—</div>
+        <div class="verdict-sub" id="verdictSub"></div>
+      </div>
+      <div class="score-badge"><span data-i="score"></span><b id="scoreNum">0 / 4</b></div>
+    </div>
+
+    <div class="bar" id="bar">
+      <div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div>
+    </div>
+
+    <div class="crack">
+      <div class="crack-label" data-i="crackLabel"></div>
+      <div class="crack-time" id="crackTime">—</div>
+      <div class="crack-ctx" id="crackCtx" data-i="crackCtx"></div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><div class="k" data-i="fLenK"></div><div class="v" id="fLen">0</div></div>
+      <div class="fact"><div class="k" data-i="fEntK"></div><div class="v" id="fEnt">0</div></div>
+      <div class="fact"><div class="k" data-i="fPoolK"></div><div class="v" id="fPool">0</div></div>
+    </div>
+
+    <div class="findings" id="findings"></div>
+  </div>
+
+  <div class="notes">
+    <h2 data-i="nH"></h2>
+    <p data-i="n1"></p>
+    <p data-i="n2"></p>
+    <p data-i="n3"></p>
+  </div>
+
+  <footer>
+    <a href="/">← plainkit.</a> &nbsp;·&nbsp; <a href="/politika" data-i="fPriv"></a><br>
+    <span data-i="fTag"></span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var T = {
+    sk:{
+      h1:"Aké silné je tvoje ", h1b:"heslo?",
+      lede:"Zadaj heslo a okamžite uvidíš, ako dlho by trvalo ho uhádnuť — a čo ho oslabuje.",
+      proof:"Beží offline · nič sa nikam neposiela",
+      inLabel:"Heslo na otestovanie", ph:"začni písať…",
+      reveal:"UKÁZAŤ", revealHide:"SKRYŤ",
+      waitSub:"čaká na vstup", score:"skóre",
+      crackLabel:"Odhadovaný čas na prelomenie",
+      crackCtx:"pri rýchlosti útoku 10 miliárd pokusov za sekundu (offline, moderná GPU)",
+      fLenK:"Dĺžka", fEntK:"Entropia", fPoolK:"Abeceda",
+      uChars:"znakov", uBits:"bitov",
+      nH:"Ako to funguje (a kde sú hranice)",
+      n1:"<b>Nič neopúšťa tvoj prehliadač.</b> Celý výpočet beží v JavaScripte na tejto stránke. Žiadne odoslanie na server, žiadne tretie strany. Over si to sám: <code>DevTools → Network</code> ostane pri písaní prázdny.",
+      n2:"<b>Je to odhad, nie istota.</b> Sila sa počíta z dĺžky, použitej abecedy a bežných vzorov (slovníkové slová, opakovania, klávesnicové sekvencie, roky). Skutočný útočník môže byť rýchlejší alebo pomalší — ber to ako rádový orientačný ukazovateľ, nie ako záruku.",
+      n3:"<b>Čo to nekontroluje:</b> či sa heslo už objavilo v úniku dát. To by si vyžadovalo dopyt na cudziu službu — a plainkit zámerne nevolá tretie strany. Únik si vieš overiť priamo na <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
+      fPriv:"súkromie", fTag:"bez reklám · bez účtu · bez sledovania",
+      verdicts:["Veľmi slabé","Slabé","Slušné","Silné","Veľmi silné"],
+      subs:["prelomí sa skoro okamžite","odolá len chvíľu","použiteľné, ale nie pre dôležité účty","dobrá voľba pre väčšinu účtov","odolné aj proti vytrvalému útoku"],
+      instant:"okamžite",
+      time:["sekúnd","minút","hodín","dní","rokov","storočí","tisícročí","miliónov rokov"],
+      find:{
+        common:"Obsahuje bežné slovo alebo známe heslo — útočník ho skúša medzi prvými.",
+        keyboard:"Obsahuje klávesnicovú sekvenciu (napr. „qwertz“, „12345“).",
+        repeat:"Opakované znaky (napr. „aaaa“) pridávajú menej sily, než sa zdá.",
+        seq:"Číselná sekvencia sa dá ľahko uhádnuť.",
+        year:"Vyzerá to ako rok — dátumy patria medzi prvé tipy.",
+        digits:"Iba číslice — pridaj písmená a symboly.",
+        short:"Kratšie ako 8 znakov sa prelomí veľmi rýchlo.",
+        longGood:"Pekná dĺžka — dĺžka pomáha viac než zložitosť.",
+        mixGood:"Mieša veľké/malé písmená, čísla aj symboly bez zjavných vzorov."
+      }
+    },
+    en:{
+      h1:"How strong is your ", h1b:"password?",
+      lede:"Type a password and instantly see how long it would take to guess — and what weakens it.",
+      proof:"Runs offline · nothing is sent anywhere",
+      inLabel:"Password to test", ph:"start typing…",
+      reveal:"SHOW", revealHide:"HIDE",
+      waitSub:"waiting for input", score:"score",
+      crackLabel:"Estimated time to crack",
+      crackCtx:"at an attack rate of 10 billion guesses per second (offline, modern GPU)",
+      fLenK:"Length", fEntK:"Entropy", fPoolK:"Alphabet",
+      uChars:"chars", uBits:"bits",
+      nH:"How it works (and its limits)",
+      n1:"<b>Nothing leaves your browser.</b> The whole calculation runs in JavaScript on this page. No server upload, no third parties. Check it yourself: <code>DevTools → Network</code> stays empty as you type.",
+      n2:"<b>It's an estimate, not a guarantee.</b> Strength is computed from length, alphabet used, and common patterns (dictionary words, repeats, keyboard sequences, years). A real attacker may be faster or slower — treat this as a rough order-of-magnitude guide, not a promise.",
+      n3:"<b>What it does not check:</b> whether the password has appeared in a data breach. That would require a request to an external service — and plainkit deliberately calls no third parties. You can check breaches directly at <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
+      fPriv:"privacy", fTag:"no ads · no signup · no tracking",
+      verdicts:["Very weak","Weak","Fair","Strong","Very strong"],
+      subs:["cracks almost instantly","holds up only briefly","usable, but not for important accounts","a good choice for most accounts","resists even a persistent attack"],
+      instant:"instantly",
+      time:["seconds","minutes","hours","days","years","centuries","millennia","million years"],
+      find:{
+        common:"Contains a common word or known password — attackers try these first.",
+        keyboard:"Contains a keyboard sequence (e.g. \"qwerty\", \"12345\").",
+        repeat:"Repeated characters (e.g. \"aaaa\") add less strength than they look.",
+        seq:"A numeric sequence is easy to guess.",
+        year:"Looks like a year — dates are among the first guesses.",
+        digits:"Digits only — add letters and symbols.",
+        short:"Shorter than 8 characters cracks very fast.",
+        longGood:"Nice length — length helps more than complexity.",
+        mixGood:"Mixes upper/lower case, numbers and symbols with no obvious patterns."
+      }
+    },
+    fr:{
+      h1:"Quelle est la force de votre ", h1b:"mot de passe ?",
+      lede:"Tapez un mot de passe et voyez aussitôt combien de temps il faudrait pour le deviner — et ce qui l'affaiblit.",
+      proof:"Fonctionne hors ligne · rien n'est envoyé",
+      inLabel:"Mot de passe à tester", ph:"commencez à taper…",
+      reveal:"AFFICHER", revealHide:"MASQUER",
+      waitSub:"en attente de saisie", score:"score",
+      crackLabel:"Temps estimé pour le casser",
+      crackCtx:"à un rythme d'attaque de 10 milliards d'essais par seconde (hors ligne, GPU moderne)",
+      fLenK:"Longueur", fEntK:"Entropie", fPoolK:"Alphabet",
+      uChars:"caractères", uBits:"bits",
+      nH:"Comment ça marche (et ses limites)",
+      n1:"<b>Rien ne quitte votre navigateur.</b> Tout le calcul se fait en JavaScript sur cette page. Aucun envoi au serveur, aucun tiers. Vérifiez-le : <code>DevTools → Network</code> reste vide pendant la saisie.",
+      n2:"<b>C'est une estimation, pas une garantie.</b> La force est calculée à partir de la longueur, de l'alphabet utilisé et des schémas courants (mots du dictionnaire, répétitions, séquences clavier, années). Un attaquant réel peut être plus rapide ou plus lent — considérez ceci comme un ordre de grandeur, pas une promesse.",
+      n3:"<b>Ce qu'il ne vérifie pas :</b> si le mot de passe est apparu dans une fuite de données. Cela nécessiterait une requête vers un service externe — et plainkit n'appelle volontairement aucun tiers. Vérifiez les fuites directement sur <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
+      fPriv:"confidentialité", fTag:"sans pub · sans compte · sans pistage",
+      verdicts:["Très faible","Faible","Correct","Fort","Très fort"],
+      subs:["se casse presque instantanément","ne résiste qu'un instant","utilisable, mais pas pour les comptes importants","un bon choix pour la plupart des comptes","résiste même à une attaque persistante"],
+      instant:"instantanément",
+      time:["secondes","minutes","heures","jours","ans","siècles","millénaires","millions d'années"],
+      find:{
+        common:"Contient un mot courant ou un mot de passe connu — les attaquants les essaient en premier.",
+        keyboard:"Contient une séquence clavier (par ex. « qwerty », « 12345 »).",
+        repeat:"Les caractères répétés (par ex. « aaaa ») ajoutent moins de force qu'il n'y paraît.",
+        seq:"Une séquence numérique est facile à deviner.",
+        year:"Ressemble à une année — les dates sont parmi les premières devinées.",
+        digits:"Que des chiffres — ajoutez des lettres et des symboles.",
+        short:"Moins de 8 caractères se casse très vite.",
+        longGood:"Belle longueur — la longueur aide plus que la complexité.",
+        mixGood:"Mélange majuscules/minuscules, chiffres et symboles sans schéma évident."
+      }
+    }
+  };
+
+  var lang = 'sk';
+
+  var pw = document.getElementById('pw');
+  var reveal = document.getElementById('reveal');
+  var card = document.getElementById('card');
+  var verdict = document.getElementById('verdict');
+  var verdictSub = document.getElementById('verdictSub');
+  var scoreNum = document.getElementById('scoreNum');
+  var bar = document.getElementById('bar');
+  var segs = bar.querySelectorAll('.seg');
+  var crackTime = document.getElementById('crackTime');
+  var fLen = document.getElementById('fLen');
+  var fEnt = document.getElementById('fEnt');
+  var fPool = document.getElementById('fPool');
+  var findings = document.getElementById('findings');
+
+  var GUESSES_PER_SEC = 1e10;
+
+  var COMMON = ['password','heslo','123456','12345678','qwerty','111111','123123',
+    'admin','letmein','welcome','monkey','dragon','iloveyou','login','abc123',
+    'football','starwars','master','sunshine','princess','azerty','qwertz',
+    'slovensko','bratislava','milujem','ahoj','test','root','user','motdepasse'];
+  var KEYBOARD = ['qwertz','qwerty','azerty','asdfgh','yxcvbn','zxcvbn','12345','123456','1234567890','poiuyt'];
+
+  function poolSize(s){
+    var pool = 0;
+    if(/[a-z]/.test(s)) pool += 26;
+    if(/[A-Z]/.test(s)) pool += 26;
+    if(/[0-9]/.test(s)) pool += 10;
+    if(/[^a-zA-Z0-9]/.test(s)) pool += 33;
+    if(/[^\x00-\x7F]/.test(s)) pool += 40;
+    return pool || 1;
+  }
+
+  function analyze(s){
+    var len = s.length;
+    var pool = poolSize(s);
+    var lower = s.toLowerCase();
+    var f = T[lang].find;
+    var notes = [];
+    var penaltyBits = 0;
+
+    var isCommon = false;
+    for(var i=0;i<COMMON.length;i++){
+      if(lower === COMMON[i] || lower.indexOf(COMMON[i]) !== -1){ isCommon = true; break; }
+    }
+    if(isCommon){ notes.push({t:'warn', x:f.common}); penaltyBits += 18; }
+
+    for(var k=0;k<KEYBOARD.length;k++){
+      if(lower.indexOf(KEYBOARD[k]) !== -1){ notes.push({t:'warn', x:f.keyboard}); penaltyBits += 12; break; }
+    }
+    if(/(.)\1{2,}/.test(s)){ notes.push({t:'note', x:f.repeat}); penaltyBits += 8; }
+    if(/(012|123|234|345|456|567|678|789|987|876|765|654|543|432|321)/.test(s)){ notes.push({t:'note', x:f.seq}); penaltyBits += 6; }
+    if(/(19|20)\d{2}/.test(s)){ notes.push({t:'note', x:f.year}); penaltyBits += 5; }
+    if(/^\d+$/.test(s) && len>0){ notes.push({t:'note', x:f.digits}); }
+
+    var rawBits = len > 0 ? len * (Math.log(pool)/Math.log(2)) : 0;
+    var bits = Math.max(0, rawBits - penaltyBits);
+
+    if(len >= 16 && !isCommon){ notes.push({t:'good', x:f.longGood}); }
+    else if(len > 0 && len < 8){ notes.push({t:'warn', x:f.short}); }
+
+    var classes = (/[a-z]/.test(s)?1:0)+(/[A-Z]/.test(s)?1:0)+(/[0-9]/.test(s)?1:0)+(/[^a-zA-Z0-9]/.test(s)?1:0);
+    if(classes >= 3 && len >= 12 && !isCommon && penaltyBits===0){ notes.push({t:'good', x:f.mixGood}); }
+
+    return {len:len, pool:pool, bits:bits, notes:notes};
+  }
+
+  function humanTime(seconds){
+    var L = T[lang];
+    if(seconds < 1) return L.instant;
+    var thresholds = [60,60,24,365,100,1000,1000];
+    var v = seconds, i = 0;
+    while(i < thresholds.length && v >= thresholds[i]){ v = v / thresholds[i]; i++; }
+    var name = (i < L.time.length-1) ? L.time[i] : L.time[L.time.length-1];
+    if(name === L.time[6] && v > 1000){ v = v/1000; name = L.time[7]; }
+    var locale = lang==='en'?'en-US':(lang==='fr'?'fr-FR':'sk-SK');
+    var num;
+    if(v >= 100) num = Math.round(v).toLocaleString(locale);
+    else if(v >= 10) num = Math.round(v);
+    else num = Math.round(v*10)/10;
+    return num + ' ' + name;
+  }
+
+  var lastVal = '';
+
+  function render(s){
+    lastVal = s;
+    var L = T[lang];
+    if(s.length === 0){
+      card.classList.remove('live');
+      verdict.textContent='—'; verdict.style.color='var(--ink-faint)';
+      verdictSub.textContent=L.waitSub;
+      scoreNum.textContent='0 / 4';
+      crackTime.textContent='—'; crackTime.style.color='var(--ink)';
+      fLen.innerHTML='0 <small>'+L.uChars+'</small>';
+      fEnt.innerHTML='0 <small>'+L.uBits+'</small>';
+      fPool.innerHTML='0 <small>'+L.uChars+'</small>';
+      segs.forEach(function(sg){sg.style.background='var(--line)';sg.style.boxShadow='none';});
+      findings.innerHTML='';
+      return;
+    }
+    card.classList.add('live');
+    var a = analyze(s);
+    var bits = a.bits;
+    var score, color;
+    if(bits < 28){ score=0; color='var(--red)'; }
+    else if(bits < 40){ score=1; color='var(--orange)'; }
+    else if(bits < 60){ score=2; color='var(--yellow)'; }
+    else if(bits < 80){ score=3; color='var(--cyan)'; }
+    else { score=4; color='var(--green)'; }
+
+    verdict.textContent=L.verdicts[score]; verdict.style.color=color;
+    verdictSub.textContent=L.subs[score];
+    scoreNum.textContent=score+' / 4';
+
+    segs.forEach(function(sg,ix){
+      if(ix < (score===0?0:score)){ sg.style.background=color; sg.style.boxShadow='0 0 8px '+color; }
+      else { sg.style.background='var(--line)'; sg.style.boxShadow='none'; }
+    });
+    if(score===0){ segs[0].style.background=color; segs[0].style.boxShadow='none'; }
+
+    var guesses = Math.pow(2, bits) / 2;
+    var seconds = guesses / GUESSES_PER_SEC;
+    crackTime.textContent = humanTime(seconds);
+    crackTime.style.color = color;
+
+    fLen.innerHTML = a.len + ' <small>'+L.uChars+'</small>';
+    fEnt.innerHTML = Math.round(bits) + ' <small>'+L.uBits+'</small>';
+    fPool.innerHTML = a.pool + ' <small>'+L.uChars+'</small>';
+
+    var ics = {warn:'!', note:'~', good:'✓'};
+    findings.innerHTML = a.notes.map(function(n){
+      return '<div class="finding '+n.t+'"><span class="ic">'+ics[n.t]+'</span><span>'+n.x+'</span></div>';
+    }).join('');
+  }
+
+  function applyLang(){
+    var L = T[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i]').forEach(function(el){
+      var key = el.getAttribute('data-i');
+      if(L[key] !== undefined) el.innerHTML = L[key];
+    });
+    document.querySelector('h1').innerHTML = L.h1 + '<span class="accent">'+L.h1b+'</span>';
+    pw.setAttribute('placeholder', L.ph);
+    reveal.textContent = (pw.type === 'password') ? L.reveal : L.revealHide;
+    render(lastVal);
+  }
+
+  pw.addEventListener('input', function(){ render(pw.value); });
+
+  reveal.addEventListener('click', function(){
+    var show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    reveal.textContent = show ? T[lang].revealHide : T[lang].reveal;
+    reveal.setAttribute('aria-pressed', show ? 'true':'false');
+    pw.focus();
+  });
+
+  document.querySelectorAll('.lang button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      lang = btn.getAttribute('data-lang');
+      document.querySelectorAll('.lang button').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      applyLang();
+    });
+  });
+
+  applyLang();
+})();
+</script>
+</body>
+</html>
