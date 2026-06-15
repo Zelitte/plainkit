@@ -131,6 +131,41 @@ h1 .accent{color:var(--cyan)}
 .finding.good .ic{color:var(--green)}
 .finding b{color:var(--ink)}
 
+/* ── kontrola únikov (opt-in, HIBP) ─────── */
+.breach{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);padding:18px;opacity:.4;transition:opacity .3s}
+.breach.live{opacity:1}
+.breach-disclose{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:12px;line-height:1.5;color:var(--ink-dim);
+  border:1px solid rgba(255,198,41,.28);background:rgba(255,198,41,.05);
+  border-radius:10px;padding:11px 13px;margin-bottom:14px;
+}
+.breach-disclose .ic{color:var(--yellow);font-family:var(--mono);font-weight:700;flex-shrink:0}
+.breach-disclose b{color:var(--ink)}
+.breach-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  font-family:var(--mono);font-size:13px;letter-spacing:.04em;
+  background:transparent;color:var(--cyan);border:1px solid var(--line-2);
+  border-radius:10px;padding:13px 16px;cursor:pointer;transition:border-color .15s,background .15s,color .15s;
+}
+.breach-btn:hover:not(:disabled){border-color:var(--cyan);background:rgba(0,212,232,.06)}
+.breach-btn:disabled{opacity:.5;cursor:not-allowed}
+.breach-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.breach-result{margin-top:14px;font-family:var(--mono);font-size:13px;display:none}
+.breach-result.show{display:block}
+.breach-result .line{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid var(--line)}
+.breach-result.found .line{border-color:rgba(255,77,94,.35);background:rgba(255,77,94,.07);color:var(--ink)}
+.breach-result.clean .line{border-color:rgba(52,226,155,.3);background:rgba(52,226,155,.06);color:var(--ink)}
+.breach-result.err .line{border-color:var(--line-2);background:var(--bg);color:var(--ink-dim)}
+.breach-result .ic{font-weight:700;flex-shrink:0}
+.breach-result.found .ic{color:var(--red)}
+.breach-result.clean .ic{color:var(--green)}
+.breach-result b{color:var(--ink)}
+.breach-sent{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:10px;word-break:break-all}
+.breach-sent b{color:var(--ink-dim)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line-2);border-top-color:var(--cyan);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
 .notes{margin-top:34px;border-top:1px solid var(--line);padding-top:22px}
 .notes h2{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin-bottom:14px}
 .notes p{font-size:13px;color:var(--ink-dim);margin-bottom:12px;max-width:62ch}
@@ -212,6 +247,16 @@ footer a:hover{color:var(--cyan)}
     <div class="findings" id="findings"></div>
   </div>
 
+  <div class="breach" id="breach">
+    <div class="breach-disclose">
+      <span class="ic">!</span>
+      <span data-i="bDisclose"></span>
+    </div>
+    <button class="breach-btn" id="breachBtn" type="button" disabled></button>
+    <div class="breach-result" id="breachResult"></div>
+    <div class="breach-sent" id="breachSent"></div>
+  </div>
+
   <div class="notes">
     <h2 data-i="nH"></h2>
     <p data-i="n1"></p>
@@ -247,6 +292,13 @@ footer a:hover{color:var(--cyan)}
       n2:"<b>Je to odhad, nie istota.</b> Sila sa počíta z dĺžky, použitej abecedy a bežných vzorov (slovníkové slová, opakovania, klávesnicové sekvencie, roky). Skutočný útočník môže byť rýchlejší alebo pomalší — ber to ako rádový orientačný ukazovateľ, nie ako záruku.",
       n3:"<b>Čo to nekontroluje:</b> či sa heslo už objavilo v úniku dát. To by si vyžadovalo dopyt na cudziu službu — a plainkit zámerne nevolá tretie strany. Únik si vieš overiť priamo na <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
       fPriv:"súkromie", fTag:"bez reklám · bez účtu · bez sledovania",
+      bDisclose:"<b>Toto je jediná funkcia, ktorá kontaktuje cudziu službu.</b> Po kliknutí sa do databázy Have I Been Pwned pošle len <b>prvých 5 znakov</b> SHA-1 odtlačku tvojho hesla — nikdy heslo ani celý odtlačok. HIBP nevie, ktoré heslo testuješ. Sila hesla vyššie sa počíta úplne offline; tento jeden request nastane iba ak ho vyvoláš.",
+      bBtn:"Skontrolovať v únikoch (pošle 5 znakov hashu)",
+      bChecking:"kontrolujem…",
+      bFound:"Toto heslo sa našlo v únikoch — videné <b>{n}×</b>. Nepoužívaj ho.",
+      bClean:"Toto heslo sa v známych únikoch <b>nenašlo</b>. (Neznamená to, že je silné — pozri skóre vyššie.)",
+      bErr:"Kontrolu sa nepodarilo dokončiť (sieť alebo služba nedostupná). Skús neskôr alebo over priamo na haveibeenpwned.com.",
+      bSent:"Odoslané do api.pwnedpasswords.com: <b>{p}</b> — prvých 5 znakov hashu, nič viac.",
       verdicts:["Veľmi slabé","Slabé","Slušné","Silné","Veľmi silné"],
       subs:["prelomí sa skoro okamžite","odolá len chvíľu","použiteľné, ale nie pre dôležité účty","dobrá voľba pre väčšinu účtov","odolné aj proti vytrvalému útoku"],
       instant:"okamžite",
@@ -279,6 +331,13 @@ footer a:hover{color:var(--cyan)}
       n2:"<b>It's an estimate, not a guarantee.</b> Strength is computed from length, alphabet used, and common patterns (dictionary words, repeats, keyboard sequences, years). A real attacker may be faster or slower — treat this as a rough order-of-magnitude guide, not a promise.",
       n3:"<b>What it does not check:</b> whether the password has appeared in a data breach. That would require a request to an external service — and plainkit deliberately calls no third parties. You can check breaches directly at <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
       fPriv:"privacy", fTag:"no ads · no signup · no tracking",
+      bDisclose:"<b>This is the only feature that contacts an external service.</b> When you click, only the <b>first 5 characters</b> of your password's SHA-1 hash are sent to the Have I Been Pwned database — never the password or the full hash. HIBP can't tell which password you're testing. The strength score above is computed fully offline; this single request happens only if you trigger it.",
+      bBtn:"Check against breaches (sends 5 hash chars)",
+      bChecking:"checking…",
+      bFound:"This password was found in breaches — seen <b>{n}×</b>. Don't use it.",
+      bClean:"This password was <b>not found</b> in known breaches. (That doesn't make it strong — see the score above.)",
+      bErr:"Couldn't complete the check (network or service unavailable). Try later or check directly at haveibeenpwned.com.",
+      bSent:"Sent to api.pwnedpasswords.com: <b>{p}</b> — first 5 hash characters, nothing more.",
       verdicts:["Very weak","Weak","Fair","Strong","Very strong"],
       subs:["cracks almost instantly","holds up only briefly","usable, but not for important accounts","a good choice for most accounts","resists even a persistent attack"],
       instant:"instantly",
@@ -311,6 +370,13 @@ footer a:hover{color:var(--cyan)}
       n2:"<b>C'est une estimation, pas une garantie.</b> La force est calculée à partir de la longueur, de l'alphabet utilisé et des schémas courants (mots du dictionnaire, répétitions, séquences clavier, années). Un attaquant réel peut être plus rapide ou plus lent — considérez ceci comme un ordre de grandeur, pas une promesse.",
       n3:"<b>Ce qu'il ne vérifie pas :</b> si le mot de passe est apparu dans une fuite de données. Cela nécessiterait une requête vers un service externe — et plainkit n'appelle volontairement aucun tiers. Vérifiez les fuites directement sur <a href=\"https://haveibeenpwned.com\">haveibeenpwned.com</a>.",
       fPriv:"confidentialité", fTag:"sans pub · sans compte · sans pistage",
+      bDisclose:"<b>C'est la seule fonction qui contacte un service externe.</b> En cliquant, seuls les <b>5 premiers caractères</b> de l'empreinte SHA-1 de votre mot de passe sont envoyés à la base Have I Been Pwned — jamais le mot de passe ni l'empreinte complète. HIBP ne sait pas quel mot de passe vous testez. Le score de force ci-dessus est calculé entièrement hors ligne ; cette requête unique n'a lieu que si vous la déclenchez.",
+      bBtn:"Vérifier dans les fuites (envoie 5 caractères du hash)",
+      bChecking:"vérification…",
+      bFound:"Ce mot de passe a été trouvé dans des fuites — vu <b>{n}×</b>. Ne l'utilisez pas.",
+      bClean:"Ce mot de passe n'a <b>pas été trouvé</b> dans les fuites connues. (Cela ne le rend pas fort — voir le score ci-dessus.)",
+      bErr:"Impossible de terminer la vérification (réseau ou service indisponible). Réessayez plus tard ou vérifiez directement sur haveibeenpwned.com.",
+      bSent:"Envoyé à api.pwnedpasswords.com : <b>{p}</b> — 5 premiers caractères du hash, rien de plus.",
       verdicts:["Très faible","Faible","Correct","Fort","Très fort"],
       subs:["se casse presque instantanément","ne résiste qu'un instant","utilisable, mais pas pour les comptes importants","un bon choix pour la plupart des comptes","résiste même à une attaque persistante"],
       instant:"instantanément",
@@ -344,6 +410,10 @@ footer a:hover{color:var(--cyan)}
   var fEnt = document.getElementById('fEnt');
   var fPool = document.getElementById('fPool');
   var findings = document.getElementById('findings');
+  var breach = document.getElementById('breach');
+  var breachBtn = document.getElementById('breachBtn');
+  var breachResult = document.getElementById('breachResult');
+  var breachSent = document.getElementById('breachSent');
 
   var GUESSES_PER_SEC = 1e10;
 
@@ -429,6 +499,9 @@ footer a:hover{color:var(--cyan)}
       fPool.innerHTML='0 <small>'+L.uChars+'</small>';
       segs.forEach(function(sg){sg.style.background='var(--line)';sg.style.boxShadow='none';});
       findings.innerHTML='';
+      breach.classList.remove('live');
+      breachBtn.disabled=true;
+      resetBreach();
       return;
     }
     card.classList.add('live');
@@ -464,7 +537,70 @@ footer a:hover{color:var(--cyan)}
     findings.innerHTML = a.notes.map(function(n){
       return '<div class="finding '+n.t+'"><span class="ic">'+ics[n.t]+'</span><span>'+n.x+'</span></div>';
     }).join('');
+
+    breach.classList.add('live');
+    breachBtn.disabled=false;
+    resetBreach();
   }
+
+  /* ── kontrola únikov (HIBP, opt-in) ───── */
+  function resetBreach(){
+    breachResult.className='breach-result';
+    breachResult.innerHTML='';
+    breachSent.innerHTML='';
+    var L=T[lang];
+    breachBtn.innerHTML = L.bBtn;
+  }
+
+  async function sha1Hex(str){
+    var buf = new TextEncoder().encode(str);
+    var digest = await crypto.subtle.digest('SHA-1', buf);
+    var bytes = new Uint8Array(digest);
+    var hex = '';
+    for(var i=0;i<bytes.length;i++){ hex += bytes[i].toString(16).padStart(2,'0'); }
+    return hex.toUpperCase();
+  }
+
+  async function checkBreach(){
+    var L=T[lang];
+    var pwd = pw.value;
+    if(!pwd) return;
+    breachBtn.disabled=true;
+    breachBtn.innerHTML = '<span class="spin"></span> '+L.bChecking;
+    breachResult.className='breach-result';
+    breachResult.innerHTML='';
+    breachSent.innerHTML='';
+    try{
+      var hash = await sha1Hex(pwd);
+      var prefix = hash.slice(0,5);
+      var suffix = hash.slice(5);
+      // jediný externý request celého webu — k-anonymity, posiela sa len 5 znakov hashu
+      var resp = await fetch('https://api.pwnedpasswords.com/range/'+prefix);
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      var text = await resp.text();
+      var count = 0;
+      var lines = text.split('\n');
+      for(var i=0;i<lines.length;i++){
+        var parts = lines[i].trim().split(':');
+        if(parts[0] === suffix){ count = parseInt(parts[1],10)||0; break; }
+      }
+      if(count > 0){
+        breachResult.className='breach-result show found';
+        breachResult.innerHTML='<div class="line"><span class="ic">✕</span><span>'+L.bFound.replace('{n}', count.toLocaleString(lang==='en'?'en-US':(lang==='fr'?'fr-FR':'sk-SK')))+'</span></div>';
+      } else {
+        breachResult.className='breach-result show clean';
+        breachResult.innerHTML='<div class="line"><span class="ic">✓</span><span>'+L.bClean+'</span></div>';
+      }
+      breachSent.innerHTML = L.bSent.replace('{p}', prefix);
+    } catch(e){
+      breachResult.className='breach-result show err';
+      breachResult.innerHTML='<div class="line"><span class="ic">~</span><span>'+L.bErr+'</span></div>';
+    }
+    breachBtn.disabled=false;
+    breachBtn.innerHTML = L.bBtn;
+  }
+
+  breachBtn.addEventListener('click', checkBreach);
 
   function applyLang(){
     var L = T[lang];
@@ -476,6 +612,7 @@ footer a:hover{color:var(--cyan)}
     document.querySelector('h1').innerHTML = L.h1 + '<span class="accent">'+L.h1b+'</span>';
     pw.setAttribute('placeholder', L.ph);
     reveal.textContent = (pw.type === 'password') ? L.reveal : L.revealHide;
+    if(breachBtn && !breachBtn.disabled) breachBtn.innerHTML = L.bBtn;
     render(lastVal);
   }
 
