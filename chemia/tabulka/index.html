@@ -125,8 +125,8 @@ select:focus{outline:none;border-color:var(--cyan)}
   overflow:hidden;padding:2px;
 }
 .cell:hover{transform:scale(1.12);z-index:5;box-shadow:0 4px 18px rgba(0,0,0,.5);border-color:var(--cyan)}
-.cell .z{position:absolute;top:2px;left:4px;font-size:8.5px;color:var(--txt-faint);font-family:'JetBrains Mono',monospace}
-.cell .sym{font-size:16px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace}
+.cell .z{position:absolute;top:2px;left:4px;font-size:8.5px;color:#7fe9f2;font-family:'JetBrains Mono',monospace}
+.cell .sym{font-size:16px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace;color:var(--txt)}
 .cell .nm{font-size:7px;color:var(--txt-dim);text-align:center;line-height:1;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cell .val{font-size:8px;color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-top:1px}
 .cell.dim{opacity:.16;filter:grayscale(.6)}
@@ -146,6 +146,8 @@ select:focus{outline:none;border-color:var(--cyan)}
 
 /* heatmap režim prepíše ľavý bordel jednotnou farbou cez inline style */
 .ptable.heat .cell{border-left:1px solid var(--line)}
+.ptable.heat .cell .z{color:rgba(4,20,27,.7)}
+.ptable.heat .cell .sym{color:#04141b}
 
 /* ===== legenda ===== */
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 0 22px;font-size:11px}
