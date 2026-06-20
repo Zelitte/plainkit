@@ -366,34 +366,27 @@ h3.section-title {
     <div class="links-card">
       <h3 class="section-title" data-i18n="tools">Nástroje</h3>
 
-      <!-- ╔══════════════════════════════════════════════╗
-           ║  AKO PRIDAŤ NOVÝ NÁSTROJ:                     ║
-           ║  Skopíruj jeden blok <a class="tool-link">,   ║
-           ║  zmeň href, názov v <span> a .url text.       ║
-           ╚══════════════════════════════════════════════╝ -->
+      <!-- ╔══════════════════════════════════════════════════════════╗
+           ║  AKO PRIDAŤ NOVÝ NÁSTROJ:                                 ║
+           ║  • Samostatný nástroj = skopíruj blok <a class="tool-link>║
+           ║    a vlož ho na ABECEDNÉ miesto medzi ostatné.            ║
+           ║  • Skupina (Hry, Vzdelávanie) = pridaj <a> do .group-body.║
+           ║  Poradie: samostatné nástroje + skupiny podľa abecedy,    ║
+           ║  Súkromie zostáva úplne dole (nie je to nástroj).         ║
+           ╚══════════════════════════════════════════════════════════╝ -->
 
-      <!-- NÁSTROJ: Prekladač -->
-      <a href="/preklad" class="tool-link">
-        <div class="label"><span data-i18n="tPreklad">Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/preklad</div>
-      </a>
-
-      <!-- NÁSTROJ: QR generátor -->
-      <a href="/qr" class="tool-link">
-        <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/qr</div>
-      </a>
-
-      <!-- NÁSTROJ: Prevodník jednotiek -->
-      <a href="/jednotky" class="tool-link">
-        <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/jednotky</div>
-      </a>
-
-     <!-- NÁSTROJ: Chat bez stopy_Off the record -->
+      <!-- ── C ── -->
+      <!-- NÁSTROJ: Chat bez stopy / Off the record -->
       <a href="/chat" class="tool-link">
         <div class="label"><span data-i18n="tChat">Chat</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/chat</div>
+      </a>
+
+      <!-- ── H ── -->
+      <!-- NÁSTROJ: Heslo / Password -->
+      <a href="/heslo" class="tool-link">
+        <div class="label"><span data-i18n="theslo">Heslo/Password</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/heslo</div>
       </a>
 
       <!-- ╔══════════════════════════════════════════════╗
@@ -450,33 +443,81 @@ h3.section-title {
         </div>
       </details>
 
-      <!-- ↓↓↓ SEM PRIDAJ ĎALŠIE NÁSTROJE (skopíruj blok .tool-link vyššie) ↓↓↓ -->
-
-       <!-- NÁSTROJ: Počasie -->
-      <a href="/pocasie" class="tool-link">
-        <div class="label"><span data-i18n="tpocasie">Počasie</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/pocasie</div>
-      </a>
-
-       <!-- NÁSTROJ: PDF -->
+      <!-- ── P ── -->
+      <!-- NÁSTROJ: PDF -->
       <a href="/pdf" class="tool-link">
         <div class="label"><span data-i18n="tpdf">Pdf</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/pdf</div>
       </a>
 
+      <!-- NÁSTROJ: Počasie -->
+      <a href="/pocasie" class="tool-link">
+        <div class="label"><span data-i18n="tpocasie">Počasie</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/pocasie</div>
+      </a>
+
+      <!-- NÁSTROJ: Prekladač -->
+      <a href="/preklad" class="tool-link">
+        <div class="label"><span data-i18n="tPreklad">Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/preklad</div>
+      </a>
+
+      <!-- NÁSTROJ: Prevodník jednotiek -->
+      <a href="/jednotky" class="tool-link">
+        <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/jednotky</div>
+      </a>
+
+      <!-- ── Q ── -->
+      <!-- NÁSTROJ: QR generátor -->
+      <a href="/qr" class="tool-link">
+        <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/qr</div>
+      </a>
+
+      <!-- ╔══════════════════════════════════════════════════════════╗
+           ║  ROZBAĽOVACIA PONUKA: VZDELÁVANIE                          ║
+           ║  Štruktúra: predmet (Chémia…) ako pod-skupina, v nej      ║
+           ║  jednotlivé nástroje. Nový predmet = skopíruj celý vnorený║
+           ║  <details class="tool-group"> blok. Nový nástroj do       ║
+           ║  predmetu = skopíruj <a class="tool-link"> v jeho body.   ║
+           ╚══════════════════════════════════════════════════════════╝ -->
+      <details class="tool-group">
+        <summary>
+          <div class="label"><span data-i18n="tEdu">Vzdelávanie</span><span class="chev">›</span></div>
+          <div class="url" data-i18n="tEduSub">Chémia</div>
+        </summary>
+        <div class="group-body">
+          <!-- PREDMET: Chémia -->
+          <details class="tool-group">
+            <summary>
+              <div class="label"><span data-i18n="tChem">Chémia</span><span class="chev">›</span></div>
+              <div class="url" data-i18n="tChemSub">Periodická tabuľka</div>
+            </summary>
+            <div class="group-body">
+              <!-- CHÉMIA: Periodická tabuľka -->
+              <a href="/chemia/tabulka/" class="tool-link">
+                <div class="label"><span data-i18n="tChemTab">Periodická tabuľka</span><span style="color:var(--text-dim)">↗</span></div>
+                <div class="url">plainkit.app/chemia/tabulka</div>
+              </a>
+              <!-- ↓ ĎALŠÍ NÁSTROJ CHÉMIE sem ↓ -->
+            </div>
+          </details>
+          <!-- ↓ ĎALŠÍ PREDMET (Matematika, Fyzika…) = skopíruj celý <details> blok vyššie ↓ -->
+        </div>
+      </details>
+
+      <!-- ── Z ── -->
       <!-- NÁSTROJ: Zvuk -->
       <a href="/zvuk" class="tool-link">
         <div class="label"><span data-i18n="tzvuk">Zvuk</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/zvuk</div>
       </a>
 
-      <!-- NÁSTROJ: Heslo/Password -->
-      <a href="/heslo" class="tool-link">
-        <div class="label"><span data-i18n="theslo">Heslo/Password</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/heslo</div>
-      </a>
+      <!-- ↓↓↓ NOVÝ SAMOSTATNÝ NÁSTROJ: vlož na abecedné miesto vyššie ↓↓↓ -->
 
-      <!-- NÁSTROJ: Súkromie a podmienky/Privacy & Terms -->
+      <!-- ── (mimo abecedy — právne) ── -->
+      <!-- NÁSTROJ: Súkromie a podmienky / Privacy & Terms -->
       <a href="/politika" class="tool-link">
         <div class="label"><span data-i18n="tpolitika">Súkromie a podmienky</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/politika</div>
@@ -559,6 +600,7 @@ const I18N = {
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
     tGames:'Hry', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Šach',
+    tEdu:'Vzdelávanie', tEduSub:'Chémia', tChem:'Chémia', tChemSub:'Periodická tabuľka', tChemTab:'Periodická tabuľka',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
@@ -576,6 +618,7 @@ const I18N = {
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
     tGames:'Games', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Chess',
+    tEdu:'Education', tEduSub:'Chemistry', tChem:'Chemistry', tChemSub:'Periodic table', tChemTab:'Periodic table',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
