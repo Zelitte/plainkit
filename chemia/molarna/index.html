@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Molárna hmotnosť — plainkit.</title>
+<meta name="description" content="Kalkulačka molárnej hmotnosti z chemického vzorca. Rozpis hmotnostných podielov prvkov. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{
+  --bg:#07090f;--bg2:#0a0f14;--panel:#0d141c;--panel2:#111a24;
+  --line:#1c2a38;--line2:#28394a;
+  --txt:#e6eef5;--txt-dim:#8da3b8;--txt-faint:#5a6f84;
+  --cyan:#00d4e8;--yellow:#ffc629;
+  --c-am:#ff6b6b;--c-aem:#ffa94d;--c-tm:#4dd0c8;--c-ptm:#74c0fc;--c-mtl:#b197fc;
+  --c-nm:#69db7c;--c-hal:#ffd43b;--c-ng:#e599f7;--c-lan:#f783ac;--c-act:#ff8787;--c-unk:#5a6f84;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5;min-height:100vh;
+  background-image:radial-gradient(circle at 80% 0%,rgba(0,212,232,.04),transparent 40%);}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:var(--cyan);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.wrap{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{border-right:1px solid var(--line);background:var(--bg2);padding:20px 16px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:24px 28px 60px;min-width:0;max-width:760px}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.02em}
+.brand .dot{color:var(--cyan)}
+.tagline{font-size:11px;color:var(--txt-faint);letter-spacing:.04em;margin-top:2px}
+.banner{font-size:10.5px;color:var(--txt-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+.banner span{color:var(--txt-dim)}
+.page-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.page-title{font-size:clamp(20px,3vw,28px);font-weight:700;letter-spacing:-.02em}
+.page-title em{font-style:normal;color:var(--cyan)}
+.side-block h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-faint);margin-bottom:10px;font-weight:600}
+#notes{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.5;padding:10px;resize:vertical;min-height:140px}
+#notes:focus{outline:none;border-color:var(--cyan)}
+.notes-bar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.notes-count{font-size:11px;color:var(--txt-faint)}
+.btn-mini{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--txt-dim);font-size:11px;padding:5px 10px;transition:.15s}
+.btn-mini:hover{border-color:var(--cyan);color:var(--cyan)}
+.side-nav{display:flex;flex-direction:column;gap:2px;margin-top:auto}
+.side-nav a{color:var(--txt-dim);font-size:13px;padding:6px 8px;border-radius:6px;transition:.15s}
+.side-nav a:hover{background:var(--panel);color:var(--cyan)}
+.lang{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{background:transparent;border:none;color:var(--txt-dim);font-size:12px;padding:8px 11px;transition:.15s}
+.lang button.on{background:var(--cyan);color:#04141b;font-weight:600}
+
+/* ===== vstup vzorca — signature prvok ===== */
+.input-wrap{margin-bottom:8px}
+#formula{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:12px;color:var(--txt);
+  font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;padding:18px 20px;letter-spacing:.01em;transition:.15s}
+#formula:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,232,.12)}
+#formula::placeholder{color:var(--txt-faint);font-weight:400}
+.hint{font-size:12px;color:var(--txt-faint);margin-bottom:18px}
+.hint code{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono',monospace;color:var(--txt-dim);cursor:pointer;transition:.15s}
+.hint code:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ===== výsledok ===== */
+.result{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:22px;margin-bottom:18px}
+.result.empty{display:none}
+.total{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.total .num{font-size:40px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan);line-height:1}
+.total .unit{font-size:16px;color:var(--txt-dim);font-family:'JetBrains Mono',monospace}
+.total-label{font-size:12px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:18px}
+
+/* rozpis prvkov */
+.breakdown{display:flex;flex-direction:column;gap:8px}
+.brow{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center}
+.brow .el{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;padding:4px 0;cursor:pointer;border-bottom:1px dashed transparent;transition:.15s}
+.brow .el:hover{border-bottom-color:var(--cyan)}
+.brow .barwrap{position:relative;height:26px;background:var(--panel);border-radius:6px;overflow:hidden}
+.brow .bar{position:absolute;left:0;top:0;height:100%;border-radius:6px;transition:width .35s cubic-bezier(.4,0,.2,1);min-width:2px}
+.brow .barlabel{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt-dim);white-space:nowrap}
+.brow .vals{text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px}
+.brow .vals .g{color:var(--txt)}
+.brow .vals .pct{color:var(--txt-faint);font-size:11px;margin-left:6px}
+
+/* chyba */
+.err{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:14px 16px;color:#ffb3b3;font-size:13.5px;margin-bottom:18px;display:none}
+.err.on{display:block}
+.err code{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px}
+
+/* detail prvku (vysúvací, ako v tabuľke) */
+.detail-backdrop{position:fixed;inset:0;background:rgba(3,6,10,.6);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.detail-backdrop.on{opacity:1;pointer-events:auto}
+.detail{position:fixed;top:0;right:0;height:100vh;width:min(340px,92vw);background:var(--panel2);border-left:1px solid var(--line2);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);z-index:50;padding:24px;overflow-y:auto}
+.detail.on{transform:translateX(0)}
+.detail-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--txt-dim);font-size:22px;line-height:1;width:32px;height:32px;border-radius:6px;transition:.15s}
+.detail-close:hover{background:var(--panel);color:var(--txt)}
+.d-sym{font-size:54px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.d-z{font-size:13px;color:var(--txt-faint);font-family:'JetBrains Mono',monospace}
+.d-name{font-size:20px;font-weight:600;margin-top:4px}
+.d-name-en{font-size:13px;color:var(--txt-dim)}
+.d-row{margin-top:18px;font-size:13px;color:var(--txt-dim)}
+.d-row b{color:var(--txt);font-family:'JetBrains Mono',monospace}
+.d-link{margin-top:20px;display:inline-block;font-size:13px}
+
+.foot{margin-top:30px;font-size:11px;color:var(--txt-faint);line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+  .side-block{flex:1;min-width:160px}.side-nav{margin-top:0}
+  #formula{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#formula:focus-visible,.btn-mini:focus-visible,.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">plainkit<span class="dot">.</span></div>
+      <div class="tagline" data-i18n="tag">chémia · molárna hmotnosť</div>
+      <div class="banner"><span>no ads</span> · <span>no signup</span> · <span>no tracking</span></div>
+    </div>
+    <div class="side-block">
+      <h3 data-i18n="notes_h">Poznámky</h3>
+      <textarea id="notes" data-i18n-ph="notes_ph" placeholder="Píš si sem…"></textarea>
+      <div class="notes-bar">
+        <span class="notes-count" id="noteCount">0 znakov</span>
+        <button class="btn-mini" id="dlNotes" data-i18n="notes_dl">Stiahnuť .txt</button>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a href="/" data-i18n="nav_home">← všetky nástroje</a>
+      <a href="/chemia/tabulka/" data-i18n="nav_tab">periodická tabuľka</a>
+      <a href="/politika" data-i18n="nav_priv">súkromie</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <h1 class="page-title" data-i18n-html="title">Molárna <em>hmotnosť</em></h1>
+      <div class="lang">
+        <button data-lang="sk" class="on">SK</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <div class="input-wrap">
+      <input id="formula" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+             data-i18n-ph="formula_ph" placeholder="napíš vzorec, napr. H2O">
+    </div>
+    <div class="hint" data-i18n-html="hint">
+      Skús: <code>H2O</code> <code>CO2</code> <code>H2SO4</code> <code>Ca(OH)2</code> <code>CuSO4·5H2O</code> <code>C6H12O6</code>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <div class="result empty" id="result">
+      <div class="total">
+        <span class="num" id="totalNum">—</span>
+        <span class="unit">g/mol</span>
+      </div>
+      <div class="total-label" id="totalLabel"></div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+
+    <div class="foot">
+      <p data-i18n-html="foot_data">Atómové hmotnosti sú zaokrúhlené hodnoty z verejných zdrojov (IUPAC). Výsledok je na učenie, nie na laboratórne váženie.</p>
+      <p data-i18n-html="foot_honest">Celý výpočet beží v tvojom prehliadači — žiadne odosielanie, žiadne sledovanie.</p>
+    </div>
+  </main>
+</div>
+
+<div class="detail-backdrop" id="backdrop"></div>
+<aside class="detail" id="detail" aria-hidden="true">
+  <button class="detail-close" id="detailClose" aria-label="Zavrieť">×</button>
+  <div id="detailBody"></div>
+</aside>
+<script>
+const EL = {"H":{"ar":1.008,"sk":"vodík","en":"Hydrogen","z":1,"cat":"nm"},"He":{"ar":4.0026,"sk":"hélium","en":"Helium","z":2,"cat":"ng"},"Li":{"ar":6.94,"sk":"lítium","en":"Lithium","z":3,"cat":"am"},"Be":{"ar":9.0122,"sk":"berýlium","en":"Beryllium","z":4,"cat":"aem"},"B":{"ar":10.81,"sk":"bór","en":"Boron","z":5,"cat":"mtl"},"C":{"ar":12.011,"sk":"uhlík","en":"Carbon","z":6,"cat":"nm"},"N":{"ar":14.007,"sk":"dusík","en":"Nitrogen","z":7,"cat":"nm"},"O":{"ar":15.999,"sk":"kyslík","en":"Oxygen","z":8,"cat":"nm"},"F":{"ar":18.998,"sk":"fluór","en":"Fluorine","z":9,"cat":"hal"},"Ne":{"ar":20.18,"sk":"neón","en":"Neon","z":10,"cat":"ng"},"Na":{"ar":22.99,"sk":"sodík","en":"Sodium","z":11,"cat":"am"},"Mg":{"ar":24.305,"sk":"horčík","en":"Magnesium","z":12,"cat":"aem"},"Al":{"ar":26.982,"sk":"hliník","en":"Aluminium","z":13,"cat":"ptm"},"Si":{"ar":28.085,"sk":"kremík","en":"Silicon","z":14,"cat":"mtl"},"P":{"ar":30.974,"sk":"fosfor","en":"Phosphorus","z":15,"cat":"nm"},"S":{"ar":32.06,"sk":"síra","en":"Sulfur","z":16,"cat":"nm"},"Cl":{"ar":35.45,"sk":"chlór","en":"Chlorine","z":17,"cat":"hal"},"Ar":{"ar":39.948,"sk":"argón","en":"Argon","z":18,"cat":"ng"},"K":{"ar":39.098,"sk":"draslík","en":"Potassium","z":19,"cat":"am"},"Ca":{"ar":40.078,"sk":"vápnik","en":"Calcium","z":20,"cat":"aem"},"Sc":{"ar":44.956,"sk":"skandium","en":"Scandium","z":21,"cat":"tm"},"Ti":{"ar":47.867,"sk":"titán","en":"Titanium","z":22,"cat":"tm"},"V":{"ar":50.942,"sk":"vanád","en":"Vanadium","z":23,"cat":"tm"},"Cr":{"ar":51.996,"sk":"chróm","en":"Chromium","z":24,"cat":"tm"},"Mn":{"ar":54.938,"sk":"mangán","en":"Manganese","z":25,"cat":"tm"},"Fe":{"ar":55.845,"sk":"železo","en":"Iron","z":26,"cat":"tm"},"Co":{"ar":58.933,"sk":"kobalt","en":"Cobalt","z":27,"cat":"tm"},"Ni":{"ar":58.693,"sk":"nikel","en":"Nickel","z":28,"cat":"tm"},"Cu":{"ar":63.546,"sk":"meď","en":"Copper","z":29,"cat":"tm"},"Zn":{"ar":65.38,"sk":"zinok","en":"Zinc","z":30,"cat":"tm"},"Ga":{"ar":69.723,"sk":"gálium","en":"Gallium","z":31,"cat":"ptm"},"Ge":{"ar":72.63,"sk":"germánium","en":"Germanium","z":32,"cat":"mtl"},"As":{"ar":74.922,"sk":"arzén","en":"Arsenic","z":33,"cat":"mtl"},"Se":{"ar":78.971,"sk":"selén","en":"Selenium","z":34,"cat":"nm"},"Br":{"ar":79.904,"sk":"bróm","en":"Bromine","z":35,"cat":"hal"},"Kr":{"ar":83.798,"sk":"kryptón","en":"Krypton","z":36,"cat":"ng"},"Rb":{"ar":85.468,"sk":"rubídium","en":"Rubidium","z":37,"cat":"am"},"Sr":{"ar":87.62,"sk":"stroncium","en":"Strontium","z":38,"cat":"aem"},"Y":{"ar":88.906,"sk":"ytrium","en":"Yttrium","z":39,"cat":"tm"},"Zr":{"ar":91.224,"sk":"zirkónium","en":"Zirconium","z":40,"cat":"tm"},"Nb":{"ar":92.906,"sk":"niób","en":"Niobium","z":41,"cat":"tm"},"Mo":{"ar":95.95,"sk":"molybdén","en":"Molybdenum","z":42,"cat":"tm"},"Tc":{"ar":98,"sk":"technécium","en":"Technetium","z":43,"cat":"tm"},"Ru":{"ar":101.07,"sk":"ruténium","en":"Ruthenium","z":44,"cat":"tm"},"Rh":{"ar":102.91,"sk":"ródium","en":"Rhodium","z":45,"cat":"tm"},"Pd":{"ar":106.42,"sk":"paládium","en":"Palladium","z":46,"cat":"tm"},"Ag":{"ar":107.87,"sk":"striebro","en":"Silver","z":47,"cat":"tm"},"Cd":{"ar":112.41,"sk":"kadmium","en":"Cadmium","z":48,"cat":"tm"},"In":{"ar":114.82,"sk":"indium","en":"Indium","z":49,"cat":"ptm"},"Sn":{"ar":118.71,"sk":"cín","en":"Tin","z":50,"cat":"ptm"},"Sb":{"ar":121.76,"sk":"antimón","en":"Antimony","z":51,"cat":"mtl"},"Te":{"ar":127.6,"sk":"telúr","en":"Tellurium","z":52,"cat":"mtl"},"I":{"ar":126.9,"sk":"jód","en":"Iodine","z":53,"cat":"hal"},"Xe":{"ar":131.29,"sk":"xenón","en":"Xenon","z":54,"cat":"ng"},"Cs":{"ar":132.91,"sk":"cézium","en":"Caesium","z":55,"cat":"am"},"Ba":{"ar":137.33,"sk":"bárium","en":"Barium","z":56,"cat":"aem"},"La":{"ar":138.91,"sk":"lantán","en":"Lanthanum","z":57,"cat":"lan"},"Ce":{"ar":140.12,"sk":"cér","en":"Cerium","z":58,"cat":"lan"},"Pr":{"ar":140.91,"sk":"prazeodým","en":"Praseodymium","z":59,"cat":"lan"},"Nd":{"ar":144.24,"sk":"neodým","en":"Neodymium","z":60,"cat":"lan"},"Pm":{"ar":145,"sk":"promécium","en":"Promethium","z":61,"cat":"lan"},"Sm":{"ar":150.36,"sk":"samárium","en":"Samarium","z":62,"cat":"lan"},"Eu":{"ar":151.96,"sk":"európium","en":"Europium","z":63,"cat":"lan"},"Gd":{"ar":157.25,"sk":"gadolínium","en":"Gadolinium","z":64,"cat":"lan"},"Tb":{"ar":158.93,"sk":"terbium","en":"Terbium","z":65,"cat":"lan"},"Dy":{"ar":162.5,"sk":"dysprózium","en":"Dysprosium","z":66,"cat":"lan"},"Ho":{"ar":164.93,"sk":"holmium","en":"Holmium","z":67,"cat":"lan"},"Er":{"ar":167.26,"sk":"erbium","en":"Erbium","z":68,"cat":"lan"},"Tm":{"ar":168.93,"sk":"túlium","en":"Thulium","z":69,"cat":"lan"},"Yb":{"ar":173.05,"sk":"yterbium","en":"Ytterbium","z":70,"cat":"lan"},"Lu":{"ar":174.97,"sk":"lutécium","en":"Lutetium","z":71,"cat":"lan"},"Hf":{"ar":178.49,"sk":"hafnium","en":"Hafnium","z":72,"cat":"tm"},"Ta":{"ar":180.95,"sk":"tantal","en":"Tantalum","z":73,"cat":"tm"},"W":{"ar":183.84,"sk":"volfrám","en":"Tungsten","z":74,"cat":"tm"},"Re":{"ar":186.21,"sk":"rénium","en":"Rhenium","z":75,"cat":"tm"},"Os":{"ar":190.23,"sk":"osmium","en":"Osmium","z":76,"cat":"tm"},"Ir":{"ar":192.22,"sk":"irídium","en":"Iridium","z":77,"cat":"tm"},"Pt":{"ar":195.08,"sk":"platina","en":"Platinum","z":78,"cat":"tm"},"Au":{"ar":196.97,"sk":"zlato","en":"Gold","z":79,"cat":"tm"},"Hg":{"ar":200.59,"sk":"ortuť","en":"Mercury","z":80,"cat":"tm"},"Tl":{"ar":204.38,"sk":"tálium","en":"Thallium","z":81,"cat":"ptm"},"Pb":{"ar":207.2,"sk":"olovo","en":"Lead","z":82,"cat":"ptm"},"Bi":{"ar":208.98,"sk":"bizmut","en":"Bismuth","z":83,"cat":"ptm"},"Po":{"ar":209,"sk":"polónium","en":"Polonium","z":84,"cat":"ptm"},"At":{"ar":210,"sk":"astát","en":"Astatine","z":85,"cat":"hal"},"Rn":{"ar":222,"sk":"radón","en":"Radon","z":86,"cat":"ng"},"Fr":{"ar":223,"sk":"francium","en":"Francium","z":87,"cat":"am"},"Ra":{"ar":226,"sk":"rádium","en":"Radium","z":88,"cat":"aem"},"Ac":{"ar":227,"sk":"aktínium","en":"Actinium","z":89,"cat":"act"},"Th":{"ar":232.04,"sk":"tórium","en":"Thorium","z":90,"cat":"act"},"Pa":{"ar":231.04,"sk":"protaktínium","en":"Protactinium","z":91,"cat":"act"},"U":{"ar":238.03,"sk":"urán","en":"Uranium","z":92,"cat":"act"},"Np":{"ar":237,"sk":"neptúnium","en":"Neptunium","z":93,"cat":"act"},"Pu":{"ar":244,"sk":"plutónium","en":"Plutonium","z":94,"cat":"act"},"Am":{"ar":243,"sk":"amerícium","en":"Americium","z":95,"cat":"act"},"Cm":{"ar":247,"sk":"kúrium","en":"Curium","z":96,"cat":"act"},"Bk":{"ar":247,"sk":"berkélium","en":"Berkelium","z":97,"cat":"act"},"Cf":{"ar":251,"sk":"kalifornium","en":"Californium","z":98,"cat":"act"},"Es":{"ar":252,"sk":"einsteinium","en":"Einsteinium","z":99,"cat":"act"},"Fm":{"ar":257,"sk":"fermium","en":"Fermium","z":100,"cat":"act"},"Md":{"ar":258,"sk":"mendelevium","en":"Mendelevium","z":101,"cat":"act"},"No":{"ar":259,"sk":"nobélium","en":"Nobelium","z":102,"cat":"act"},"Lr":{"ar":266,"sk":"laurencium","en":"Lawrencium","z":103,"cat":"act"},"Rf":{"ar":267,"sk":"rutherfordium","en":"Rutherfordium","z":104,"cat":"tm"},"Db":{"ar":268,"sk":"dubnium","en":"Dubnium","z":105,"cat":"tm"},"Sg":{"ar":269,"sk":"seaborgium","en":"Seaborgium","z":106,"cat":"tm"},"Bh":{"ar":270,"sk":"bohrium","en":"Bohrium","z":107,"cat":"tm"},"Hs":{"ar":269,"sk":"hassium","en":"Hassium","z":108,"cat":"tm"},"Mt":{"ar":278,"sk":"meitnérium","en":"Meitnerium","z":109,"cat":"unk"},"Ds":{"ar":281,"sk":"darmstadtium","en":"Darmstadtium","z":110,"cat":"unk"},"Rg":{"ar":282,"sk":"röntgénium","en":"Roentgenium","z":111,"cat":"unk"},"Cn":{"ar":285,"sk":"kopernícium","en":"Copernicium","z":112,"cat":"unk"},"Nh":{"ar":286,"sk":"nihónium","en":"Nihonium","z":113,"cat":"unk"},"Fl":{"ar":289,"sk":"flerovium","en":"Flerovium","z":114,"cat":"unk"},"Mc":{"ar":290,"sk":"moskovium","en":"Moscovium","z":115,"cat":"unk"},"Lv":{"ar":293,"sk":"livermórium","en":"Livermorium","z":116,"cat":"unk"},"Ts":{"ar":294,"sk":"tennessín","en":"Tennessine","z":117,"cat":"unk"},"Og":{"ar":294,"sk":"oganesón","en":"Oganesson","z":118,"cat":"unk"}};
+(function(){
+'use strict';
+const CAT_NAMES={sk:{am:'alkalický kov',aem:'kov alk. zemín',tm:'prechodný kov',ptm:'kov po prechodných',mtl:'polokov',nm:'nekov',hal:'halogén',ng:'vzácny plyn',lan:'lantanoid',act:'aktinoid',unk:'neznáme'},
+  en:{am:'alkali metal',aem:'alkaline earth metal',tm:'transition metal',ptm:'post-transition metal',mtl:'metalloid',nm:'nonmetal',hal:'halogen',ng:'noble gas',lan:'lanthanide',act:'actinide',unk:'unknown'}};
+const I18N={
+  sk:{tag:'chémia · molárna hmotnosť',notes_h:'Poznámky',notes_dl:'Stiahnuť .txt',notes_ph:'Píš si sem…',
+    nav_home:'← všetky nástroje',nav_tab:'periodická tabuľka',nav_priv:'súkromie',
+    title:'Molárna <em>hmotnosť</em>',formula_ph:'napíš vzorec, napr. H2O',
+    hint:'Skús: <code>H2O</code> <code>CO2</code> <code>H2SO4</code> <code>Ca(OH)2</code> <code>CuSO4·5H2O</code> <code>C6H12O6</code>',
+    totalLabel:f=>`molárna hmotnosť · ${f}`,
+    foot_data:'Atómové hmotnosti sú zaokrúhlené hodnoty z verejných zdrojov (IUPAC). Výsledok je na učenie, nie na laboratórne váženie.',
+    foot_honest:'Celý výpočet beží v tvojom prehliadači — žiadne odosielanie, žiadne sledovanie.',
+    chars:n=>`${n} znakov`,
+    e_unknown:s=>`Neznáma značka prvku: <code>${s}</code>`,
+    e_unmatched:'Nezatvorená zátvorka.',
+    e_char:c=>`Neočakávaný znak: <code>${c}</code>`,
+    e_trailing:'Vzorec sa nedá prečítať až do konca — skontroluj zátvorky.',
+    e_empty:'Zadaj chemický vzorec.',
+    atoms:'atómov',mass:'hmotnosť',share:'podiel'},
+  en:{tag:'chemistry · molar mass',notes_h:'Notes',notes_dl:'Download .txt',notes_ph:'Write here…',
+    nav_home:'← all tools',nav_tab:'periodic table',nav_priv:'privacy',
+    title:'Molar <em>mass</em>',formula_ph:'type a formula, e.g. H2O',
+    hint:'Try: <code>H2O</code> <code>CO2</code> <code>H2SO4</code> <code>Ca(OH)2</code> <code>CuSO4·5H2O</code> <code>C6H12O6</code>',
+    totalLabel:f=>`molar mass · ${f}`,
+    foot_data:'Atomic masses are rounded figures from public sources (IUPAC). For learning, not lab weighing.',
+    foot_honest:'The whole calculation runs in your browser — nothing is sent, nothing tracked.',
+    chars:n=>`${n} chars`,
+    e_unknown:s=>`Unknown element symbol: <code>${s}</code>`,
+    e_unmatched:'Unclosed bracket.',
+    e_char:c=>`Unexpected character: <code>${c}</code>`,
+    e_trailing:'Formula could not be fully parsed — check the brackets.',
+    e_empty:'Enter a chemical formula.',
+    atoms:'atoms',mass:'mass',share:'share'}
+};
+let lang='sk';
+const $=s=>document.querySelector(s);
+
+// ---- parser (overený samostatne) ----
+function parseFormula(input){
+  let s=input.replace(/\s+/g,'').replace(/[·•∙*]/g,'.')
+    .replace(/[₀-₉]/g,d=>'0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)]);
+  if(!s) return {ok:false,err:'empty'};
+  let i=0;
+  function cnt(){let n='';while(i<s.length&&/[0-9]/.test(s[i]))n+=s[i++];return n===''?1:parseInt(n,10);}
+  function grp(stop){
+    const c={};
+    while(i<s.length&&!stop.includes(s[i])){
+      const ch=s[i];
+      if(ch==='('||ch==='['){
+        const close=ch==='('?')':']';i++;
+        const inner=grp([close,')',']']);
+        if(inner.err)return inner;
+        if(s[i]!==close)return{err:'unmatched',pos:i};
+        i++;const m=cnt();for(const k in inner)c[k]=(c[k]||0)+inner[k]*m;
+      }else if(ch==='.'){
+        i++;const coef=cnt();const inner=grp(stop);if(inner.err)return inner;
+        for(const k in inner)c[k]=(c[k]||0)+inner[k]*coef;return c;
+      }else if(/[A-Z]/.test(ch)){
+        let sym=s[i++];while(i<s.length&&/[a-z]/.test(s[i]))sym+=s[i++];
+        if(!EL[sym])return{err:'unknown',sym,pos:i-sym.length};
+        const n=cnt();c[sym]=(c[sym]||0)+n;
+      }else return{err:'char',ch,pos:i};
+    }
+    return c;
+  }
+  const r=grp([]);
+  if(r&&r.err)return{ok:false,...r};
+  if(i<s.length)return{ok:false,err:'trailing',pos:i};
+  if(Object.keys(r).length===0)return{ok:false,err:'empty'};
+  return{ok:true,counts:r};
+}
+
+// ---- výpočet + render ----
+function compute(){
+  const t=I18N[lang];
+  const raw=$('#formula').value.trim();
+  const errBox=$('#err'), res=$('#result');
+  if(!raw){ errBox.classList.remove('on'); res.classList.add('empty'); return; }
+  const p=parseFormula(raw);
+  if(!p.ok){
+    let msg;
+    if(p.err==='unknown')msg=t.e_unknown(p.sym);
+    else if(p.err==='unmatched')msg=t.e_unmatched;
+    else if(p.err==='char')msg=t.e_char(p.ch);
+    else if(p.err==='trailing')msg=t.e_trailing;
+    else msg=t.e_empty;
+    errBox.innerHTML=msg; errBox.classList.add('on'); res.classList.add('empty');
+    return;
+  }
+  errBox.classList.remove('on');
+  // celková hmotnosť
+  const counts=p.counts;
+  let total=0;
+  const rows=[];
+  for(const sym in counts){
+    const el=EL[sym], n=counts[sym], mass=el.ar*n;
+    total+=mass;
+    rows.push({sym,n,ar:el.ar,mass,cat:el.cat});
+  }
+  rows.sort((a,b)=>b.mass-a.mass); // najväčší podiel hore
+  // render
+  $('#totalNum').textContent=total.toFixed(2);
+  $('#totalLabel').textContent=t.totalLabel(raw);
+  const bd=$('#breakdown'); bd.innerHTML='';
+  for(const r of rows){
+    const pct=total>0?(r.mass/total*100):0;
+    const div=document.createElement('div'); div.className='brow';
+    div.innerHTML=`
+      <div class="el" style="color:var(--c-${r.cat})" data-sym="${r.sym}">${r.sym}${r.n>1?'<span style="color:var(--txt-faint);font-size:11px">×'+r.n+'</span>':''}</div>
+      <div class="barwrap"><div class="bar" style="width:${pct.toFixed(1)}%;background:var(--c-${r.cat});opacity:.55"></div>
+        <span class="barlabel">${pct.toFixed(1)} %</span></div>
+      <div class="vals"><span class="g">${r.mass.toFixed(2)}</span><span class="pct">g/mol</span></div>`;
+    div.querySelector('.el').addEventListener('click',()=>openDetail(r.sym));
+    bd.appendChild(div);
+  }
+  res.classList.remove('empty');
+}
+
+function openDetail(sym){
+  const el=EL[sym], t=I18N[lang];
+  const nm=lang==='sk'?el.sk:el.en, nmEn=el.en;
+  $('#detailBody').innerHTML=`
+    <div class="d-z">${el.z}</div>
+    <div class="d-sym" style="color:var(--c-${el.cat})">${sym}</div>
+    <div class="d-name">${nm}</div>
+    <div class="d-name-en">${nmEn}</div>
+    <div class="d-row">${CAT_NAMES[lang][el.cat]}</div>
+    <div class="d-row">A<sub>r</sub> = <b>${el.ar}</b> g/mol</div>
+    <a class="d-link" href="/chemia/tabulka/">${lang==='sk'?'↗ otvoriť v periodickej tabuľke':'↗ open in periodic table'}</a>`;
+  $('#detail').classList.add('on');$('#detail').setAttribute('aria-hidden','false');
+  $('#backdrop').classList.add('on');
+}
+function closeDetail(){$('#detail').classList.remove('on');$('#detail').setAttribute('aria-hidden','true');$('#backdrop').classList.remove('on');}
+
+function updateNoteCount(){$('#noteCount').textContent=I18N[lang].chars($('#notes').value.length);}
+function applyLang(){
+  const t=I18N[lang];document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k]!=null)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{const k=el.dataset.i18nHtml;if(t[k]!=null)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(t[k]!=null)el.placeholder=t[k];});
+  updateNoteCount();
+  bindHints();
+  compute();
+}
+function bindHints(){
+  document.querySelectorAll('.hint code').forEach(c=>{
+    c.onclick=()=>{$('#formula').value=c.textContent;compute();$('#formula').focus();};
+  });
+}
+function init(){
+  $('#formula').addEventListener('input',compute);
+  $('#notes').addEventListener('input',updateNoteCount);
+  $('#dlNotes').addEventListener('click',()=>{
+    const blob=new Blob([$('#notes').value],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='poznamky-molarna.txt';a.click();URL.revokeObjectURL(a.href);
+  });
+  $('#detailClose').addEventListener('click',closeDetail);
+  $('#backdrop').addEventListener('click',closeDetail);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+  document.querySelectorAll('.lang button').forEach(b=>{
+    b.addEventListener('click',()=>{lang=b.dataset.lang;document.querySelectorAll('.lang button').forEach(x=>x.classList.toggle('on',x===b));applyLang();});
+  });
+  applyLang();
+  $('#formula').focus();
+}
+init();
+})();
+</script>
+</body>
+</html>
