@@ -127,6 +127,14 @@
     <priority>0.5</priority>
   </url>
 
+ <!-- periodická tabuľka -->
+  <url>
+    <loc>https://plainkit.app/chemia/tabulka/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+
   <!-- ↓↓↓ KEĎ PRIDÁŠ NOVÝ NÁSTROJ, SKOPÍRUJ BLOK <url>...</url> A ZMEŇ <loc> ↓↓↓ -->
 
 </urlset>
