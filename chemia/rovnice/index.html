@@ -216,7 +216,12 @@ function balance(input){
   const norm=input.replace(/→|⟶|⇒/g,'->').replace(/=/g,'->');
   const sides=norm.split('->');
   if(sides.length!==2)return{ok:false,err:'arrow'};
-  const parse=side=>side.split('+').map(x=>x.trim()).filter(Boolean);
+  // odstráň stavové značky (s)(l)(g)(aq) a šípky zrazenín ↓↑ z celej rovnice
+  const clean=str=>str
+    .replace(/\((?:s|l|g|aq)\)/gi,'')
+    .replace(/[↓↑]/g,'');
+  const stripCoef=sp=>sp.replace(/^\s*\d+\s*(?=[A-Z(\[])/,''); // vedúci koeficient pred vzorcom
+  const parse=side=>clean(side).split('+').map(x=>stripCoef(x.trim())).filter(Boolean);
   const left=parse(sides[0]),right=parse(sides[1]);
   if(!left.length||!right.length)return{ok:false,err:'empty'};
   const species=[...left,...right];
