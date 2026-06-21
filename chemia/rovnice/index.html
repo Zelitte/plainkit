@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vyrovnávanie rovníc — plainkit.</title>
+<meta name="description" content="Vyrovnávač chemických rovníc — presný výpočet koeficientov. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{
+  --bg:#07090f;--bg2:#0a0f14;--panel:#0d141c;--panel2:#111a24;
+  --line:#1c2a38;--line2:#28394a;--txt:#e6eef5;--txt-dim:#8da3b8;--txt-faint:#5a6f84;
+  --cyan:#00d4e8;--yellow:#ffc629;--green:#69db7c;--red:#ff6b6b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5;min-height:100vh;
+  background-image:radial-gradient(circle at 20% 0%,rgba(0,212,232,.04),transparent 40%)}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:var(--cyan);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+sub,sup{font-size:.7em;line-height:0}
+.wrap{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{border-right:1px solid var(--line);background:var(--bg2);padding:20px 16px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:24px 28px 60px;min-width:0;max-width:780px}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.02em}.brand .dot{color:var(--cyan)}
+.tagline{font-size:11px;color:var(--txt-faint);letter-spacing:.04em;margin-top:2px}
+.banner{font-size:10.5px;color:var(--txt-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+.banner span{color:var(--txt-dim)}
+.page-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.page-title{font-size:clamp(20px,3vw,28px);font-weight:700;letter-spacing:-.02em}
+.page-title em{font-style:normal;color:var(--cyan)}
+.side-block h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-faint);margin-bottom:10px;font-weight:600}
+#notes{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.5;padding:10px;resize:vertical;min-height:140px}
+#notes:focus{outline:none;border-color:var(--cyan)}
+.notes-bar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.notes-count{font-size:11px;color:var(--txt-faint)}
+.btn-mini{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--txt-dim);font-size:11px;padding:5px 10px;transition:.15s}
+.btn-mini:hover{border-color:var(--cyan);color:var(--cyan)}
+.side-nav{display:flex;flex-direction:column;gap:2px;margin-top:auto}
+.side-nav a{color:var(--txt-dim);font-size:13px;padding:6px 8px;border-radius:6px;transition:.15s}
+.side-nav a:hover{background:var(--panel);color:var(--cyan)}
+.lang{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{background:transparent;border:none;color:var(--txt-dim);font-size:12px;padding:8px 11px;transition:.15s}
+.lang button.on{background:var(--cyan);color:#04141b;font-weight:600}
+
+/* vstup */
+#eq{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:12px;color:var(--txt);
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;padding:16px 18px;transition:.15s}
+#eq:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,232,.12)}
+#eq::placeholder{color:var(--txt-faint);font-weight:400}
+.hint{font-size:12px;color:var(--txt-faint);margin:8px 0 18px}
+.hint code{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono',monospace;color:var(--txt-dim);cursor:pointer;transition:.15s;display:inline-block;margin:2px}
+.hint code:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* výsledok */
+.result{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:24px;margin-bottom:18px;display:none}
+.result.on{display:block}
+.balanced{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;line-height:1.6;word-break:break-word}
+.balanced .coef{color:var(--cyan);margin-right:1px}
+.balanced .plus{color:var(--txt-faint);margin:0 8px}
+.balanced .arrow{color:var(--yellow);margin:0 14px}
+.check{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.check-title{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--txt-faint);margin-bottom:10px}
+.check-grid{display:flex;flex-wrap:wrap;gap:8px}
+.atom-chip{font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:5px 10px;border-radius:6px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:6px}
+.atom-chip .ok{color:var(--green)}
+.atom-chip .n{color:var(--txt-dim)}
+
+/* chyba */
+.err{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:14px 16px;color:#ffb3b3;font-size:13.5px;margin-bottom:18px;display:none}
+.err.on{display:block}
+.err code{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px}
+
+.note-box{font-size:12px;color:var(--txt-faint);line-height:1.55;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:18px}
+.note-box b{color:var(--txt-dim)}
+
+.foot{margin-top:24px;font-size:11px;color:var(--txt-faint);line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+  .side-block{flex:1;min-width:160px}.side-nav{margin-top:0}
+  #eq{font-size:18px}.balanced{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#eq:focus-visible,.btn-mini:focus-visible,.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">plainkit<span class="dot">.</span></div>
+      <div class="tagline" data-i18n="tag">chémia · vyrovnávanie rovníc</div>
+      <div class="banner"><span>no ads</span> · <span>no signup</span> · <span>no tracking</span></div>
+    </div>
+    <div class="side-block">
+      <h3 data-i18n="notes_h">Poznámky</h3>
+      <textarea id="notes" data-i18n-ph="notes_ph" placeholder="Píš si sem…"></textarea>
+      <div class="notes-bar">
+        <span class="notes-count" id="noteCount">0 znakov</span>
+        <button class="btn-mini" id="dlNotes" data-i18n="notes_dl">Stiahnuť .txt</button>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a href="/" data-i18n="nav_home">← všetky nástroje</a>
+      <a href="/chemia/tabulka/" data-i18n="nav_tab">periodická tabuľka</a>
+      <a href="/chemia/molarna/" data-i18n="nav_mol">molárna hmotnosť</a>
+      <a href="/chemia/rozpustnost/" data-i18n="nav_sol">rozpustnosť</a>
+      <a href="/politika" data-i18n="nav_priv">súkromie</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <h1 class="page-title" data-i18n-html="title">Vyrovnávanie <em>rovníc</em></h1>
+      <div class="lang">
+        <button data-lang="sk" class="on">SK</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <input id="eq" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+           data-i18n-ph="eq_ph" placeholder="napr. H2 + O2 -> H2O">
+    <div class="hint" data-i18n-html="hint">
+      Skús:
+      <code>H2 + O2 -> H2O</code>
+      <code>CH4 + O2 -> CO2 + H2O</code>
+      <code>Fe + O2 -> Fe2O3</code>
+      <code>Al + HCl -> AlCl3 + H2</code>
+      <code>C6H12O6 + O2 -> CO2 + H2O</code>
+    </div>
+
+    <div class="err" id="err"></div>
+    <div class="result" id="result">
+      <div class="balanced" id="balanced"></div>
+      <div class="check">
+        <div class="check-title" data-i18n="check_t">Kontrola — počet atómov vľavo = vpravo</div>
+        <div class="check-grid" id="checkGrid"></div>
+      </div>
+    </div>
+
+    <div class="note-box" data-i18n-html="limits">
+      <b>Čo nástroj vie:</b> vyrovná koeficienty bežných rovníc (zlučovanie, rozklad, horenie, neutralizácia, aj redoxné v molekulovom tvare) presným výpočtom. <b>Čo nevie:</b> iónové polrovnice s elektrónmi, a rovnice, ktoré nemajú jednoznačné riešenie — vtedy to priamo povie, namiesto vymyslenia čísel.
+    </div>
+
+    <div class="foot">
+      <p data-i18n-html="foot_honest">Výpočet beží celý v tvojom prehliadači (presná zlomková aritmetika, žiadne zaokrúhľovanie). Žiadne odosielanie, žiadne sledovanie.</p>
+    </div>
+  </main>
+</div>
+<script>
+const ELEMS = new Set(["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C", "Ca", "Cd", "Ce", "Cf", "Cl", "Cm", "Cn", "Co", "Cr", "Cs", "Cu", "Db", "Ds", "Dy", "Er", "Es", "Eu", "F", "Fe", "Fl", "Fm", "Fr", "Ga", "Gd", "Ge", "H", "He", "Hf", "Hg", "Ho", "Hs", "I", "In", "Ir", "K", "Kr", "La", "Li", "Lr", "Lu", "Lv", "Mc", "Md", "Mg", "Mn", "Mo", "Mt", "N", "Na", "Nb", "Nd", "Ne", "Nh", "Ni", "No", "Np", "O", "Og", "Os", "P", "Pa", "Pb", "Pd", "Pm", "Po", "Pr", "Pt", "Pu", "Ra", "Rb", "Re", "Rf", "Rg", "Rh", "Rn", "Ru", "S", "Sb", "Sc", "Se", "Sg", "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te", "Th", "Ti", "Tl", "Tm", "Ts", "U", "V", "W", "Xe", "Y", "Yb", "Zn", "Zr"]);
+
+// ===== Jadro: vyrovnávač chemických rovníc =====
+// Presná zlomková aritmetika (BigInt) → riešenie nulového priestoru → najmenšie celé koeficienty.
+
+// --- zlomky cez BigInt ---
+function gcd(a,b){a=a<0n?-a:a;b=b<0n?-b:b;while(b){[a,b]=[b,a%b];}return a;}
+class Frac{
+  constructor(n,d=1n){
+    n=BigInt(n);d=BigInt(d);
+    if(d===0n)throw new Error('div0');
+    if(d<0n){n=-n;d=-d;}
+    const g=gcd(n,d)||1n;
+    this.n=n/g;this.d=d/g;
+  }
+  add(o){return new Frac(this.n*o.d+o.n*this.d,this.d*o.d);}
+  sub(o){return new Frac(this.n*o.d-o.n*this.d,this.d*o.d);}
+  mul(o){return new Frac(this.n*o.n,this.d*o.d);}
+  div(o){return new Frac(this.n*o.d,this.d*o.n);}
+  isZero(){return this.n===0n;}
+}
+const F=(n,d)=>new Frac(n,d);
+
+// --- parser vzorca → {prvok:počet} (zhodný princíp ako molárna) ---
+function parseFormula(s){
+  s=s.replace(/\s+/g,'').replace(/[·•∙*]/g,'.')
+     .replace(/[₀-₉]/g,d=>'0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)]);
+  let i=0;
+  function cnt(){let n='';while(i<s.length&&/[0-9]/.test(s[i]))n+=s[i++];return n===''?1:parseInt(n,10);}
+  function grp(stop){
+    const c={};
+    while(i<s.length&&!stop.includes(s[i])){
+      const ch=s[i];
+      if(ch==='('||ch==='['){
+        const close=ch==='('?')':']';i++;
+        const inner=grp([close,')',']']);if(inner.err)return inner;
+        if(s[i]!==close)return{err:'unmatched'};i++;const m=cnt();
+        for(const k in inner)c[k]=(c[k]||0)+inner[k]*m;
+      }else if(ch==='.'){
+        i++;const coef=cnt();const inner=grp(stop);if(inner.err)return inner;
+        for(const k in inner)c[k]=(c[k]||0)+inner[k]*coef;return c;
+      }else if(/[A-Z]/.test(ch)){
+        let sym=s[i++];while(i<s.length&&/[a-z]/.test(s[i]))sym+=s[i++];
+        if(typeof ELEMS!=='undefined'&&!ELEMS.has(sym))return{err:'unknown',sym};
+        const n=cnt();c[sym]=(c[sym]||0)+n;
+      }else return{err:'char',ch};
+    }
+    return c;
+  }
+  const r=grp([]);
+  if(r&&r.err)return{ok:false,...r};
+  if(i<s.length)return{ok:false,err:'trailing'};
+  return{ok:true,counts:r};
+}
+
+// --- vyrovnanie ---
+// vstup: "H2 + O2 -> H2O" alebo "H2 + O2 = H2O"
+function balance(input){
+  const norm=input.replace(/→|⟶|⇒/g,'->').replace(/=/g,'->');
+  const sides=norm.split('->');
+  if(sides.length!==2)return{ok:false,err:'arrow'};
+  const parse=side=>side.split('+').map(x=>x.trim()).filter(Boolean);
+  const left=parse(sides[0]),right=parse(sides[1]);
+  if(!left.length||!right.length)return{ok:false,err:'empty'};
+  const species=[...left,...right];
+  // parsuj každý
+  const comps=[];
+  for(const sp of species){
+    const p=parseFormula(sp);
+    if(!p.ok)return{ok:false,err:'formula',sp,detail:p.err};
+    comps.push(p.counts);
+  }
+  // zoznam prvkov
+  const elems=[...new Set(comps.flatMap(c=>Object.keys(c)))];
+  // matica: riadok = prvok, stĺpec = látka; ľavé +, pravé -
+  const nL=left.length, n=species.length;
+  const A=elems.map(el=>comps.map((c,j)=>{
+    const v=F(c[el]||0);
+    return j<nL?v:v.mul(F(-1));
+  }));
+  // hľadáme nulový priestor A·x=0, x>0 celé.
+  // Gauss-Jordan nad zlomkami.
+  const rows=A.length, cols=n;
+  let r=0;const pivots=[];
+  for(let col=0;col<cols&&r<rows;col++){
+    // nájdi pivot
+    let pr=-1;for(let k=r;k<rows;k++)if(!A[k][col].isZero()){pr=k;break;}
+    if(pr<0)continue;
+    [A[r],A[pr]]=[A[pr],A[r]];
+    // normalizuj riadok
+    const pv=A[r][col];
+    for(let c=0;c<cols;c++)A[r][c]=A[r][c].div(pv);
+    // vynuluj ostatné
+    for(let k=0;k<rows;k++){
+      if(k!==r&&!A[k][col].isZero()){
+        const f=A[k][col];
+        for(let c=0;c<cols;c++)A[k][c]=A[k][c].sub(f.mul(A[r][c]));
+      }
+    }
+    pivots.push(col);r++;
+  }
+  const rank=r;
+  const freeCols=[];for(let c=0;c<cols;c++)if(!pivots.includes(c))freeCols.push(c);
+  if(freeCols.length!==1)return{ok:false,err:freeCols.length===0?'unique_none':'multiple',free:freeCols.length};
+  // nastav voľnú premennú = 1, dopočítaj pivotné
+  const x=new Array(cols).fill(null);
+  const free=freeCols[0];x[free]=F(1);
+  for(let pi=0;pi<pivots.length;pi++){
+    const col=pivots[pi];
+    // riadok pi: x[col] + Σ A[pi][free]*x[free] = 0
+    x[col]=A[pi][free].mul(F(-1)); // lebo voľná=1
+  }
+  // spoločný menovateľ → celé čísla
+  let lcm=1n;for(const v of x)lcm=lcm/gcd(lcm,v.d)*v.d;
+  let ints=x.map(v=>v.n*(lcm/v.d));
+  // znamienko: nech sú kladné
+  if(ints.some(v=>v<0n)&&ints.every(v=>v<=0n))ints=ints.map(v=>-v);
+  if(ints.some(v=>v<0n))ints=ints.map(v=>-v); // ak zmiešané, otoč (riešenie je ±)
+  // skontroluj všetky kladné
+  if(ints.some(v=>v<=0n))return{ok:false,err:'nonpositive'};
+  // vyděl spoločným deliteľom
+  let g=ints[0];for(const v of ints)g=gcd(g,v);
+  ints=ints.map(v=>v/g);
+  return{ok:true,coef:ints.map(Number),left,right,nL};
+}
+
+
+
+/* ===== UI logika ===== */
+(function(){
+'use strict';
+const I18N={
+  sk:{tag:'chémia · vyrovnávanie rovníc',notes_h:'Poznámky',notes_dl:'Stiahnuť .txt',notes_ph:'Píš si sem…',
+    nav_home:'← všetky nástroje',nav_tab:'periodická tabuľka',nav_mol:'molárna hmotnosť',nav_sol:'rozpustnosť',nav_priv:'súkromie',
+    title:'Vyrovnávanie <em>rovníc</em>',eq_ph:'napr. H2 + O2 -> H2O',
+    hint:'Skús: <code>H2 + O2 -> H2O</code> <code>CH4 + O2 -> CO2 + H2O</code> <code>Fe + O2 -> Fe2O3</code> <code>Al + HCl -> AlCl3 + H2</code> <code>C6H12O6 + O2 -> CO2 + H2O</code>',
+    check_t:'Kontrola — počet atómov vľavo = vpravo',
+    limits:'<b>Čo nástroj vie:</b> vyrovná koeficienty bežných rovníc (zlučovanie, rozklad, horenie, neutralizácia, aj redoxné v molekulovom tvare) presným výpočtom. <b>Čo nevie:</b> iónové polrovnice s elektrónmi, a rovnice, ktoré nemajú jednoznačné riešenie — vtedy to priamo povie, namiesto vymyslenia čísel.',
+    foot_honest:'Výpočet beží celý v tvojom prehliadači (presná zlomková aritmetika, žiadne zaokrúhľovanie). Žiadne odosielanie, žiadne sledovanie.',
+    chars:n=>`${n} znakov`,
+    e_arrow:'Chýba šípka. Použi <code>-></code> alebo <code>=</code> medzi ľavou a pravou stranou.',
+    e_empty:'Zadaj látky na oboch stranách rovnice.',
+    e_formula:s=>`Vzorec <code>${s}</code> sa nedá prečítať — skontroluj zápis a značky prvkov.`,
+    e_unknown:s=>`Neznáma značka prvku vo vzorci <code>${s}</code>.`,
+    e_unique_none:'Túto rovnicu sa nedá vyrovnať — látky vľavo a vpravo si nezodpovedajú (rôzne prvky alebo chýba produkt).',
+    e_multiple:'Táto rovnica má viac možných riešení — nedá sa vyrovnať jednoznačne. Skontroluj, či si nezadal nezlučiteľné látky.',
+    e_nonpositive:'Rovnicu sa nepodarilo vyrovnať s kladnými celými koeficientmi.',
+    e_generic:'Rovnicu sa nepodarilo vyrovnať.'},
+  en:{tag:'chemistry · equation balancing',notes_h:'Notes',notes_dl:'Download .txt',notes_ph:'Write here…',
+    nav_home:'← all tools',nav_tab:'periodic table',nav_mol:'molar mass',nav_sol:'solubility',nav_priv:'privacy',
+    title:'Equation <em>balancing</em>',eq_ph:'e.g. H2 + O2 -> H2O',
+    hint:'Try: <code>H2 + O2 -> H2O</code> <code>CH4 + O2 -> CO2 + H2O</code> <code>Fe + O2 -> Fe2O3</code> <code>Al + HCl -> AlCl3 + H2</code> <code>C6H12O6 + O2 -> CO2 + H2O</code>',
+    check_t:'Check — atom count left = right',
+    limits:'<b>What it does:</b> balances coefficients of common equations (synthesis, decomposition, combustion, neutralization, and redox in molecular form) by exact calculation. <b>What it doesn\'t:</b> ionic half-equations with electrons, and equations with no unique solution — it says so rather than inventing numbers.',
+    foot_honest:'The whole calculation runs in your browser (exact fraction arithmetic, no rounding). Nothing sent, nothing tracked.',
+    chars:n=>`${n} chars`,
+    e_arrow:'Missing arrow. Use <code>-></code> or <code>=</code> between the two sides.',
+    e_empty:'Enter species on both sides of the equation.',
+    e_formula:s=>`Formula <code>${s}</code> can\'t be read — check the notation and element symbols.`,
+    e_unknown:s=>`Unknown element symbol in <code>${s}</code>.`,
+    e_unique_none:'This equation can\'t be balanced — the species on each side don\'t match (different elements or a missing product).',
+    e_multiple:'This equation has multiple solutions — it can\'t be balanced uniquely. Check for incompatible species.',
+    e_nonpositive:'Could not balance with positive integer coefficients.',
+    e_generic:'Could not balance the equation.'}
+};
+let lang='sk';
+const $=s=>document.querySelector(s);
+
+function fmtFormula(s){
+  // dolné indexy za písmenom/zátvorkou; · pre hydráty
+  return s.replace(/[·*]/g,'·').replace(/(\d+)/g,'<sub>$1</sub>');
+}
+
+function run(){
+  const t=I18N[lang];
+  const raw=$('#eq').value.trim();
+  const errBox=$('#err'),res=$('#result');
+  if(!raw){errBox.classList.remove('on');res.classList.remove('on');return;}
+  let r;
+  try{r=balance(raw);}catch(e){r={ok:false,err:'generic'};}
+  if(!r.ok){
+    let msg;
+    if(r.err==='arrow')msg=t.e_arrow;
+    else if(r.err==='empty')msg=t.e_empty;
+    else if(r.err==='formula')msg=(r.detail==='unknown')?t.e_unknown(r.sp):t.e_formula(r.sp);
+    else if(r.err==='unique_none')msg=t.e_unique_none;
+    else if(r.err==='multiple')msg=t.e_multiple;
+    else if(r.err==='nonpositive')msg=t.e_nonpositive;
+    else msg=t.e_generic;
+    errBox.innerHTML=msg;errBox.classList.add('on');res.classList.remove('on');
+    return;
+  }
+  errBox.classList.remove('on');
+  // poskladaj vyrovnanú rovnicu
+  const species=[...r.left,...r.right];
+  const parts=[];
+  species.forEach((sp,j)=>{
+    const c=r.coef[j];
+    const coefStr=c===1?'':`<span class="coef">${c}</span>`;
+    parts.push(`${coefStr}${fmtFormula(sp)}`);
+  });
+  let html='';
+  for(let j=0;j<species.length;j++){
+    if(j===r.nL)html+='<span class="arrow">→</span>';
+    else if(j>0)html+='<span class="plus">+</span>';
+    html+=parts[j];
+  }
+  $('#balanced').innerHTML=html;
+  // kontrola atómov
+  const counts={}; // prvok -> [vľavo, vpravo]
+  species.forEach((sp,j)=>{
+    const p=parseFormula(sp);
+    for(const el in p.counts){
+      if(!counts[el])counts[el]=[0,0];
+      const side=j<r.nL?0:1;
+      counts[el][side]+=p.counts[el]*r.coef[j];
+    }
+  });
+  const grid=$('#checkGrid');grid.innerHTML='';
+  Object.keys(counts).sort().forEach(el=>{
+    const [l,rr]=counts[el];
+    const chip=document.createElement('div');chip.className='atom-chip';
+    chip.innerHTML=`<span class="ok">✓</span>${el}<span class="n">${l}=${rr}</span>`;
+    grid.appendChild(chip);
+  });
+  res.classList.add('on');
+}
+
+function updateNoteCount(){$('#noteCount').textContent=I18N[lang].chars($('#notes').value.length);}
+function bindHints(){document.querySelectorAll('.hint code').forEach(c=>{c.onclick=()=>{$('#eq').value=c.textContent;run();$('#eq').focus();};});}
+function applyLang(){
+  const t=I18N[lang];document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k]!=null)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{const k=el.dataset.i18nHtml;if(t[k]!=null)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(t[k]!=null)el.placeholder=t[k];});
+  updateNoteCount();bindHints();run();
+}
+function init(){
+  $('#eq').addEventListener('input',run);
+  $('#notes').addEventListener('input',updateNoteCount);
+  $('#dlNotes').addEventListener('click',()=>{
+    const blob=new Blob([$('#notes').value],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='poznamky-rovnice.txt';a.click();URL.revokeObjectURL(a.href);
+  });
+  document.querySelectorAll('.lang button').forEach(b=>{
+    b.addEventListener('click',()=>{lang=b.dataset.lang;document.querySelectorAll('.lang button').forEach(x=>x.classList.toggle('on',x===b));applyLang();});
+  });
+  applyLang();$('#eq').focus();
+}
+init();
+})();
+</script>
+</body>
+</html>
