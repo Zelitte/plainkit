@@ -277,6 +277,31 @@ h3.section-title {
 .tool-group .group-body .tool-link { background: transparent; }
 .tool-group .group-body .tool-link:hover { background: var(--bg-elev-2); }
 
+/* Decentné zvýraznenie odkazu na chat */
+.tool-link.featured {
+  border-left: 2px solid var(--accent);
+  background:
+    linear-gradient(90deg, var(--accent-dim), transparent 55%),
+    var(--bg-elev);
+}
+.tool-link.featured:hover { background:
+    linear-gradient(90deg, var(--accent-dim), transparent 45%),
+    var(--bg-elev-2); }
+.live-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); margin-right: 6px; vertical-align: middle;
+  box-shadow: 0 0 0 0 rgba(0,212,232,0.55);
+  animation: livePulse 2.4s ease-out infinite;
+}
+@keyframes livePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,212,232,0.5); }
+  70%  { box-shadow: 0 0 0 6px rgba(0,212,232,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,212,232,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
 .foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 20px; margin-top: 20px; line-height: 1.8; }
 </style>
 </head>
@@ -376,9 +401,9 @@ h3.section-title {
            ╚══════════════════════════════════════════════════════════╝ -->
 
       <!-- ── C ── -->
-      <!-- NÁSTROJ: Chat bez stopy / Off the record -->
-      <a href="/chat" class="tool-link">
-        <div class="label"><span data-i18n="tChat">Chat</span><span style="color:var(--text-dim)">↗</span></div>
+      <!-- NÁSTROJ: Chat bez stopy / Off the record (decentne zvýraznený) -->
+      <a href="/chat" class="tool-link featured">
+        <div class="label"><span><span class="live-dot"></span><span data-i18n="tChat">Chat</span></span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/chat</div>
       </a>
 
@@ -500,10 +525,26 @@ h3.section-title {
                 <div class="label"><span data-i18n="tChemTab">Periodická tabuľka</span><span style="color:var(--text-dim)">↗</span></div>
                 <div class="url">plainkit.app/chemia/tabulka</div>
               </a>
+              <!-- CHÉMIA: Molárna hmotnosť -->
               <a href="/chemia/molarna/" class="tool-link">
                 <div class="label"><span data-i18n="tChemMol">Molárna hmotnosť</span><span style="color:var(--text-dim)">↗</span></div>
                 <div class="url">plainkit.app/chemia/molarna</div>
-              </a> 
+              </a>
+              <!-- CHÉMIA: Tabuľka rozpustnosti -->
+              <a href="/chemia/rozpustnost/" class="tool-link">
+                <div class="label"><span data-i18n="tChemSol">Tabuľka rozpustnosti</span><span style="color:var(--text-dim)">↗</span></div>
+                <div class="url">plainkit.app/chemia/rozpustnost</div>
+              </a>
+              <!-- CHÉMIA: Vyrovnávanie rovníc -->
+              <a href="/chemia/rovnice/" class="tool-link">
+                <div class="label"><span data-i18n="tChemEq">Vyrovnávanie rovníc</span><span style="color:var(--text-dim)">↗</span></div>
+                <div class="url">plainkit.app/chemia/rovnice</div>
+              </a>
+              <!-- CHÉMIA: pH a koncentrácia -->
+              <a href="/chemia/ph/" class="tool-link">
+                <div class="label"><span data-i18n="tChemPh">pH a koncentrácia</span><span style="color:var(--text-dim)">↗</span></div>
+                <div class="url">plainkit.app/chemia/ph</div>
+              </a>
               <!-- ↓ ĎALŠÍ NÁSTROJ CHÉMIE sem ↓ -->
             </div>
           </details>
@@ -604,7 +645,8 @@ const I18N = {
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
     tGames:'Hry', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Šach',
-    tEdu:'Vzdelávanie', tEduSub:'Chémia', tChem:'Chémia', tChemSub:'Periodická tabuľka', tChemTab:'Periodická tabuľka', tChemMol:'Molárna hmotnosť' ,
+    tEdu:'Vzdelávanie', tEduSub:'Chémia', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
+    tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
@@ -622,7 +664,8 @@ const I18N = {
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
     tGames:'Games', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Chess',
-    tEdu:'Education', tEduSub:'Chemistry', tChem:'Chemistry', tChemSub:'Periodic table', tChemTab:'Periodic table', tChemMol:'Molar mass' ,
+    tEdu:'Education', tEduSub:'Chemistry', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
+    tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
