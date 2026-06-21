@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pH a koncentrácia — plainkit.</title>
+<meta name="description" content="Kalkulačka pH, koncentrácie a riedenia roztokov. Silné aj slabé kyseliny a zásady. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Inter';src:url('/fonts/Inter-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{
+  --bg:#07090f;--bg2:#0a0f14;--panel:#0d141c;--panel2:#111a24;
+  --line:#1c2a38;--line2:#28394a;--txt:#e6eef5;--txt-dim:#8da3b8;--txt-faint:#5a6f84;
+  --cyan:#00d4e8;--yellow:#ffc629;
+  /* pH škála */
+  --acid:#ff6b6b;--neutral:#69db7c;--base:#74c0fc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5;min-height:100vh;
+  background-image:radial-gradient(circle at 80% 0%,rgba(0,212,232,.04),transparent 40%)}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:var(--cyan);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+sub,sup{font-size:.7em;line-height:0}
+.wrap{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{border-right:1px solid var(--line);background:var(--bg2);padding:20px 16px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:24px 28px 60px;min-width:0;max-width:720px}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.02em}.brand .dot{color:var(--cyan)}
+.tagline{font-size:11px;color:var(--txt-faint);letter-spacing:.04em;margin-top:2px}
+.banner{font-size:10.5px;color:var(--txt-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+.banner span{color:var(--txt-dim)}
+.page-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.page-title{font-size:clamp(20px,3vw,28px);font-weight:700;letter-spacing:-.02em}
+.page-title em{font-style:normal;color:var(--cyan)}
+.side-block h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-faint);margin-bottom:10px;font-weight:600}
+#notes{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.5;padding:10px;resize:vertical;min-height:140px}
+#notes:focus{outline:none;border-color:var(--cyan)}
+.notes-bar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.notes-count{font-size:11px;color:var(--txt-faint)}
+.btn-mini{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--txt-dim);font-size:11px;padding:5px 10px;transition:.15s}
+.btn-mini:hover{border-color:var(--cyan);color:var(--cyan)}
+.side-nav{display:flex;flex-direction:column;gap:2px;margin-top:auto}
+.side-nav a{color:var(--txt-dim);font-size:13px;padding:6px 8px;border-radius:6px;transition:.15s}
+.side-nav a:hover{background:var(--panel);color:var(--cyan)}
+.lang{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lang button{background:transparent;border:none;color:var(--txt-dim);font-size:12px;padding:8px 11px;transition:.15s}
+.lang button.on{background:var(--cyan);color:#04141b;font-weight:600}
+
+/* prepínač režimov */
+.modes{display:flex;gap:6px;margin-bottom:22px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.modes button{flex:1;background:transparent;border:none;color:var(--txt-dim);font-size:13.5px;font-weight:500;padding:10px;border-radius:7px;transition:.15s}
+.modes button.on{background:var(--panel2);color:var(--cyan);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.field input,.field select{width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:9px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:16px;padding:12px 14px;transition:.15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,232,.1)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:flex;gap:6px;margin-bottom:16px}
+.seg button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--txt-dim);font-size:13px;padding:9px;border-radius:8px;transition:.15s}
+.seg button.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,232,.06)}
+
+.mode-panel{display:none}.mode-panel.on{display:block}
+
+/* výsledok */
+.result{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:22px;margin:18px 0;display:none}
+.result.on{display:block}
+.ph-big{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+.ph-big .num{font-size:48px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.ph-big .lab{font-size:13px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.05em}
+/* pH škála pruh */
+.scale{height:34px;border-radius:8px;background:linear-gradient(90deg,#ff3b3b 0%,#ff6b6b 14%,#ffa94d 28%,#ffd43b 43%,#69db7c 50%,#4dd0c8 60%,#74c0fc 78%,#5a8def 100%);position:relative;margin:6px 0 20px}
+.scale .marker{position:absolute;top:-4px;width:3px;height:42px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,.6);transform:translateX(-50%)}
+.scale .ticks{position:absolute;bottom:-18px;left:0;right:0;display:flex;justify-content:space-between;font-size:10px;color:var(--txt-faint);font-family:'JetBrains Mono',monospace}
+.vals{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.vals .v{background:var(--panel);padding:11px 14px}
+.vals .v .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--txt-faint)}
+.vals .v .n{font-size:16px;font-family:'JetBrains Mono',monospace;margin-top:3px}
+
+.warn{margin-top:16px;font-size:12.5px;line-height:1.5;color:#ffe08a;border-left:2px solid var(--yellow);padding:10px 14px;background:rgba(255,198,41,.06);border-radius:0 6px 6px 0}
+.err{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:14px 16px;color:#ffb3b3;font-size:13.5px;margin:18px 0;display:none}
+.err.on{display:block}
+.note-box{font-size:12px;color:var(--txt-faint);line-height:1.55;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:18px}
+.note-box b{color:var(--txt-dim)}
+.foot{margin-top:24px;font-size:11px;color:var(--txt-faint);line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+  .side-block{flex:1;min-width:160px}.side-nav{margin-top:0}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">plainkit<span class="dot">.</span></div>
+      <div class="tagline" data-i18n="tag">chémia · pH a koncentrácia</div>
+      <div class="banner"><span>no ads</span> · <span>no signup</span> · <span>no tracking</span></div>
+    </div>
+    <div class="side-block">
+      <h3 data-i18n="notes_h">Poznámky</h3>
+      <textarea id="notes" data-i18n-ph="notes_ph" placeholder="Píš si sem…"></textarea>
+      <div class="notes-bar">
+        <span class="notes-count" id="noteCount">0 znakov</span>
+        <button class="btn-mini" id="dlNotes" data-i18n="notes_dl">Stiahnuť .txt</button>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a href="/" data-i18n="nav_home">← všetky nástroje</a>
+      <a href="/chemia/tabulka/" data-i18n="nav_tab">periodická tabuľka</a>
+      <a href="/chemia/molarna/" data-i18n="nav_mol">molárna hmotnosť</a>
+      <a href="/chemia/rozpustnost/" data-i18n="nav_sol">rozpustnosť</a>
+      <a href="/chemia/rovnice/" data-i18n="nav_eq">vyrovnávanie rovníc</a>
+      <a href="/politika" data-i18n="nav_priv">súkromie</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <h1 class="page-title" data-i18n-html="title">pH a <em>koncentrácia</em></h1>
+      <div class="lang">
+        <button data-lang="sk" class="on">SK</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button data-mode="ph" class="on" data-i18n="m_ph">pH a koncentrácia</button>
+      <button data-mode="dil" data-i18n="m_dil">Riedenie roztokov</button>
+    </div>
+
+    <!-- REŽIM pH -->
+    <div class="mode-panel on" id="panel-ph">
+      <div class="seg" id="typeSeg">
+        <button data-type="acid" class="on" data-i18n="t_acid">Kyselina</button>
+        <button data-type="base" data-i18n="t_base">Zásada</button>
+      </div>
+      <div class="seg" id="strSeg">
+        <button data-str="strong" class="on" data-i18n="s_strong">Silná</button>
+        <button data-str="weak" data-i18n="s_weak">Slabá</button>
+      </div>
+
+      <div class="field">
+        <label data-i18n="l_conc">Koncentrácia (mol/l)</label>
+        <input id="conc" type="text" inputmode="decimal" autocomplete="off" placeholder="napr. 0.1">
+      </div>
+
+      <div class="field" id="presetField" style="display:none">
+        <label data-i18n="l_preset">Látka (predvolí Ka/Kb)</label>
+        <select id="preset"></select>
+      </div>
+      <div class="field" id="kField" style="display:none">
+        <label id="kLabel">Ka</label>
+        <input id="kval" type="text" inputmode="decimal" autocomplete="off" placeholder="napr. 1.8e-5">
+      </div>
+
+      <div class="err" id="errPh"></div>
+      <div class="result" id="resultPh">
+        <div class="ph-big">
+          <span class="num" id="phNum">—</span>
+          <span class="lab">pH</span>
+        </div>
+        <div class="scale"><div class="marker" id="phMarker"></div>
+          <div class="ticks"><span>0</span><span>7</span><span>14</span></div></div>
+        <div class="vals">
+          <div class="v"><div class="k">[H⁺]</div><div class="n" id="vH">—</div></div>
+          <div class="v"><div class="k">[OH⁻]</div><div class="n" id="vOH">—</div></div>
+          <div class="v"><div class="k">pOH</div><div class="n" id="vpOH">—</div></div>
+          <div class="v"><div class="k" id="vExtraK">—</div><div class="n" id="vExtra">—</div></div>
+        </div>
+        <div class="warn" id="phWarn" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- REŽIM riedenie -->
+    <div class="mode-panel" id="panel-dil">
+      <div class="note-box" data-i18n-html="dil_hint" style="margin-top:0;margin-bottom:18px">
+        Vzťah <b>c₁·V₁ = c₂·V₂</b>. Nechaj jedno políčko prázdne — dopočíta sa.
+      </div>
+      <div class="row">
+        <div class="field"><label data-i18n="l_c1">c₁ — pôvodná koncentrácia (mol/l)</label><input id="c1" type="text" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label data-i18n="l_v1">V₁ — pôvodný objem (ml)</label><input id="v1" type="text" inputmode="decimal" autocomplete="off"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label data-i18n="l_c2">c₂ — cieľová koncentrácia (mol/l)</label><input id="c2" type="text" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label data-i18n="l_v2">V₂ — cieľový objem (ml)</label><input id="v2" type="text" inputmode="decimal" autocomplete="off"></div>
+      </div>
+      <div class="err" id="errDil"></div>
+      <div class="result" id="resultDil">
+        <div class="ph-big"><span class="num" id="dilNum" style="font-size:30px">—</span></div>
+        <div class="vals" id="dilVals"></div>
+        <div class="warn" id="dilWarn" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="note-box" data-i18n-html="limits">
+      <b>Silné</b> kyseliny/zásady (HCl, NaOH…) počíta presne. <b>Slabé</b> (octová, amoniak…) cez približný vzorec [H⁺]≈√(Ka·c), ktorý platí pri malej disociácii — keď je odchýlka veľká, nástroj to upozorní. Pri 25 °C, K<sub>w</sub>=10⁻¹⁴.
+    </div>
+
+    <div class="foot">
+      <p data-i18n-html="foot_honest">Výpočet beží v tvojom prehliadači. Na učenie, nie ako laboratórny etalón — reálne pH ovplyvňuje teplota, iónová sila aj ďalšie vplyvy.</p>
+    </div>
+  </main>
+</div>
+<script>
+const PRESETS = {
+  acids: [
+    {sk:"kyselina octová",en:"acetic acid",f:"CH₃COOH",Ka:1.8e-5},
+    {sk:"kyselina mravčia",en:"formic acid",f:"HCOOH",Ka:1.8e-4},
+    {sk:"kyselina uhličitá",en:"carbonic acid",f:"H₂CO₃",Ka:4.3e-7},
+    {sk:"kyselina fluorovodíková",en:"hydrofluoric acid",f:"HF",Ka:6.6e-4},
+    {sk:"kyselina dusitá",en:"nitrous acid",f:"HNO₂",Ka:4.5e-4},
+    {sk:"kyselina kyanovodíková",en:"hydrocyanic acid",f:"HCN",Ka:6.2e-10},
+    {sk:"kyselina benzoová",en:"benzoic acid",f:"C₆H₅COOH",Ka:6.3e-5},
+  ],
+  bases: [
+    {sk:"amoniak",en:"ammonia",f:"NH₃",Kb:1.8e-5},
+    {sk:"metylamín",en:"methylamine",f:"CH₃NH₂",Kb:4.4e-4},
+    {sk:"hydroxid amónny",en:"ammonium hydroxide",f:"NH₄OH",Kb:1.8e-5},
+    {sk:"anilín",en:"aniline",f:"C₆H₅NH₂",Kb:4.3e-10},
+    {sk:"pyridín",en:"pyridine",f:"C₅H₅N",Kb:1.7e-9},
+  ]
+};
+
+(function(){
+'use strict';
+const Kw=1e-14;
+const I18N={
+  sk:{tag:'chémia · pH a koncentrácia',notes_h:'Poznámky',notes_dl:'Stiahnuť .txt',notes_ph:'Píš si sem…',
+    nav_home:'← všetky nástroje',nav_tab:'periodická tabuľka',nav_mol:'molárna hmotnosť',nav_sol:'rozpustnosť',nav_eq:'vyrovnávanie rovníc',nav_priv:'súkromie',
+    title:'pH a <em>koncentrácia</em>',m_ph:'pH a koncentrácia',m_dil:'Riedenie roztokov',
+    t_acid:'Kyselina',t_base:'Zásada',s_strong:'Silná',s_weak:'Slabá',
+    l_conc:'Koncentrácia (mol/l)',l_preset:'Látka (predvolí Ka/Kb)',
+    dil_hint:'Vzťah <b>c₁·V₁ = c₂·V₂</b>. Nechaj jedno políčko prázdne — dopočíta sa.',
+    l_c1:'c₁ — pôvodná koncentrácia (mol/l)',l_v1:'V₁ — pôvodný objem (ml)',
+    l_c2:'c₂ — cieľová koncentrácia (mol/l)',l_v2:'V₂ — cieľový objem (ml)',
+    limits:'<b>Silné</b> kyseliny/zásady (HCl, NaOH…) počíta presne. <b>Slabé</b> (octová, amoniak…) cez približný vzorec [H⁺]≈√(Ka·c), ktorý platí pri malej disociácii — keď je odchýlka veľká, nástroj to upozorní. Pri 25 °C, K<sub>w</sub>=10⁻¹⁴.',
+    foot_honest:'Výpočet beží v tvojom prehliadači. Na učenie, nie ako laboratórny etalón — reálne pH ovplyvňuje teplota, iónová sila aj ďalšie vplyvy.',
+    chars:n=>`${n} znakov`,
+    custom:'— vlastná hodnota —',
+    e_conc:'Zadaj kladnú koncentráciu (napr. 0.1).',
+    e_k:'Zadaj kladnú konštantu Ka/Kb (napr. 1.8e-5).',
+    e_approx_fail:'Pre túto kombináciu koncentrácie a Ka/Kb približný vzorec neplatí — vyšla by disociácia nad 50 %, čo nie je fyzikálne možné. Pri takto silnej „slabej" kyseline/zásade alebo veľmi nízkej koncentrácii treba presný výpočet cez kvadratickú rovnicu. Skús reálnejšie hodnoty (slabé kyseliny majú Ka rádovo 10⁻³ a menej).',
+    e_dil:'Vyplň práve tri zo štyroch políčok — štvrté dopočítam.',
+    e_dilpos:'Hodnoty musia byť kladné.',
+    w_approx:a=>`Disociácia je ${(a*100).toFixed(1)} % — to je dosť veľa, takže približný vzorec je len orientačný. Presný výsledok vyžaduje kvadratickú rovnicu.`,
+    w_conc_low:'Pri takejto nízkej koncentrácii sa blížiš k pH vody (7) — vlastná disociácia vody už nie je zanedbateľná, výsledok ber orientačne.',
+    res_label:'výsledok',alpha:'disociácia α',ka_eff:'použité Ka',kb_eff:'použité Kb',
+    dil_added:'pridať rozpúšťadlo',dil_result:k=>({c1:'c₁',v1:'V₁',c2:'c₂',v2:'V₂'}[k])},
+  en:{tag:'chemistry · pH and concentration',notes_h:'Notes',notes_dl:'Download .txt',notes_ph:'Write here…',
+    nav_home:'← all tools',nav_tab:'periodic table',nav_mol:'molar mass',nav_sol:'solubility',nav_eq:'equation balancing',nav_priv:'privacy',
+    title:'pH and <em>concentration</em>',m_ph:'pH and concentration',m_dil:'Dilution',
+    t_acid:'Acid',t_base:'Base',s_strong:'Strong',s_weak:'Weak',
+    l_conc:'Concentration (mol/L)',l_preset:'Substance (sets Ka/Kb)',
+    dil_hint:'Relation <b>c₁·V₁ = c₂·V₂</b>. Leave one field empty — it will be computed.',
+    l_c1:'c₁ — initial concentration (mol/L)',l_v1:'V₁ — initial volume (mL)',
+    l_c2:'c₂ — target concentration (mol/L)',l_v2:'V₂ — target volume (mL)',
+    limits:'<b>Strong</b> acids/bases (HCl, NaOH…) are exact. <b>Weak</b> ones (acetic, ammonia…) use the approximation [H⁺]≈√(Ka·c), valid at low dissociation — if the deviation is large, the tool warns you. At 25 °C, K<sub>w</sub>=10⁻¹⁴.',
+    foot_honest:'Runs in your browser. For learning, not a lab reference — real pH depends on temperature, ionic strength and more.',
+    chars:n=>`${n} chars`,
+    custom:'— custom value —',
+    e_conc:'Enter a positive concentration (e.g. 0.1).',
+    e_k:'Enter a positive Ka/Kb constant (e.g. 1.8e-5).',
+    e_approx_fail:'For this combination of concentration and Ka/Kb the approximation breaks down — it would give over 50 % dissociation, which is not physically possible. Such a strong "weak" acid/base or very low concentration needs the exact quadratic calculation. Try more realistic values (weak acids have Ka around 10⁻³ or smaller).',
+    e_dil:'Fill exactly three of four fields — the fourth is computed.',
+    e_dilpos:'Values must be positive.',
+    w_approx:a=>`Dissociation is ${(a*100).toFixed(1)} % — that's high, so the approximation is only a rough estimate. An exact result needs the quadratic equation.`,
+    w_conc_low:'At such low concentration you approach the pH of water (7) — water self-ionization is no longer negligible, treat the result as approximate.',
+    res_label:'result',alpha:'dissociation α',ka_eff:'Ka used',kb_eff:'Kb used',
+    dil_added:'solvent to add',dil_result:k=>({c1:'c₁',v1:'V₁',c2:'c₂',v2:'V₂'}[k])}
+};
+let lang='sk',mode='ph',acidType='acid',strength='strong';
+const $=s=>document.querySelector(s);
+const log10=x=>Math.log(x)/Math.LN10;
+const fmtSci=x=>{
+  if(x===0)return'0';
+  if(x>=1e-3&&x<1e4)return (Math.round(x*1e4)/1e4).toString();
+  const e=Math.floor(log10(x));const m=x/Math.pow(10,e);
+  return m.toFixed(2)+'·10'+sup(e);
+};
+function sup(n){const map={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return String(n).split('').map(c=>map[c]||c).join('');}
+
+function parseNum(s){
+  if(!s)return NaN;
+  s=s.trim().replace(',', '.');
+  const v=Number(s);
+  return isFinite(v)?v:NaN;
+}
+
+function fillPresets(){
+  const t=I18N[lang],sel=$('#preset');
+  const list = acidType==='acid'?PRESETS.acids:PRESETS.bases;
+  sel.innerHTML='';
+  list.forEach((it,i)=>{
+    const o=document.createElement('option');o.value=i;
+    const name=lang==='sk'?it.sk:it.en;const K=acidType==='acid'?it.Ka:it.Kb;
+    o.textContent=`${name} (${it.f}) · ${acidType==='acid'?'Ka':'Kb'}=${fmtSci(K)}`;
+    sel.appendChild(o);
+  });
+  const oc=document.createElement('option');oc.value='custom';oc.textContent=t.custom;sel.appendChild(oc);
+}
+
+function syncWeakFields(){
+  const weak=strength==='weak';
+  $('#presetField').style.display=weak?'':'none';
+  $('#kField').style.display=weak?'':'none';
+  $('#kLabel').textContent=acidType==='acid'?'Ka':'Kb';
+  if(weak){
+    fillPresets();
+    // predvyplň K z presetu ak nie custom
+    onPresetChange();
+  }
+}
+function onPresetChange(){
+  const sel=$('#preset');
+  if(sel.value==='custom')return;
+  const list=acidType==='acid'?PRESETS.acids:PRESETS.bases;
+  const it=list[+sel.value];const K=acidType==='acid'?it.Ka:it.Kb;
+  $('#kval').value=fmtSci(K).replace('·10','e').replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g,c=>'-0123456789'['⁻⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)]);
+}
+
+function calcPh(){
+  const t=I18N[lang];
+  const err=$('#errPh'),res=$('#resultPh');
+  const c=parseNum($('#conc').value);
+  if(!(c>0)){err.textContent=t.e_conc;err.classList.add(($('#conc').value?'on':'on'));if(!$('#conc').value){err.classList.remove('on');}res.classList.remove('on');return;}
+  err.classList.remove('on');
+  let H,OH,alpha=null,approxOk=true,Kused=null;
+  if(strength==='strong'){
+    if(acidType==='acid'){H=c;OH=Kw/H;}else{OH=c;H=Kw/OH;}
+  }else{
+    const K=parseNum($('#kval').value);
+    if(!(K>0)){err.textContent=t.e_k;err.classList.add('on');res.classList.remove('on');return;}
+    Kused=K;
+    const x=Math.sqrt(K*c);alpha=x/c;approxOk=alpha<0.05;
+    // tvrdá hranica: nad ~50% disociácie je aproximácia fyzikálne neplatná → nezobraz nezmysel
+    if(alpha>0.5){err.textContent=t.e_approx_fail;err.classList.add('on');res.classList.remove('on');return;}
+    if(acidType==='acid'){H=x;OH=Kw/H;}else{OH=x;H=Kw/OH;}
+  }
+  const pH=-log10(H),pOH=-log10(OH);
+  $('#phNum').textContent=pH.toFixed(2);
+  $('#phNum').style.color = pH<6.5?'var(--acid)':(pH>7.5?'var(--base)':'var(--neutral)');
+  const pos=Math.max(0,Math.min(14,pH))/14*100;
+  $('#phMarker').style.left=pos+'%';
+  $('#vH').innerHTML=fmtSci(H)+' M';
+  $('#vOH').innerHTML=fmtSci(OH)+' M';
+  $('#vpOH').textContent=pOH.toFixed(2);
+  if(alpha!==null){$('#vExtraK').textContent=t.alpha;$('#vExtra').textContent=(alpha*100).toFixed(2)+' %';}
+  else{$('#vExtraK').textContent='pH+pOH';$('#vExtra').textContent=(pH+pOH).toFixed(2);}
+  // varovania
+  const warn=$('#phWarn');let w='';
+  if(alpha!==null&&!approxOk)w=t.w_approx(alpha);
+  else if(pH>6&&pH<8&&strength==='strong')w=t.w_conc_low;
+  if(w){warn.textContent=w;warn.style.display='';}else{warn.style.display='none';}
+  res.classList.add('on');
+}
+
+function calcDil(){
+  const t=I18N[lang];
+  const err=$('#errDil'),res=$('#resultDil');
+  const fields={c1:$('#c1').value,v1:$('#v1').value,c2:$('#c2').value,v2:$('#v2').value};
+  const filled=Object.entries(fields).filter(([k,v])=>v.trim()!=='');
+  if(filled.length===0){err.classList.remove('on');res.classList.remove('on');return;}
+  if(filled.length!==3){err.textContent=t.e_dil;err.classList.add('on');res.classList.remove('on');return;}
+  const nums={};for(const k in fields){if(fields[k].trim()!=='')nums[k]=parseNum(fields[k]);}
+  for(const k in nums)if(!(nums[k]>0)){err.textContent=t.e_dilpos;err.classList.add('on');res.classList.remove('on');return;}
+  err.classList.remove('on');
+  // ktoré chýba
+  const missing=['c1','v1','c2','v2'].find(k=>!(k in nums));
+  let val;
+  if(missing==='c1')val=nums.c2*nums.v2/nums.v1;
+  else if(missing==='v1')val=nums.c2*nums.v2/nums.c1;
+  else if(missing==='c2')val=nums.c1*nums.v1/nums.v2;
+  else val=nums.c1*nums.v1/nums.c2;
+  const unit=(missing==='v1'||missing==='v2')?' ml':' mol/l';
+  $('#dilNum').innerHTML=`${t.dil_result(missing)} = <span style="color:var(--cyan)">${(Math.round(val*1e4)/1e4)}</span>${unit}`;
+  // dopočítaj pridaný objem rozpúšťadla ak rátame V2
+  const dv=$('#dilVals');dv.innerHTML='';
+  const all={...nums,[missing]:val};
+  if(all.v2>all.v1){
+    const add=all.v2-all.v1;
+    const d=document.createElement('div');d.className='v';d.style.gridColumn='1/3';
+    d.innerHTML=`<div class="k">${t.dil_added}</div><div class="n">${(Math.round(add*1e2)/1e2)} ml</div>`;
+    dv.appendChild(d);
+  }
+  res.classList.add('on');
+}
+
+function recalc(){if(mode==='ph')calcPh();else calcDil();}
+
+function updateNoteCount(){$('#noteCount').textContent=I18N[lang].chars($('#notes').value.length);}
+function applyLang(){
+  const t=I18N[lang];document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k]!=null)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{const k=el.dataset.i18nHtml;if(t[k]!=null)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(t[k]!=null)el.placeholder=t[k];});
+  updateNoteCount();if(strength==='weak')fillPresets();recalc();
+}
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('#panel-ph').classList.toggle('on',m==='ph');
+  $('#panel-dil').classList.toggle('on',m==='dil');
+  recalc();
+}
+function init(){
+  document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  $('#typeSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    acidType=b.dataset.type;$('#typeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncWeakFields();calcPh();
+  }));
+  $('#strSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    strength=b.dataset.str;$('#strSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncWeakFields();calcPh();
+  }));
+  $('#preset').addEventListener('change',()=>{onPresetChange();calcPh();});
+  ['conc','kval'].forEach(id=>$('#'+id).addEventListener('input',calcPh));
+  ['c1','v1','c2','v2'].forEach(id=>$('#'+id).addEventListener('input',calcDil));
+  $('#notes').addEventListener('input',updateNoteCount);
+  $('#dlNotes').addEventListener('click',()=>{
+    const blob=new Blob([$('#notes').value],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='poznamky-ph.txt';a.click();URL.revokeObjectURL(a.href);
+  });
+  document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>{
+    lang=b.dataset.lang;document.querySelectorAll('.lang button').forEach(x=>x.classList.toggle('on',x===b));applyLang();
+  }));
+  applyLang();$('#conc').focus();
+}
+init();
+})();
+</script>
+</body>
+</html>
