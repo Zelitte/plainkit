@@ -4,149 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>plainkit. — fyzikálna kalkulačka</title>
-<meta name="description" content="Fyzikálne kalkulačky s tabuľkovým režimom: kinematika, Ohmov zákon, voľný pád. Bez reklám, bez registrácie, bez sledovania.">
+<meta name="description" content="Fyzikálne kalkulačky s tabuľkovým režimom: mechanika, elektrina, energia, gravitácia, tlak. Bez reklám, bez registrácie, bez sledovania.">
 
 <!-- FONTY: samohostené IBM Plex (rovnaké ako /jednotky). -->
 <!-- POZOR: over, že tieto .woff2 reálne existujú v /fonts/ pod týmito názvami. -->
-<!-- Ak sa volajú inak, uprav len src: url(...) nižšie. Fallback na systémové fonty drží stránku funkčnú aj bez nich. -->
+<!-- Ak sa volajú inak, uprav len src: url(...). Fallback na systémové fonty drží stránku funkčnú. -->
 <style>
-@font-face{
-  font-family:'IBM Plex Sans';
-  src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');
-  font-weight:400;font-style:normal;font-display:swap;
-}
-@font-face{
-  font-family:'IBM Plex Sans';
-  src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');
-  font-weight:500;font-style:normal;font-display:swap;
-}
-@font-face{
-  font-family:'IBM Plex Sans';
-  src:url('/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
-  font-weight:600;font-style:normal;font-display:swap;
-}
-@font-face{
-  font-family:'IBM Plex Mono';
-  src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');
-  font-weight:400;font-style:normal;font-display:swap;
-}
-@font-face{
-  font-family:'IBM Plex Mono';
-  src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');
-  font-weight:500;font-style:normal;font-display:swap;
-}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 
 :root{
-  --bg:#0a0f14;
-  --bg2:#07090f;
-  --panel:#0e151c;
-  --panel2:#11191f;
-  --border:#1c2730;
-  --border2:#26343f;
-  --text:#dfe7ee;
-  --muted:#8595a3;
-  --faint:#5a6b78;
-  --cyan:#00d4e8;
-  --yellow:#ffc629;
+  --bg:#0a0f14;--bg2:#07090f;--panel:#0e151c;--panel2:#11191f;
+  --border:#1c2730;--border2:#26343f;
+  --text:#dfe7ee;--muted:#8595a3;--faint:#5a6b78;
+  --cyan:#00d4e8;--yellow:#ffc629;
   --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
   background:radial-gradient(1200px 600px at 50% -10%,#0d141b 0%,var(--bg) 45%,var(--bg2) 100%);
-  color:var(--text);
-  font-family:var(--sans);
-  font-size:15px;
-  line-height:1.55;
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
+  color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.55;
+  min-height:100vh;-webkit-font-smoothing:antialiased;
 }
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
 
-.wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px}
-
-/* ---- hlavička ---- */
 header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
-.brand{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-.5px;color:var(--text);text-decoration:none;display:inline-flex;align-items:baseline;gap:0}
+.brand{font-weight:600;font-size:20px;letter-spacing:-.5px;text-decoration:none;display:inline-flex;align-items:baseline}
 .brand b{color:var(--cyan);font-weight:600}
 .brand .dot{color:var(--cyan)}
 .brand:hover{opacity:.85}
-
 .tagline{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.5px;white-space:nowrap}
-
 .controls{display:flex;align-items:center;gap:8px}
 .lang{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.lang button{
-  background:transparent;color:var(--muted);border:none;
-  font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer;
-}
+.lang button{background:transparent;color:var(--muted);border:none;font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer}
 .lang button.active{background:var(--cyan);color:#04181c;font-weight:500}
 .lang button:not(.active):hover{color:var(--text);background:var(--panel2)}
 
-h1{font-size:23px;font-weight:600;letter-spacing:-.4px;margin:22px 0 4px}
-.lead{color:var(--muted);font-size:14px;max-width:62ch;margin-bottom:6px}
+h1{font-size:23px;font-weight:600;letter-spacing:-.4px;margin:20px 0 4px}
+.lead{color:var(--muted);font-size:14px;max-width:64ch;margin-bottom:8px}
 .lead b{color:var(--text);font-weight:500}
 
-/* ---- karty ---- */
-.card{
-  background:linear-gradient(180deg,var(--panel) 0%,var(--bg2) 130%);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:20px 20px 18px;
-  margin-top:22px;
-}
-.card-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-.card-head .ico{
-  width:30px;height:30px;flex:none;border-radius:8px;
-  display:grid;place-items:center;
-  background:var(--panel2);border:1px solid var(--border2);
-  color:var(--cyan);
-}
-.card-head h2{font-size:16px;font-weight:600;letter-spacing:-.2px}
-.card-sub{color:var(--faint);font-size:12.5px;font-family:var(--mono);margin-bottom:16px}
+/* ---- layout: lišta + obsah ---- */
+.layout{display:grid;grid-template-columns:240px 1fr;gap:22px;margin-top:18px;align-items:start}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
 
-/* ---- vstupné polia (mriežka) ---- */
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.field{position:relative}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-family:var(--mono)}
+/* ---- ľavá lišta: poznámky ---- */
+.sidebar{position:sticky;top:18px;display:flex;flex-direction:column;gap:14px}
+@media(max-width:820px){.sidebar{position:static;order:2}}
+.note-card{background:linear-gradient(180deg,var(--panel) 0%,var(--bg2) 140%);border:1px solid var(--border);border-radius:14px;padding:16px}
+.note-card h3{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.note-card h3 .ico{color:var(--cyan)}
+#notes{width:100%;min-height:200px;resize:vertical;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;padding:10px;outline:none}
+#notes:focus{border-color:var(--cyan)}
+.note-meta{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.note-actions{display:flex;gap:7px;margin-top:9px}
+.mini{flex:1;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:12px;padding:7px;cursor:pointer}
+.mini:hover{color:var(--text);border-color:var(--border2)}
+.mini.accent{color:var(--cyan);border-color:var(--border2)}
+
+.sb-links{font-family:var(--mono);font-size:12px;color:var(--faint);line-height:2}
+.sb-links a{color:var(--muted);text-decoration:none;display:block;border-bottom:1px solid transparent}
+.sb-links a:hover{color:var(--cyan)}
+
+/* ---- akordeón ---- */
+.acc{display:flex;flex-direction:column;gap:12px}
+details.cat{background:linear-gradient(180deg,var(--panel) 0%,var(--bg2) 130%);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+details.cat[open]{border-color:var(--border2)}
+summary.cat-head{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px;user-select:none}
+summary.cat-head::-webkit-details-marker{display:none}
+summary.cat-head .ico{width:32px;height:32px;flex:none;border-radius:8px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--border2);color:var(--cyan);font-size:16px}
+summary.cat-head .ct{flex:1}
+summary.cat-head .ct .t{font-size:16px;font-weight:600;letter-spacing:-.2px}
+summary.cat-head .ct .d{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+summary.cat-head .chev{color:var(--faint);transition:transform .2s;font-size:14px}
+details.cat[open] summary.cat-head .chev{transform:rotate(90deg)}
+.cat-body{padding:0 18px 18px;display:flex;flex-direction:column;gap:16px}
+
+/* ---- jednotlivá kalkulačka vnútri kategórie ---- */
+.calc{border-top:1px solid var(--border);padding-top:15px}
+.calc:first-child{border-top:none;padding-top:2px}
+.calc-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.calc-formula{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-bottom:12px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)}
 .field label .sym{color:var(--cyan)}
-.field .unit{color:var(--faint)}
-.field input{
-  width:100%;background:var(--bg2);border:1px solid var(--border);
-  border-radius:9px;color:var(--text);font-family:var(--mono);font-size:14px;
-  padding:10px 11px;outline:none;transition:border-color .15s,background .15s;
-}
+.field label .unit{color:var(--faint)}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--mono);font-size:14px;padding:9px 10px;outline:none;transition:border-color .15s,background .15s}
 .field input:focus{border-color:var(--cyan);background:#091116}
-.field input.computed{color:var(--cyan);background:#0a141a;border-color:var(--border2)}
 .field input::placeholder{color:#3c4a55}
-.field.computed-tag::after{
-  content:'='attr(data-tag);position:absolute;top:0;right:0;
-  font-family:var(--mono);font-size:10px;color:var(--faint);
-}
-
-.row-actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-.btn{
-  background:var(--cyan);color:#04181c;border:none;border-radius:9px;
-  font-family:var(--sans);font-weight:600;font-size:13.5px;padding:9px 16px;cursor:pointer;
-  transition:filter .15s;
-}
+.row-actions{display:flex;align-items:center;gap:9px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--cyan);color:#04181c;border:none;border-radius:9px;font-family:var(--sans);font-weight:600;font-size:13px;padding:8px 15px;cursor:pointer;transition:filter .15s}
 .btn:hover{filter:brightness(1.08)}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
 .btn.ghost:hover{color:var(--text);border-color:var(--border2)}
-
-.hint{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
-.err{font-family:var(--mono);font-size:12px;color:var(--yellow);margin-top:10px;min-height:1em}
-
-/* ---- výsledky / vzorce ---- */
-.results{margin-top:14px;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.res{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:9px 11px}
-.res .k{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.res .v{font-family:var(--mono);font-size:15px;color:var(--cyan);font-weight:500;word-break:break-all}
+.hint{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.err{font-family:var(--mono);font-size:12px;color:var(--yellow);margin-top:9px;min-height:0}
+.err:not(:empty){margin-top:9px}
+.results{margin-top:12px;display:grid;gap:7px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.res{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+.res .k{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.res .v{font-family:var(--mono);font-size:14px;color:var(--cyan);font-weight:500;word-break:break-all}
 .res.dim .v{color:var(--faint)}
-
-.formula{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:12px;line-height:1.7}
-.formula code{color:var(--muted)}
 
 footer{margin-top:46px;border-top:1px solid var(--border);padding-top:18px;color:var(--faint);font-size:12px;font-family:var(--mono);line-height:1.8}
 footer a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--faint)}
@@ -172,137 +135,408 @@ html[lang="en"] [data-lang-en].block{display:block}
     </div>
   </header>
 
-  <h1>
-    <span data-lang-sk>Fyzikálna kalkulačka</span>
-    <span data-lang-en>Physics calculator</span>
-  </h1>
+  <h1><span data-lang-sk>Fyzikálna kalkulačka</span><span data-lang-en>Physics calculator</span></h1>
   <p class="lead">
-    <span data-lang-sk>Zadáš, čo vieš — <b>dopočíta sa zvyšok</b>. Žiadny vstup → jeden výstup ako inde; tu vidíš celý vzťah naraz. Všetko beží v prehliadači, nič sa neodosiela.</span>
-    <span data-lang-en class="block">Enter what you know — <b>the rest is computed</b>. Not one input → one output like elsewhere; here you see the whole relation at once. Everything runs in your browser, nothing is sent.</span>
+    <span data-lang-sk>Zadáš, čo vieš — <b>dopočíta sa zvyšok</b>. Vyber kategóriu, otvor ju a počítaj. Všetko beží v prehliadači, nič sa neodosiela.</span>
+    <span data-lang-en class="block">Enter what you know — <b>the rest is computed</b>. Pick a category, open it, calculate. Everything runs in your browser, nothing is sent.</span>
   </p>
 
-  <!-- ================= KINEMATIKA ================= -->
-  <section class="card">
-    <div class="card-head">
-      <div class="ico">→</div>
-      <h2><span data-lang-sk>Rovnomerne zrýchlený pohyb</span><span data-lang-en>Uniformly accelerated motion</span></h2>
-    </div>
-    <div class="card-sub">v = v₀ + a·t &nbsp;·&nbsp; s = v₀·t + ½·a·t²</div>
+  <div class="layout">
 
-    <div class="grid">
-      <div class="field">
-        <label><span class="sym">v₀</span> — <span data-lang-sk>počiat. rýchlosť</span><span data-lang-en>initial velocity</span> <span class="unit">[m/s]</span></label>
-        <input type="text" inputmode="decimal" id="k_v0" placeholder="—">
+    <!-- ============ ĽAVÁ LIŠTA: POZNÁMKY ============ -->
+    <aside class="sidebar">
+      <div class="note-card">
+        <h3><span class="ico">▤</span><span data-lang-sk>Poznámky</span><span data-lang-en>Notes</span></h3>
+        <textarea id="notes" placeholder="…" oninput="updateNoteMeta()"></textarea>
+        <div class="note-meta">
+          <span><span id="note-count">0</span> <span data-lang-sk>znakov</span><span data-lang-en>chars</span></span>
+          <span data-lang-sk>v prehliadači</span><span data-lang-en>in browser</span>
+        </div>
+        <div class="note-actions">
+          <button class="mini accent" onclick="downloadNotes()"><span data-lang-sk>Stiahnuť .txt</span><span data-lang-en>Download .txt</span></button>
+          <button class="mini" onclick="clearNotes()"><span data-lang-sk>Zmazať</span><span data-lang-en>Clear</span></button>
+        </div>
       </div>
-      <div class="field">
-        <label><span class="sym">v</span> — <span data-lang-sk>konc. rýchlosť</span><span data-lang-en>final velocity</span> <span class="unit">[m/s]</span></label>
-        <input type="text" inputmode="decimal" id="k_v" placeholder="—">
+      <div class="note-card">
+        <div class="sb-links">
+          <a href="/"><span data-lang-sk>← domov</span><span data-lang-en>← home</span></a>
+          <a href="/jednotky"><span data-lang-sk>prevodník jednotiek</span><span data-lang-en>unit converter</span></a>
+          <a href="/politika"><span data-lang-sk>súkromie</span><span data-lang-en>privacy</span></a>
+        </div>
       </div>
-      <div class="field">
-        <label><span class="sym">a</span> — <span data-lang-sk>zrýchlenie</span><span data-lang-en>acceleration</span> <span class="unit">[m/s²]</span></label>
-        <input type="text" inputmode="decimal" id="k_a" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">t</span> — <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[s]</span></label>
-        <input type="text" inputmode="decimal" id="k_t" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">s</span> — <span data-lang-sk>dráha</span><span data-lang-en>distance</span> <span class="unit">[m]</span></label>
-        <input type="text" inputmode="decimal" id="k_s" placeholder="—">
-      </div>
-    </div>
+    </aside>
 
-    <div class="row-actions">
-      <button class="btn" onclick="solveKin()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
-      <button class="btn ghost" onclick="clearKin()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
-      <span class="hint"><span data-lang-sk>zadaj ľubovoľné 3</span><span data-lang-en>enter any 3</span></span>
-    </div>
-    <div class="err" id="k_err"></div>
-    <div class="results" id="k_res"></div>
-  </section>
+    <!-- ============ AKORDEÓN KATEGÓRIÍ ============ -->
+    <div class="acc" id="acc">
 
-  <!-- ================= OHMOV ZÁKON + VÝKON ================= -->
-  <section class="card">
-    <div class="card-head">
-      <div class="ico">Ω</div>
-      <h2><span data-lang-sk>Ohmov zákon &amp; výkon</span><span data-lang-en>Ohm's law &amp; power</span></h2>
-    </div>
-    <div class="card-sub">U = I·R &nbsp;·&nbsp; P = U·I</div>
+      <!-- ===== MECHANIKA ===== -->
+      <details class="cat" open>
+        <summary class="cat-head">
+          <span class="ico">→</span>
+          <span class="ct"><span class="t"><span data-lang-sk>Mechanika</span><span data-lang-en>Mechanics</span></span>
+            <span class="d"><span data-lang-sk>pohyb · sila · pád · hybnosť</span><span data-lang-en>motion · force · fall · momentum</span></span></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="cat-body">
 
-    <div class="grid">
-      <div class="field">
-        <label><span class="sym">U</span> — <span data-lang-sk>napätie</span><span data-lang-en>voltage</span> <span class="unit">[V]</span></label>
-        <input type="text" inputmode="decimal" id="o_U" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">I</span> — <span data-lang-sk>prúd</span><span data-lang-en>current</span> <span class="unit">[A]</span></label>
-        <input type="text" inputmode="decimal" id="o_I" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">R</span> — <span data-lang-sk>odpor</span><span data-lang-en>resistance</span> <span class="unit">[Ω]</span></label>
-        <input type="text" inputmode="decimal" id="o_R" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">P</span> — <span data-lang-sk>výkon</span><span data-lang-en>power</span> <span class="unit">[W]</span></label>
-        <input type="text" inputmode="decimal" id="o_P" placeholder="—">
-      </div>
-    </div>
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Rovnomerne zrýchlený pohyb</span><span data-lang-en>Uniformly accelerated motion</span></div>
+            <div class="calc-formula">v = v₀ + a·t · s = v₀·t + ½·a·t² · v² = v₀² + 2·a·s</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">v₀</span> <span data-lang-sk>poč. rýchl.</span><span data-lang-en>init. vel.</span> <span class="unit">[m/s]</span></label><input type="text" inputmode="decimal" id="k_v0" placeholder="—"></div>
+              <div class="field"><label><span class="sym">v</span> <span data-lang-sk>konc. rýchl.</span><span data-lang-en>final vel.</span> <span class="unit">[m/s]</span></label><input type="text" inputmode="decimal" id="k_v" placeholder="—"></div>
+              <div class="field"><label><span class="sym">a</span> <span data-lang-sk>zrýchlenie</span><span data-lang-en>accel.</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="k_a" placeholder="—"></div>
+              <div class="field"><label><span class="sym">t</span> <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[s]</span></label><input type="text" inputmode="decimal" id="k_t" placeholder="—"></div>
+              <div class="field"><label><span class="sym">s</span> <span data-lang-sk>dráha</span><span data-lang-en>distance</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="k_s" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveKin()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['k_v0','k_v','k_a','k_t','k_s'],'k_res','k_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 3</span><span data-lang-en>enter 3</span></span>
+            </div>
+            <div class="err" id="k_err"></div><div class="results" id="k_res"></div>
+          </div>
 
-    <div class="row-actions">
-      <button class="btn" onclick="solveOhm()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
-      <button class="btn ghost" onclick="clearOhm()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
-      <span class="hint"><span data-lang-sk>zadaj ľubovoľné 2</span><span data-lang-en>enter any 2</span></span>
-    </div>
-    <div class="err" id="o_err"></div>
-    <div class="results" id="o_res"></div>
-  </section>
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Newtonov zákon sily</span><span data-lang-en>Newton's second law</span></div>
+            <div class="calc-formula">F = m·a</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">F</span> <span data-lang-sk>sila</span><span data-lang-en>force</span> <span class="unit">[N]</span></label><input type="text" inputmode="decimal" id="n_F" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="n_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">a</span> <span data-lang-sk>zrýchlenie</span><span data-lang-en>accel.</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="n_a" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('n_F','n_m','n_a','mul','n_res','n_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['n_F','n_m','n_a'],'n_res','n_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="n_err"></div><div class="results" id="n_res"></div>
+          </div>
 
-  <!-- ================= VOĽNÝ PÁD / VRH ================= -->
-  <section class="card">
-    <div class="card-head">
-      <div class="ico">↓</div>
-      <h2><span data-lang-sk>Voľný pád &amp; zvislý vrh</span><span data-lang-en>Free fall &amp; vertical throw</span></h2>
-    </div>
-    <div class="card-sub"><span data-lang-sk>bez odporu vzduchu</span><span data-lang-en>no air resistance</span> &nbsp;·&nbsp; g = <span id="g_label">9,81</span> m/s²</div>
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Hybnosť</span><span data-lang-en>Momentum</span></div>
+            <div class="calc-formula">p = m·v</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">p</span> <span data-lang-sk>hybnosť</span><span data-lang-en>momentum</span> <span class="unit">[kg·m/s]</span></label><input type="text" inputmode="decimal" id="hb_p" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="hb_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">v</span> <span data-lang-sk>rýchlosť</span><span data-lang-en>velocity</span> <span class="unit">[m/s]</span></label><input type="text" inputmode="decimal" id="hb_v" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('hb_p','hb_m','hb_v','mul','hb_res','hb_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['hb_p','hb_m','hb_v'],'hb_res','hb_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="hb_err"></div><div class="results" id="hb_res"></div>
+          </div>
 
-    <div class="grid">
-      <div class="field">
-        <label><span class="sym">h</span> — <span data-lang-sk>výška</span><span data-lang-en>height</span> <span class="unit">[m]</span></label>
-        <input type="text" inputmode="decimal" id="f_h" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">t</span> — <span data-lang-sk>čas pádu</span><span data-lang-en>fall time</span> <span class="unit">[s]</span></label>
-        <input type="text" inputmode="decimal" id="f_t" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">v</span> — <span data-lang-sk>dopadová rýchlosť</span><span data-lang-en>impact velocity</span> <span class="unit">[m/s]</span></label>
-        <input type="text" inputmode="decimal" id="f_v" placeholder="—">
-      </div>
-      <div class="field">
-        <label><span class="sym">g</span> — <span data-lang-sk>tiažové zrýchl.</span><span data-lang-en>gravity</span> <span class="unit">[m/s²]</span></label>
-        <input type="text" inputmode="decimal" id="f_g" placeholder="9.81">
-      </div>
-    </div>
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Voľný pád &amp; zvislý vrh</span><span data-lang-en>Free fall &amp; vertical throw</span></div>
+            <div class="calc-formula"><span data-lang-sk>bez odporu</span><span data-lang-en>no drag</span> · h = ½·g·t² · v = g·t · v² = 2·g·h</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">h</span> <span data-lang-sk>výška</span><span data-lang-en>height</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="f_h" placeholder="—"></div>
+              <div class="field"><label><span class="sym">t</span> <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[s]</span></label><input type="text" inputmode="decimal" id="f_t" placeholder="—"></div>
+              <div class="field"><label><span class="sym">v</span> <span data-lang-sk>dopad. rýchl.</span><span data-lang-en>impact vel.</span> <span class="unit">[m/s]</span></label><input type="text" inputmode="decimal" id="f_v" placeholder="—"></div>
+              <div class="field"><label><span class="sym">g</span> <span data-lang-sk>tiaž. zrýchl.</span><span data-lang-en>gravity</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="f_g" placeholder="9.81"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveFall()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['f_h','f_t','f_v','f_g'],'f_res','f_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 1 z h/t/v</span><span data-lang-en>enter 1 of h/t/v</span></span>
+            </div>
+            <div class="err" id="f_err"></div><div class="results" id="f_res"></div>
+          </div>
 
-    <div class="row-actions">
-      <button class="btn" onclick="solveFall()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
-      <button class="btn ghost" onclick="clearFall()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
-      <span class="hint"><span data-lang-sk>zadaj 1 z h/t/v (g voliteľné)</span><span data-lang-en>enter 1 of h/t/v (g optional)</span></span>
+        </div>
+      </details>
+
+      <!-- ===== ELEKTRINA ===== -->
+      <details class="cat">
+        <summary class="cat-head">
+          <span class="ico">Ω</span>
+          <span class="ct"><span class="t"><span data-lang-sk>Elektrina</span><span data-lang-en>Electricity</span></span>
+            <span class="d"><span data-lang-sk>Ohm · výkon · odpory · náboj · spotreba</span><span data-lang-en>Ohm · power · resistors · charge · usage</span></span></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="cat-body">
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Ohmov zákon &amp; výkon</span><span data-lang-en>Ohm's law &amp; power</span></div>
+            <div class="calc-formula">U = I·R · P = U·I · P = I²·R · P = U²/R</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">U</span> <span data-lang-sk>napätie</span><span data-lang-en>voltage</span> <span class="unit">[V]</span></label><input type="text" inputmode="decimal" id="o_U" placeholder="—"></div>
+              <div class="field"><label><span class="sym">I</span> <span data-lang-sk>prúd</span><span data-lang-en>current</span> <span class="unit">[A]</span></label><input type="text" inputmode="decimal" id="o_I" placeholder="—"></div>
+              <div class="field"><label><span class="sym">R</span> <span data-lang-sk>odpor</span><span data-lang-en>resistance</span> <span class="unit">[Ω]</span></label><input type="text" inputmode="decimal" id="o_R" placeholder="—"></div>
+              <div class="field"><label><span class="sym">P</span> <span data-lang-sk>výkon</span><span data-lang-en>power</span> <span class="unit">[W]</span></label><input type="text" inputmode="decimal" id="o_P" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveOhm()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['o_U','o_I','o_R','o_P'],'o_res','o_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="o_err"></div><div class="results" id="o_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Náboj kondenzátora</span><span data-lang-en>Capacitor charge</span></div>
+            <div class="calc-formula">Q = C·U</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">Q</span> <span data-lang-sk>náboj</span><span data-lang-en>charge</span> <span class="unit">[C]</span></label><input type="text" inputmode="decimal" id="cap_Q" placeholder="—"></div>
+              <div class="field"><label><span class="sym">C</span> <span data-lang-sk>kapacita</span><span data-lang-en>capacitance</span> <span class="unit">[F]</span></label><input type="text" inputmode="decimal" id="cap_C" placeholder="—"></div>
+              <div class="field"><label><span class="sym">U</span> <span data-lang-sk>napätie</span><span data-lang-en>voltage</span> <span class="unit">[V]</span></label><input type="text" inputmode="decimal" id="cap_U" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('cap_Q','cap_C','cap_U','mul','cap_res','cap_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['cap_Q','cap_C','cap_U'],'cap_res','cap_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="cap_err"></div><div class="results" id="cap_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Náhradný odpor (séria + paralela)</span><span data-lang-en>Equivalent resistance (series + parallel)</span></div>
+            <div class="calc-formula"><span data-lang-sk>zadaj odpory oddelené čiarkou/medzerou</span><span data-lang-en>enter resistances separated by comma/space</span></div>
+            <div class="grid">
+              <div class="field" style="grid-column:1/-1"><label><span class="sym">R₁…Rₙ</span> <span class="unit">[Ω]</span></label><input type="text" id="rr_list" placeholder="10, 22, 47"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveRes()"><span data-lang-sk>Spočítať</span><span data-lang-en>Compute</span></button>
+              <button class="btn ghost" onclick="clearCalc(['rr_list'],'rr_res','rr_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+            </div>
+            <div class="err" id="rr_err"></div><div class="results" id="rr_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Spotreba &amp; cena energie</span><span data-lang-en>Energy usage &amp; cost</span></div>
+            <div class="calc-formula">E = P·t · <span data-lang-sk>cena</span><span data-lang-en>cost</span> = E·<span data-lang-sk>sadzba</span><span data-lang-en>rate</span></div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">P</span> <span data-lang-sk>príkon</span><span data-lang-en>power</span> <span class="unit">[W]</span></label><input type="text" inputmode="decimal" id="e_P" placeholder="—"></div>
+              <div class="field"><label><span class="sym">t</span> <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[h]</span></label><input type="text" inputmode="decimal" id="e_t" placeholder="—"></div>
+              <div class="field"><label><span class="sym">€/kWh</span> <span data-lang-sk>sadzba</span><span data-lang-en>rate</span></label><input type="text" inputmode="decimal" id="e_rate" placeholder="0.20"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveEnergyCost()"><span data-lang-sk>Spočítať</span><span data-lang-en>Compute</span></button>
+              <button class="btn ghost" onclick="clearCalc(['e_P','e_t','e_rate'],'e_res','e_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>P a t povinné</span><span data-lang-en>P and t required</span></span>
+            </div>
+            <div class="err" id="e_err"></div><div class="results" id="e_res"></div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- ===== ENERGIA A TEPLO ===== -->
+      <details class="cat">
+        <summary class="cat-head">
+          <span class="ico">⚡</span>
+          <span class="ct"><span class="t"><span data-lang-sk>Energia &amp; teplo</span><span data-lang-en>Energy &amp; heat</span></span>
+            <span class="d"><span data-lang-sk>kinetická · potenciálna · práca · teplo</span><span data-lang-en>kinetic · potential · work · heat</span></span></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="cat-body">
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Kinetická energia</span><span data-lang-en>Kinetic energy</span></div>
+            <div class="calc-formula">E = ½·m·v²</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">E</span> <span data-lang-sk>energia</span><span data-lang-en>energy</span> <span class="unit">[J]</span></label><input type="text" inputmode="decimal" id="ek_E" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="ek_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">v</span> <span data-lang-sk>rýchlosť</span><span data-lang-en>velocity</span> <span class="unit">[m/s]</span></label><input type="text" inputmode="decimal" id="ek_v" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveEkin()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['ek_E','ek_m','ek_v'],'ek_res','ek_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="ek_err"></div><div class="results" id="ek_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Potenciálna energia</span><span data-lang-en>Potential energy</span></div>
+            <div class="calc-formula">E = m·g·h · g = <span class="g-ref">9,81</span></div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">E</span> <span data-lang-sk>energia</span><span data-lang-en>energy</span> <span class="unit">[J]</span></label><input type="text" inputmode="decimal" id="ep_E" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="ep_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">h</span> <span data-lang-sk>výška</span><span data-lang-en>height</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="ep_h" placeholder="—"></div>
+              <div class="field"><label><span class="sym">g</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="ep_g" placeholder="9.81"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveEpot()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['ep_E','ep_m','ep_h','ep_g'],'ep_res','ep_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2 z E/m/h</span><span data-lang-en>enter 2 of E/m/h</span></span>
+            </div>
+            <div class="err" id="ep_err"></div><div class="results" id="ep_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Práca / výkon / čas</span><span data-lang-en>Work / power / time</span></div>
+            <div class="calc-formula">W = P·t</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">W</span> <span data-lang-sk>práca</span><span data-lang-en>work</span> <span class="unit">[J]</span></label><input type="text" inputmode="decimal" id="w_W" placeholder="—"></div>
+              <div class="field"><label><span class="sym">P</span> <span data-lang-sk>výkon</span><span data-lang-en>power</span> <span class="unit">[W]</span></label><input type="text" inputmode="decimal" id="w_P" placeholder="—"></div>
+              <div class="field"><label><span class="sym">t</span> <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[s]</span></label><input type="text" inputmode="decimal" id="w_t" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('w_W','w_P','w_t','mul','w_res','w_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['w_W','w_P','w_t'],'w_res','w_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="w_err"></div><div class="results" id="w_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Teplo (ohrev/ochladenie)</span><span data-lang-en>Heat (heating/cooling)</span></div>
+            <div class="calc-formula">Q = m·c·ΔT · <span data-lang-sk>voda c=4186</span><span data-lang-en>water c=4186</span></div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">Q</span> <span data-lang-sk>teplo</span><span data-lang-en>heat</span> <span class="unit">[J]</span></label><input type="text" inputmode="decimal" id="q_Q" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="q_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">c</span> <span data-lang-sk>merné teplo</span><span data-lang-en>spec. heat</span> <span class="unit">[J/kg·K]</span></label><input type="text" inputmode="decimal" id="q_c" placeholder="4186"></div>
+              <div class="field"><label><span class="sym">ΔT</span> <span data-lang-sk>zmena tepl.</span><span data-lang-en>temp. change</span> <span class="unit">[K]</span></label><input type="text" inputmode="decimal" id="q_dT" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveHeat()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['q_Q','q_m','q_c','q_dT'],'q_res','q_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 3</span><span data-lang-en>enter 3</span></span>
+            </div>
+            <div class="err" id="q_err"></div><div class="results" id="q_res"></div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- ===== GRAVITÁCIA ===== -->
+      <details class="cat">
+        <summary class="cat-head">
+          <span class="ico">◍</span>
+          <span class="ct"><span class="t"><span data-lang-sk>Gravitácia</span><span data-lang-en>Gravity</span></span>
+            <span class="d"><span data-lang-sk>Newtonov zákon · tiaž. zrýchl. · obežná · úniková</span><span data-lang-en>Newton's law · surface g · orbital · escape</span></span></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="cat-body">
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Newtonov gravitačný zákon</span><span data-lang-en>Newton's law of gravitation</span></div>
+            <div class="calc-formula">F = G·m₁·m₂ / r² · G = 6,674×10⁻¹¹</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">F</span> <span data-lang-sk>sila</span><span data-lang-en>force</span> <span class="unit">[N]</span></label><input type="text" inputmode="decimal" id="g_F" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m₁</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="g_m1" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m₂</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="g_m2" placeholder="—"></div>
+              <div class="field"><label><span class="sym">r</span> <span data-lang-sk>vzdialenosť</span><span data-lang-en>distance</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="g_r" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveGrav()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['g_F','g_m1','g_m2','g_r'],'g_res','g_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 3</span><span data-lang-en>enter 3</span></span>
+            </div>
+            <div class="err" id="g_err"></div><div class="results" id="g_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Tiažové zrýchlenie na povrchu</span><span data-lang-en>Surface gravity</span></div>
+            <div class="calc-formula">g = G·M / r²</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">g</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="sg_g" placeholder="—"></div>
+              <div class="field"><label><span class="sym">M</span> <span data-lang-sk>hmotnosť telesa</span><span data-lang-en>body mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="sg_M" placeholder="—"></div>
+              <div class="field"><label><span class="sym">r</span> <span data-lang-sk>polomer</span><span data-lang-en>radius</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="sg_r" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveSurfaceG()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['sg_g','sg_M','sg_r'],'sg_res','sg_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="sg_err"></div><div class="results" id="sg_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Obežná &amp; úniková rýchlosť</span><span data-lang-en>Orbital &amp; escape velocity</span></div>
+            <div class="calc-formula">v_orb = √(G·M/r) · v_esc = √(2·G·M/r)</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">M</span> <span data-lang-sk>hmotnosť telesa</span><span data-lang-en>body mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="ov_M" placeholder="—"></div>
+              <div class="field"><label><span class="sym">r</span> <span data-lang-sk>vzdialenosť</span><span data-lang-en>distance</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="ov_r" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveOrbit()"><span data-lang-sk>Spočítať</span><span data-lang-en>Compute</span></button>
+              <button class="btn ghost" onclick="clearCalc(['ov_M','ov_r'],'ov_res','ov_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>M aj r povinné</span><span data-lang-en>M and r required</span></span>
+            </div>
+            <div class="err" id="ov_err"></div><div class="results" id="ov_res"></div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- ===== TLAK A TEKUTINY ===== -->
+      <details class="cat">
+        <summary class="cat-head">
+          <span class="ico">≋</span>
+          <span class="ct"><span class="t"><span data-lang-sk>Tlak &amp; tekutiny</span><span data-lang-en>Pressure &amp; fluids</span></span>
+            <span class="d"><span data-lang-sk>tlak · hydrostatický · hustota</span><span data-lang-en>pressure · hydrostatic · density</span></span></span>
+          <span class="chev">▸</span>
+        </summary>
+        <div class="cat-body">
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Tlak</span><span data-lang-en>Pressure</span></div>
+            <div class="calc-formula">p = F / S</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">p</span> <span data-lang-sk>tlak</span><span data-lang-en>pressure</span> <span class="unit">[Pa]</span></label><input type="text" inputmode="decimal" id="pr_p" placeholder="—"></div>
+              <div class="field"><label><span class="sym">F</span> <span data-lang-sk>sila</span><span data-lang-en>force</span> <span class="unit">[N]</span></label><input type="text" inputmode="decimal" id="pr_F" placeholder="—"></div>
+              <div class="field"><label><span class="sym">S</span> <span data-lang-sk>plocha</span><span data-lang-en>area</span> <span class="unit">[m²]</span></label><input type="text" inputmode="decimal" id="pr_S" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('pr_p','pr_F','pr_S','div','pr_res','pr_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['pr_p','pr_F','pr_S'],'pr_res','pr_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="pr_err"></div><div class="results" id="pr_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Hydrostatický tlak</span><span data-lang-en>Hydrostatic pressure</span></div>
+            <div class="calc-formula">p = ρ·g·h · g = <span class="g-ref">9,81</span></div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">p</span> <span data-lang-sk>tlak</span><span data-lang-en>pressure</span> <span class="unit">[Pa]</span></label><input type="text" inputmode="decimal" id="hs_p" placeholder="—"></div>
+              <div class="field"><label><span class="sym">ρ</span> <span data-lang-sk>hustota</span><span data-lang-en>density</span> <span class="unit">[kg/m³]</span></label><input type="text" inputmode="decimal" id="hs_rho" placeholder="1000"></div>
+              <div class="field"><label><span class="sym">h</span> <span data-lang-sk>hĺbka</span><span data-lang-en>depth</span> <span class="unit">[m]</span></label><input type="text" inputmode="decimal" id="hs_h" placeholder="—"></div>
+              <div class="field"><label><span class="sym">g</span> <span class="unit">[m/s²]</span></label><input type="text" inputmode="decimal" id="hs_g" placeholder="9.81"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solveHydro()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['hs_p','hs_rho','hs_h','hs_g'],'hs_res','hs_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2 z p/ρ/h</span><span data-lang-en>enter 2 of p/ρ/h</span></span>
+            </div>
+            <div class="err" id="hs_err"></div><div class="results" id="hs_res"></div>
+          </div>
+
+          <div class="calc">
+            <div class="calc-title"><span data-lang-sk>Hustota</span><span data-lang-en>Density</span></div>
+            <div class="calc-formula">ρ = m / V</div>
+            <div class="grid">
+              <div class="field"><label><span class="sym">ρ</span> <span data-lang-sk>hustota</span><span data-lang-en>density</span> <span class="unit">[kg/m³]</span></label><input type="text" inputmode="decimal" id="d_rho" placeholder="—"></div>
+              <div class="field"><label><span class="sym">m</span> <span data-lang-sk>hmotnosť</span><span data-lang-en>mass</span> <span class="unit">[kg]</span></label><input type="text" inputmode="decimal" id="d_m" placeholder="—"></div>
+              <div class="field"><label><span class="sym">V</span> <span data-lang-sk>objem</span><span data-lang-en>volume</span> <span class="unit">[m³]</span></label><input type="text" inputmode="decimal" id="d_V" placeholder="—"></div>
+            </div>
+            <div class="row-actions">
+              <button class="btn" onclick="solve3('d_rho','d_m','d_V','div','d_res','d_err')"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+              <button class="btn ghost" onclick="clearCalc(['d_rho','d_m','d_V'],'d_res','d_err')"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+              <span class="hint"><span data-lang-sk>zadaj 2</span><span data-lang-en>enter 2</span></span>
+            </div>
+            <div class="err" id="d_err"></div><div class="results" id="d_res"></div>
+          </div>
+
+        </div>
+      </details>
+
     </div>
-    <div class="err" id="f_err"></div>
-    <div class="results" id="f_res"></div>
-  </section>
+  </div>
 
   <footer>
     <div>
-      <span data-lang-sk>Beží celé v tvojom prehliadači — žiadne požiadavky na tretie strany, nič sa neukladá ani neodosiela.</span>
-      <span data-lang-en class="block">Runs entirely in your browser — no third-party requests, nothing stored or sent.</span>
+      <span data-lang-sk>Beží celé v tvojom prehliadači — žiadne požiadavky na tretie strany, nič sa neukladá ani neodosiela. Vzorce sú zjednodušené (bez odporu vzduchu, ideálne podmienky); ber ako pomôcku, nie ako autoritu na skúšku.</span>
+      <span data-lang-en class="block">Runs entirely in your browser — no third-party requests, nothing stored or sent. Formulas are simplified (no air resistance, ideal conditions); use as an aid, not exam authority.</span>
     </div>
     <div style="margin-top:8px">
-      <a href="/"><span data-lang-sk>← domov</span><span data-lang-en>← home</span></a>
-      &nbsp;·&nbsp;
-      <a href="/jednotky"><span data-lang-sk>prevodník jednotiek</span><span data-lang-en>unit converter</span></a>
-      &nbsp;·&nbsp;
+      <a href="/"><span data-lang-sk>← domov</span><span data-lang-en>← home</span></a> ·
+      <a href="/jednotky"><span data-lang-sk>prevodník jednotiek</span><span data-lang-en>unit converter</span></a> ·
       <a href="/politika"><span data-lang-sk>súkromie</span><span data-lang-en>privacy</span></a>
     </div>
   </footer>
@@ -312,187 +546,322 @@ html[lang="en"] [data-lang-en].block{display:block}
 <script>
 "use strict";
 
-/* ---------- jazyk ---------- */
+/* ===== jazyk ===== */
 function setLang(l){
-  document.documentElement.lang = l;
-  document.getElementById('lang-sk').classList.toggle('active', l==='sk');
-  document.getElementById('lang-en').classList.toggle('active', l==='en');
+  document.documentElement.lang=l;
+  document.getElementById('lang-sk').classList.toggle('active',l==='sk');
+  document.getElementById('lang-en').classList.toggle('active',l==='en');
 }
 
-/* ---------- pomocné ---------- */
-// Prijme aj desatinnú čiarku (SK), vráti číslo alebo NaN.
-function num(id){
-  var raw = document.getElementById(id).value.trim();
-  if(raw === '') return NaN;
-  return parseFloat(raw.replace(',', '.'));
+/* ===== poznámky (len v pamäti relácie, žiadne úložisko) ===== */
+function updateNoteMeta(){
+  document.getElementById('note-count').textContent=document.getElementById('notes').value.length;
 }
-function has(id){ return !isNaN(num(id)); }
-// Formát: orežeme na rozumný počet platných číslic, čiarka podľa jazyka.
+function downloadNotes(){
+  var txt=document.getElementById('notes').value;
+  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='plainkit-poznamky.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function clearNotes(){
+  document.getElementById('notes').value=''; updateNoteMeta();
+}
+
+/* ===== pomocné ===== */
+function num(id){
+  var raw=document.getElementById(id).value.trim();
+  if(raw==='')return NaN;
+  return parseFloat(raw.replace(',','.'));
+}
+function k(x){return !isNaN(x)&&isFinite(x);}
 function fmt(x){
-  if(!isFinite(x)) return '—';
+  if(!isFinite(x))return '—';
   var s;
-  if(x !== 0 && (Math.abs(x) >= 1e7 || Math.abs(x) < 1e-4)){
-    s = x.toExponential(4);
-  } else {
-    s = (Math.round(x*1e6)/1e6).toString();
-  }
-  if(document.documentElement.lang === 'sk') s = s.replace('.', ',');
+  if(x!==0&&(Math.abs(x)>=1e7||Math.abs(x)<1e-4)){s=x.toExponential(4);}
+  else{s=(Math.round(x*1e6)/1e6).toString();}
+  if(document.documentElement.lang==='sk')s=s.replace('.',',');
   return s;
 }
-function T(sk,en){ return document.documentElement.lang==='en' ? en : sk; }
-
-function showRes(boxId, items, computedKeys){
-  var box = document.getElementById(boxId);
-  box.innerHTML = '';
+function T(sk,en){return document.documentElement.lang==='en'?en:sk;}
+function setErr(id,msg){document.getElementById(id).textContent=msg;}
+function showRes(boxId,items,computed){
+  var box=document.getElementById(boxId); box.innerHTML='';
   items.forEach(function(it){
-    var d = document.createElement('div');
-    d.className = 'res' + (computedKeys.indexOf(it.id) === -1 ? ' dim' : '');
-    d.innerHTML = '<div class="k">'+it.k+'</div><div class="v">'+it.v+'</div>';
+    var d=document.createElement('div');
+    d.className='res'+(computed.indexOf(it.id)===-1?' dim':'');
+    d.innerHTML='<div class="k">'+it.k+'</div><div class="v">'+it.v+'</div>';
     box.appendChild(d);
   });
 }
+function clearCalc(ids,resId,errId){
+  ids.forEach(function(id){document.getElementById(id).value='';});
+  if(resId)document.getElementById(resId).innerHTML='';
+  if(errId)document.getElementById(errId).textContent='';
+}
 
-/* ================= KINEMATIKA =================
-   Premenné: v0, v, a, t, s. Treba práve/aspoň 3 známe.
-   Vzťahy: v = v0 + a t ; s = v0 t + ½ a t²
-*/
+/* ===== generický 3-premenný vzťah: A = B op C =====
+   op 'mul': A=B*C ; op 'div': A=B/C
+   ids: [A,B,C]. Treba 2 známe. */
+function solve3(idA,idB,idC,op,resId,errId){
+  setErr(errId,'');
+  var A=num(idA),B=num(idB),C=num(idC);
+  var known=[idA,idB,idC].filter(function(id){return k(num(id));});
+  if(known.length<2){setErr(errId,T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.'));return;}
+  if(op==='mul'){
+    if(!k(A)&&k(B)&&k(C))A=B*C;
+    if(!k(B)&&k(A)&&k(C)&&C!==0)B=A/C;
+    if(!k(C)&&k(A)&&k(B)&&B!==0)C=A/B;
+  }else{ // A=B/C
+    if(!k(A)&&k(B)&&k(C)&&C!==0)A=B/C;
+    if(!k(B)&&k(A)&&k(C))B=A*C;
+    if(!k(C)&&k(A)&&k(B)&&A!==0)C=B/A;
+  }
+  var vals={}; vals[idA]=A; vals[idB]=B; vals[idC]=C;
+  var computed=[idA,idB,idC].filter(function(id){return k(vals[id])&&known.indexOf(id)===-1;});
+  // popisky beriem z label textu pri vstupe
+  function lab(id){
+    var el=document.getElementById(id);
+    var field=el.closest?el.closest('.field'):null;
+    var l=field?field.querySelector('label'):null;
+    return l?l.textContent.replace(/\s+/g,' ').trim():id;
+  }
+  showRes(resId,[
+    {id:idA,k:lab(idA),v:fmt(A)},
+    {id:idB,k:lab(idB),v:fmt(B)},
+    {id:idC,k:lab(idC),v:fmt(C)}
+  ],computed);
+}
+
+/* ===== KINEMATIKA ===== */
 function solveKin(){
-  var err = document.getElementById('k_err');
-  err.textContent = '';
-  var V = {v0:num('k_v0'), v:num('k_v'), a:num('k_a'), t:num('k_t'), s:num('k_s')};
-  var known = Object.keys(V).filter(function(k){return !isNaN(V[k]);});
-  if(known.length < 3){
-    err.textContent = T('Zadaj aspoň 3 hodnoty.','Enter at least 3 values.');
-    return;
-  }
-
-  // Postupne dopĺňame, kým niečo pribúda. Každý vzorec použijeme, ak má dosť vstupov.
-  function known_(k){ return V[k]!==undefined && !isNaN(V[k]); }
-  for(var iter=0; iter<6; iter++){
-    // v = v0 + a t  (3 zo 4 → 4.)
-    if(!known_('v')  && known_('v0') && known_('a') && known_('t')) V.v  = V.v0 + V.a*V.t;
-    if(!known_('v0') && known_('v')  && known_('a') && known_('t')) V.v0 = V.v  - V.a*V.t;
-    if(!known_('a')  && known_('v')  && known_('v0')&& known_('t') && V.t!==0) V.a = (V.v - V.v0)/V.t;
-    if(!known_('t')  && known_('v')  && known_('v0')&& known_('a') && V.a!==0) V.t = (V.v - V.v0)/V.a;
-
-    // s = v0 t + ½ a t²
-    if(!known_('s') && known_('v0') && known_('a') && known_('t')) V.s = V.v0*V.t + 0.5*V.a*V.t*V.t;
-    // s = ½ (v0+v) t  (priemerná rýchlosť)
-    if(!known_('s') && known_('v0') && known_('v') && known_('t')) V.s = 0.5*(V.v0+V.v)*V.t;
-    // v² = v0² + 2 a s  → doplnenie chýbajúcich z energetického vzťahu
-    if(!known_('v')  && known_('v0') && known_('a') && known_('s')){
-      var vv = V.v0*V.v0 + 2*V.a*V.s; if(vv>=0) V.v = Math.sqrt(vv);
-    }
-    if(!known_('a')  && known_('v')  && known_('v0')&& known_('s') && V.s!==0) V.a = (V.v*V.v - V.v0*V.v0)/(2*V.s);
-    if(!known_('s')  && known_('v')  && known_('v0')&& known_('a') && V.a!==0) V.s = (V.v*V.v - V.v0*V.v0)/(2*V.a);
-    if(!known_('t')  && known_('s')  && known_('v0')&& known_('v') && (V.v0+V.v)!==0) V.t = 2*V.s/(V.v0+V.v);
-  }
-
-  var solved = ['v0','v','a','t','s'].filter(function(k){return known_(k);});
-  var computed = solved.filter(function(k){return known.indexOf(k)===-1;});
-  if(computed.length === 0){
-    err.textContent = T('Z týchto vstupov sa nedá nič dopočítať (alebo chýba čas).','Cannot derive anything from these inputs (time may be missing).');
-  }
-  showRes('k_res', [
-    {id:'v0', k:'v₀ [m/s]', v:fmt(V.v0)},
-    {id:'v',  k:'v [m/s]',  v:fmt(V.v)},
-    {id:'a',  k:'a [m/s²]', v:fmt(V.a)},
-    {id:'t',  k:'t [s]',    v:fmt(V.t)},
-    {id:'s',  k:'s [m]',    v:fmt(V.s)}
-  ], computed);
-}
-function clearKin(){
-  ['k_v0','k_v','k_a','k_t','k_s'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('k_res').innerHTML='';
-  document.getElementById('k_err').textContent='';
-}
-
-/* ================= OHMOV ZÁKON + VÝKON =================
-   U, I, R, P. Treba 2 nezávislé → dopočíta zvyšok.
-*/
-function solveOhm(){
-  var err = document.getElementById('o_err');
-  err.textContent='';
-  var U=num('o_U'), I=num('o_I'), R=num('o_R'), P=num('o_P');
-  var known = [['U',U],['I',I],['R',R],['P',P]].filter(function(p){return !isNaN(p[1]);}).map(function(p){return p[0];});
-  if(known.length < 2){
-    err.textContent = T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.');
-    return;
-  }
-
-  function k(x){return !isNaN(x);}
+  setErr('k_err','');
+  var V={v0:num('k_v0'),v:num('k_v'),a:num('k_a'),t:num('k_t'),s:num('k_s')};
+  var known=Object.keys(V).filter(function(key){return k(V[key]);});
+  if(known.length<3){setErr('k_err',T('Zadaj aspoň 3 hodnoty.','Enter at least 3 values.'));return;}
+  function kn(key){return k(V[key]);}
   for(var i=0;i<6;i++){
-    // Ohm: U=I·R
-    if(!k(U) && k(I) && k(R)) U = I*R;
-    if(!k(I) && k(U) && k(R) && R!==0) I = U/R;
-    if(!k(R) && k(U) && k(I) && I!==0) R = U/I;
-    // Výkon: P=U·I
-    if(!k(P) && k(U) && k(I)) P = U*I;
-    if(!k(U) && k(P) && k(I) && I!==0) U = P/I;
-    if(!k(I) && k(P) && k(U) && U!==0) I = P/U;
-    // Kombinácie cez R: P=I²·R, P=U²/R
-    if(!k(P) && k(I) && k(R)) P = I*I*R;
-    if(!k(P) && k(U) && k(R) && R!==0) P = U*U/R;
-    if(!k(R) && k(P) && k(I) && I!==0) R = P/(I*I);
-    if(!k(R) && k(P) && k(U) && P!==0) R = U*U/P;
-    if(!k(I) && k(P) && k(R) && R!==0) I = Math.sqrt(P/R);
-    if(!k(U) && k(P) && k(R)) U = Math.sqrt(P*R);
+    if(!kn('v')&&kn('v0')&&kn('a')&&kn('t'))V.v=V.v0+V.a*V.t;
+    if(!kn('v0')&&kn('v')&&kn('a')&&kn('t'))V.v0=V.v-V.a*V.t;
+    if(!kn('a')&&kn('v')&&kn('v0')&&kn('t')&&V.t!==0)V.a=(V.v-V.v0)/V.t;
+    if(!kn('t')&&kn('v')&&kn('v0')&&kn('a')&&V.a!==0)V.t=(V.v-V.v0)/V.a;
+    if(!kn('s')&&kn('v0')&&kn('a')&&kn('t'))V.s=V.v0*V.t+0.5*V.a*V.t*V.t;
+    if(!kn('s')&&kn('v0')&&kn('v')&&kn('t'))V.s=0.5*(V.v0+V.v)*V.t;
+    if(!kn('v')&&kn('v0')&&kn('a')&&kn('s')){var vv=V.v0*V.v0+2*V.a*V.s;if(vv>=0)V.v=Math.sqrt(vv);}
+    if(!kn('a')&&kn('v')&&kn('v0')&&kn('s')&&V.s!==0)V.a=(V.v*V.v-V.v0*V.v0)/(2*V.s);
+    if(!kn('s')&&kn('v')&&kn('v0')&&kn('a')&&V.a!==0)V.s=(V.v*V.v-V.v0*V.v0)/(2*V.a);
+    if(!kn('t')&&kn('s')&&kn('v0')&&kn('v')&&(V.v0+V.v)!==0)V.t=2*V.s/(V.v0+V.v);
   }
+  var computed=['v0','v','a','t','s'].filter(function(key){return kn(key)&&known.indexOf(key)===-1;});
+  if(computed.length===0)setErr('k_err',T('Z týchto vstupov sa nedá nič dopočítať.','Cannot derive anything from these inputs.'));
+  showRes('k_res',[
+    {id:'v0',k:'v₀ [m/s]',v:fmt(V.v0)},{id:'v',k:'v [m/s]',v:fmt(V.v)},
+    {id:'a',k:'a [m/s²]',v:fmt(V.a)},{id:'t',k:'t [s]',v:fmt(V.t)},
+    {id:'s',k:'s [m]',v:fmt(V.s)}
+  ],computed);
+}
 
+/* ===== OHM + VÝKON ===== */
+function solveOhm(){
+  setErr('o_err','');
+  var U=num('o_U'),I=num('o_I'),R=num('o_R'),P=num('o_P');
+  var known=[['U',U],['I',I],['R',R],['P',P]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<2){setErr('o_err',T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.'));return;}
+  for(var i=0;i<6;i++){
+    if(!k(U)&&k(I)&&k(R))U=I*R;
+    if(!k(I)&&k(U)&&k(R)&&R!==0)I=U/R;
+    if(!k(R)&&k(U)&&k(I)&&I!==0)R=U/I;
+    if(!k(P)&&k(U)&&k(I))P=U*I;
+    if(!k(U)&&k(P)&&k(I)&&I!==0)U=P/I;
+    if(!k(I)&&k(P)&&k(U)&&U!==0)I=P/U;
+    if(!k(P)&&k(I)&&k(R))P=I*I*R;
+    if(!k(P)&&k(U)&&k(R)&&R!==0)P=U*U/R;
+    if(!k(R)&&k(P)&&k(I)&&I!==0)R=P/(I*I);
+    if(!k(R)&&k(P)&&k(U)&&P!==0)R=U*U/P;
+    if(!k(I)&&k(P)&&k(R)&&R!==0)I=Math.sqrt(P/R);
+    if(!k(U)&&k(P)&&k(R))U=Math.sqrt(P*R);
+  }
   var vals={U:U,I:I,R:R,P:P};
-  var computed = ['U','I','R','P'].filter(function(key){return k(vals[key]) && known.indexOf(key)===-1;});
-  showRes('o_res', [
-    {id:'U', k:'U [V]', v:fmt(U)},
-    {id:'I', k:'I [A]', v:fmt(I)},
-    {id:'R', k:'R [Ω]', v:fmt(R)},
-    {id:'P', k:'P [W]', v:fmt(P)}
-  ], computed);
-}
-function clearOhm(){
-  ['o_U','o_I','o_R','o_P'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('o_res').innerHTML='';
-  document.getElementById('o_err').textContent='';
+  var computed=['U','I','R','P'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  showRes('o_res',[
+    {id:'U',k:'U [V]',v:fmt(U)},{id:'I',k:'I [A]',v:fmt(I)},
+    {id:'R',k:'R [Ω]',v:fmt(R)},{id:'P',k:'P [W]',v:fmt(P)}
+  ],computed);
 }
 
-/* ================= VOĽNÝ PÁD =================
-   h = ½ g t² ; v = g t ; v² = 2 g h. Stačí 1 z {h,t,v}.
-*/
+/* ===== NÁHRADNÝ ODPOR ===== */
+function solveRes(){
+  setErr('rr_err','');
+  var raw=document.getElementById('rr_list').value.replace(/,/g,' ').split(/\s+/).filter(function(x){return x!=='';});
+  var arr=raw.map(function(x){return parseFloat(x.replace(',','.'));}).filter(function(x){return k(x)&&x>0;});
+  if(arr.length<1){setErr('rr_err',T('Zadaj aspoň jeden kladný odpor.','Enter at least one positive resistance.'));return;}
+  var series=arr.reduce(function(a,b){return a+b;},0);
+  var invSum=arr.reduce(function(a,b){return a+1/b;},0);
+  var parallel=invSum>0?1/invSum:NaN;
+  showRes('rr_res',[
+    {id:'n',k:T('počet','count'),v:arr.length.toString()},
+    {id:'s',k:T('séria','series')+' [Ω]',v:fmt(series)},
+    {id:'p',k:T('paralela','parallel')+' [Ω]',v:fmt(parallel)}
+  ],['n','s','p']);
+}
+
+/* ===== SPOTREBA + CENA ===== */
+function solveEnergyCost(){
+  setErr('e_err','');
+  var P=num('e_P'),t=num('e_t'),rate=num('e_rate');
+  if(!k(P)||!k(t)){setErr('e_err',T('Zadaj príkon P aj čas t.','Enter power P and time t.'));return;}
+  var kWh=P*t/1000;
+  var items=[
+    {id:'wh',k:'Wh',v:fmt(P*t)},
+    {id:'kwh',k:'kWh',v:fmt(kWh)}
+  ];
+  var computed=['wh','kwh'];
+  if(k(rate)){items.push({id:'cost',k:T('cena €','cost €'),v:fmt(kWh*rate)});computed.push('cost');}
+  showRes('e_res',items,computed);
+}
+
+/* ===== VOĽNÝ PÁD ===== */
 function solveFall(){
-  var err = document.getElementById('f_err');
-  err.textContent='';
-  var h=num('f_h'), t=num('f_t'), v=num('f_v');
-  var g=num('f_g'); if(isNaN(g)) g=9.81;
-  if(g<=0){ err.textContent=T('g musí byť kladné.','g must be positive.'); return; }
-
-  var primary = [['h',h],['t',t],['v',v]].filter(function(p){return !isNaN(p[1]);}).map(function(p){return p[0];});
-  if(primary.length === 0){
-    err.textContent = T('Zadaj aspoň jednu z h, t alebo v.','Enter at least one of h, t or v.');
-    return;
-  }
-
-  function k(x){return !isNaN(x);}
+  setErr('f_err','');
+  var h=num('f_h'),t=num('f_t'),v=num('f_v'),g=num('f_g'); if(!k(g))g=9.81;
+  if(g<=0){setErr('f_err',T('g musí byť kladné.','g must be positive.'));return;}
+  var primary=[['h',h],['t',t],['v',v]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(primary.length===0){setErr('f_err',T('Zadaj aspoň jednu z h, t alebo v.','Enter at least one of h, t or v.'));return;}
   for(var i=0;i<5;i++){
-    if(!k(t) && k(h) && h>=0) t = Math.sqrt(2*h/g);
-    if(!k(t) && k(v)) t = v/g;
-    if(!k(v) && k(t)) v = g*t;
-    if(!k(v) && k(h) && h>=0) v = Math.sqrt(2*g*h);
-    if(!k(h) && k(t)) h = 0.5*g*t*t;
-    if(!k(h) && k(v)) h = v*v/(2*g);
+    if(!k(t)&&k(h)&&h>=0)t=Math.sqrt(2*h/g);
+    if(!k(t)&&k(v))t=v/g;
+    if(!k(v)&&k(t))v=g*t;
+    if(!k(v)&&k(h)&&h>=0)v=Math.sqrt(2*g*h);
+    if(!k(h)&&k(t))h=0.5*g*t*t;
+    if(!k(h)&&k(v))h=v*v/(2*g);
   }
-
   var vals={h:h,t:t,v:v};
-  var computed = ['h','t','v'].filter(function(key){return k(vals[key]) && primary.indexOf(key)===-1;});
-  showRes('f_res', [
-    {id:'h', k:'h [m]',   v:fmt(h)},
-    {id:'t', k:'t [s]',   v:fmt(t)},
-    {id:'v', k:'v [m/s]', v:fmt(v)},
-    {id:'g', k:'g [m/s²]',v:fmt(g)}
-  ], computed.concat(isNaN(num('f_g'))?[]:['g']));
+  var computed=['h','t','v'].filter(function(key){return k(vals[key])&&primary.indexOf(key)===-1;});
+  if(!isNaN(num('f_g')))computed.push('g');
+  showRes('f_res',[
+    {id:'h',k:'h [m]',v:fmt(h)},{id:'t',k:'t [s]',v:fmt(t)},
+    {id:'v',k:'v [m/s]',v:fmt(v)},{id:'g',k:'g [m/s²]',v:fmt(g)}
+  ],computed);
 }
-function clearFall(){
-  ['f_h','f_t','f_v','f_g'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('f_res').innerHTML='';
-  document.getElementById('f_err').textContent='';
+
+/* ===== KINETICKÁ ENERGIA E=½mv² ===== */
+function solveEkin(){
+  setErr('ek_err','');
+  var E=num('ek_E'),m=num('ek_m'),v=num('ek_v');
+  var known=[['E',E],['m',m],['v',v]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<2){setErr('ek_err',T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.'));return;}
+  if(!k(E)&&k(m)&&k(v))E=0.5*m*v*v;
+  if(!k(m)&&k(E)&&k(v)&&v!==0)m=2*E/(v*v);
+  if(!k(v)&&k(E)&&k(m)&&m!==0){var vv=2*E/m;if(vv>=0)v=Math.sqrt(vv);}
+  var vals={E:E,m:m,v:v};
+  var computed=['E','m','v'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  showRes('ek_res',[
+    {id:'E',k:'E [J]',v:fmt(E)},{id:'m',k:'m [kg]',v:fmt(m)},{id:'v',k:'v [m/s]',v:fmt(v)}
+  ],computed);
+}
+
+/* ===== POTENCIÁLNA ENERGIA E=mgh ===== */
+function solveEpot(){
+  setErr('ep_err','');
+  var E=num('ep_E'),m=num('ep_m'),h=num('ep_h'),g=num('ep_g'); if(!k(g))g=9.81;
+  var known=[['E',E],['m',m],['h',h]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<2){setErr('ep_err',T('Zadaj aspoň 2 z E/m/h.','Enter at least 2 of E/m/h.'));return;}
+  if(!k(E)&&k(m)&&k(h))E=m*g*h;
+  if(!k(m)&&k(E)&&k(h)&&g*h!==0)m=E/(g*h);
+  if(!k(h)&&k(E)&&k(m)&&g*m!==0)h=E/(g*m);
+  var vals={E:E,m:m,h:h};
+  var computed=['E','m','h'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  if(!isNaN(num('ep_g')))computed.push('g');
+  showRes('ep_res',[
+    {id:'E',k:'E [J]',v:fmt(E)},{id:'m',k:'m [kg]',v:fmt(m)},
+    {id:'h',k:'h [m]',v:fmt(h)},{id:'g',k:'g [m/s²]',v:fmt(g)}
+  ],computed);
+}
+
+/* ===== TEPLO Q=mcΔT ===== */
+function solveHeat(){
+  setErr('q_err','');
+  var Q=num('q_Q'),m=num('q_m'),c=num('q_c'),dT=num('q_dT');
+  var known=[['Q',Q],['m',m],['c',c],['dT',dT]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<3){setErr('q_err',T('Zadaj aspoň 3 hodnoty.','Enter at least 3 values.'));return;}
+  if(!k(Q)&&k(m)&&k(c)&&k(dT))Q=m*c*dT;
+  if(!k(m)&&k(Q)&&k(c)&&k(dT)&&c*dT!==0)m=Q/(c*dT);
+  if(!k(c)&&k(Q)&&k(m)&&k(dT)&&m*dT!==0)c=Q/(m*dT);
+  if(!k(dT)&&k(Q)&&k(m)&&k(c)&&m*c!==0)dT=Q/(m*c);
+  var vals={Q:Q,m:m,c:c,dT:dT};
+  var computed=['Q','m','c','dT'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  showRes('q_res',[
+    {id:'Q',k:'Q [J]',v:fmt(Q)},{id:'m',k:'m [kg]',v:fmt(m)},
+    {id:'c',k:'c [J/kg·K]',v:fmt(c)},{id:'dT',k:'ΔT [K]',v:fmt(dT)}
+  ],computed);
+}
+
+/* ===== NEWTONOV GRAV. ZÁKON F=G m1 m2 / r² ===== */
+var GRAV=6.674e-11;
+function solveGrav(){
+  setErr('g_err','');
+  var F=num('g_F'),m1=num('g_m1'),m2=num('g_m2'),r=num('g_r');
+  var known=[['F',F],['m1',m1],['m2',m2],['r',r]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<3){setErr('g_err',T('Zadaj aspoň 3 hodnoty.','Enter at least 3 values.'));return;}
+  if(!k(F)&&k(m1)&&k(m2)&&k(r)&&r!==0)F=GRAV*m1*m2/(r*r);
+  if(!k(m1)&&k(F)&&k(m2)&&k(r)&&GRAV*m2!==0)m1=F*r*r/(GRAV*m2);
+  if(!k(m2)&&k(F)&&k(m1)&&k(r)&&GRAV*m1!==0)m2=F*r*r/(GRAV*m1);
+  if(!k(r)&&k(F)&&k(m1)&&k(m2)&&F!==0){var rr=GRAV*m1*m2/F;if(rr>=0)r=Math.sqrt(rr);}
+  var vals={F:F,m1:m1,m2:m2,r:r};
+  var computed=['F','m1','m2','r'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  showRes('g_res',[
+    {id:'F',k:'F [N]',v:fmt(F)},{id:'m1',k:'m₁ [kg]',v:fmt(m1)},
+    {id:'m2',k:'m₂ [kg]',v:fmt(m2)},{id:'r',k:'r [m]',v:fmt(r)}
+  ],computed);
+}
+
+/* ===== TIAŽOVÉ ZRÝCHLENIE g=GM/r² ===== */
+function solveSurfaceG(){
+  setErr('sg_err','');
+  var g=num('sg_g'),M=num('sg_M'),r=num('sg_r');
+  var known=[['g',g],['M',M],['r',r]].filter(function(p){return k(p[1]);}).map(function(p){return p[0];});
+  if(known.length<2){setErr('sg_err',T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.'));return;}
+  if(!k(g)&&k(M)&&k(r)&&r!==0)g=GRAV*M/(r*r);
+  if(!k(M)&&k(g)&&k(r)&&GRAV!==0)M=g*r*r/GRAV;
+  if(!k(r)&&k(g)&&k(M)&&g!==0){var rr=GRAV*M/g;if(rr>=0)r=Math.sqrt(rr);}
+  var vals={g:g,M:M,r:r};
+  var computed=['g','M','r'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  showRes('sg_res',[
+    {id:'g',k:'g [m/s²]',v:fmt(g)},{id:'M',k:'M [kg]',v:fmt(M)},{id:'r',k:'r [m]',v:fmt(r)}
+  ],computed);
+}
+
+/* ===== OBEŽNÁ + ÚNIKOVÁ RÝCHLOSŤ ===== */
+function solveOrbit(){
+  setErr('ov_err','');
+  var M=num('ov_M'),r=num('ov_r');
+  if(!k(M)||!k(r)||r<=0){setErr('ov_err',T('Zadaj M aj kladné r.','Enter M and positive r.'));return;}
+  var vorb=Math.sqrt(GRAV*M/r);
+  var vesc=Math.sqrt(2*GRAV*M/r);
+  showRes('ov_res',[
+    {id:'vo',k:T('obežná','orbital')+' [m/s]',v:fmt(vorb)},
+    {id:'ve',k:T('úniková','escape')+' [m/s]',v:fmt(vesc)}
+  ],['vo','ve']);
+}
+
+/* ===== HYDROSTATICKÝ TLAK p=ρgh ===== */
+function solveHydro(){
+  setErr('hs_err','');
+  var p=num('hs_p'),rho=num('hs_rho'),h=num('hs_h'),g=num('hs_g'); if(!k(g))g=9.81;
+  var known=[['p',p],['rho',rho],['h',h]].filter(function(x){return k(x[1]);}).map(function(x){return x[0];});
+  if(known.length<2){setErr('hs_err',T('Zadaj aspoň 2 z p/ρ/h.','Enter at least 2 of p/ρ/h.'));return;}
+  if(!k(p)&&k(rho)&&k(h))p=rho*g*h;
+  if(!k(rho)&&k(p)&&k(h)&&g*h!==0)rho=p/(g*h);
+  if(!k(h)&&k(p)&&k(rho)&&g*rho!==0)h=p/(g*rho);
+  var vals={p:p,rho:rho,h:h};
+  var computed=['p','rho','h'].filter(function(key){return k(vals[key])&&known.indexOf(key)===-1;});
+  if(!isNaN(num('hs_g')))computed.push('g');
+  showRes('hs_res',[
+    {id:'p',k:'p [Pa]',v:fmt(p)},{id:'rho',k:'ρ [kg/m³]',v:fmt(rho)},
+    {id:'h',k:'h [m]',v:fmt(h)},{id:'g',k:'g [m/s²]',v:fmt(g)}
+  ],computed);
 }
 </script>
 </body>
