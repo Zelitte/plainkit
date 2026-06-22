@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plainkit. — fyzikálna kalkulačka</title>
+<meta name="description" content="Fyzikálne kalkulačky s tabuľkovým režimom: kinematika, Ohmov zákon, voľný pád. Bez reklám, bez registrácie, bez sledovania.">
+
+<!-- FONTY: samohostené IBM Plex (rovnaké ako /jednotky). -->
+<!-- POZOR: over, že tieto .woff2 reálne existujú v /fonts/ pod týmito názvami. -->
+<!-- Ak sa volajú inak, uprav len src: url(...) nižšie. Fallback na systémové fonty drží stránku funkčnú aj bez nich. -->
+<style>
+@font-face{
+  font-family:'IBM Plex Sans';
+  src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'IBM Plex Sans';
+  src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');
+  font-weight:500;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'IBM Plex Sans';
+  src:url('/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');
+  font-weight:600;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'IBM Plex Mono';
+  src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'IBM Plex Mono';
+  src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');
+  font-weight:500;font-style:normal;font-display:swap;
+}
+
+:root{
+  --bg:#0a0f14;
+  --bg2:#07090f;
+  --panel:#0e151c;
+  --panel2:#11191f;
+  --border:#1c2730;
+  --border2:#26343f;
+  --text:#dfe7ee;
+  --muted:#8595a3;
+  --faint:#5a6b78;
+  --cyan:#00d4e8;
+  --yellow:#ffc629;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(1200px 600px at 50% -10%,#0d141b 0%,var(--bg) 45%,var(--bg2) 100%);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.55;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px}
+
+/* ---- hlavička ---- */
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.brand{font-family:var(--sans);font-weight:600;font-size:20px;letter-spacing:-.5px;color:var(--text);text-decoration:none;display:inline-flex;align-items:baseline;gap:0}
+.brand b{color:var(--cyan);font-weight:600}
+.brand .dot{color:var(--cyan)}
+.brand:hover{opacity:.85}
+
+.tagline{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.5px;white-space:nowrap}
+
+.controls{display:flex;align-items:center;gap:8px}
+.lang{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.lang button{
+  background:transparent;color:var(--muted);border:none;
+  font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer;
+}
+.lang button.active{background:var(--cyan);color:#04181c;font-weight:500}
+.lang button:not(.active):hover{color:var(--text);background:var(--panel2)}
+
+h1{font-size:23px;font-weight:600;letter-spacing:-.4px;margin:22px 0 4px}
+.lead{color:var(--muted);font-size:14px;max-width:62ch;margin-bottom:6px}
+.lead b{color:var(--text);font-weight:500}
+
+/* ---- karty ---- */
+.card{
+  background:linear-gradient(180deg,var(--panel) 0%,var(--bg2) 130%);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px 20px 18px;
+  margin-top:22px;
+}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.card-head .ico{
+  width:30px;height:30px;flex:none;border-radius:8px;
+  display:grid;place-items:center;
+  background:var(--panel2);border:1px solid var(--border2);
+  color:var(--cyan);
+}
+.card-head h2{font-size:16px;font-weight:600;letter-spacing:-.2px}
+.card-sub{color:var(--faint);font-size:12.5px;font-family:var(--mono);margin-bottom:16px}
+
+/* ---- vstupné polia (mriežka) ---- */
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.field{position:relative}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-family:var(--mono)}
+.field label .sym{color:var(--cyan)}
+.field .unit{color:var(--faint)}
+.field input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:var(--mono);font-size:14px;
+  padding:10px 11px;outline:none;transition:border-color .15s,background .15s;
+}
+.field input:focus{border-color:var(--cyan);background:#091116}
+.field input.computed{color:var(--cyan);background:#0a141a;border-color:var(--border2)}
+.field input::placeholder{color:#3c4a55}
+.field.computed-tag::after{
+  content:'='attr(data-tag);position:absolute;top:0;right:0;
+  font-family:var(--mono);font-size:10px;color:var(--faint);
+}
+
+.row-actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{
+  background:var(--cyan);color:#04181c;border:none;border-radius:9px;
+  font-family:var(--sans);font-weight:600;font-size:13.5px;padding:9px 16px;cursor:pointer;
+  transition:filter .15s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn.ghost:hover{color:var(--text);border-color:var(--border2)}
+
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.err{font-family:var(--mono);font-size:12px;color:var(--yellow);margin-top:10px;min-height:1em}
+
+/* ---- výsledky / vzorce ---- */
+.results{margin-top:14px;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.res{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:9px 11px}
+.res .k{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.res .v{font-family:var(--mono);font-size:15px;color:var(--cyan);font-weight:500;word-break:break-all}
+.res.dim .v{color:var(--faint)}
+
+.formula{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:12px;line-height:1.7}
+.formula code{color:var(--muted)}
+
+footer{margin-top:46px;border-top:1px solid var(--border);padding-top:18px;color:var(--faint);font-size:12px;font-family:var(--mono);line-height:1.8}
+footer a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--faint)}
+footer a:hover{color:var(--cyan)}
+
+[data-lang-en]{display:none}
+html[lang="en"] [data-lang-sk]{display:none}
+html[lang="en"] [data-lang-en]{display:inline}
+html[lang="en"] [data-lang-en].block{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="brand" href="/"><b>plainkit</b><span class="dot">.</span></a>
+    <span class="tagline">no ads · no signup · no tracking</span>
+    <div class="controls">
+      <div class="lang" role="group" aria-label="jazyk / language">
+        <button id="lang-sk" class="active" onclick="setLang('sk')">SK</button>
+        <button id="lang-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <h1>
+    <span data-lang-sk>Fyzikálna kalkulačka</span>
+    <span data-lang-en>Physics calculator</span>
+  </h1>
+  <p class="lead">
+    <span data-lang-sk>Zadáš, čo vieš — <b>dopočíta sa zvyšok</b>. Žiadny vstup → jeden výstup ako inde; tu vidíš celý vzťah naraz. Všetko beží v prehliadači, nič sa neodosiela.</span>
+    <span data-lang-en class="block">Enter what you know — <b>the rest is computed</b>. Not one input → one output like elsewhere; here you see the whole relation at once. Everything runs in your browser, nothing is sent.</span>
+  </p>
+
+  <!-- ================= KINEMATIKA ================= -->
+  <section class="card">
+    <div class="card-head">
+      <div class="ico">→</div>
+      <h2><span data-lang-sk>Rovnomerne zrýchlený pohyb</span><span data-lang-en>Uniformly accelerated motion</span></h2>
+    </div>
+    <div class="card-sub">v = v₀ + a·t &nbsp;·&nbsp; s = v₀·t + ½·a·t²</div>
+
+    <div class="grid">
+      <div class="field">
+        <label><span class="sym">v₀</span> — <span data-lang-sk>počiat. rýchlosť</span><span data-lang-en>initial velocity</span> <span class="unit">[m/s]</span></label>
+        <input type="text" inputmode="decimal" id="k_v0" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">v</span> — <span data-lang-sk>konc. rýchlosť</span><span data-lang-en>final velocity</span> <span class="unit">[m/s]</span></label>
+        <input type="text" inputmode="decimal" id="k_v" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">a</span> — <span data-lang-sk>zrýchlenie</span><span data-lang-en>acceleration</span> <span class="unit">[m/s²]</span></label>
+        <input type="text" inputmode="decimal" id="k_a" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">t</span> — <span data-lang-sk>čas</span><span data-lang-en>time</span> <span class="unit">[s]</span></label>
+        <input type="text" inputmode="decimal" id="k_t" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">s</span> — <span data-lang-sk>dráha</span><span data-lang-en>distance</span> <span class="unit">[m]</span></label>
+        <input type="text" inputmode="decimal" id="k_s" placeholder="—">
+      </div>
+    </div>
+
+    <div class="row-actions">
+      <button class="btn" onclick="solveKin()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+      <button class="btn ghost" onclick="clearKin()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+      <span class="hint"><span data-lang-sk>zadaj ľubovoľné 3</span><span data-lang-en>enter any 3</span></span>
+    </div>
+    <div class="err" id="k_err"></div>
+    <div class="results" id="k_res"></div>
+  </section>
+
+  <!-- ================= OHMOV ZÁKON + VÝKON ================= -->
+  <section class="card">
+    <div class="card-head">
+      <div class="ico">Ω</div>
+      <h2><span data-lang-sk>Ohmov zákon &amp; výkon</span><span data-lang-en>Ohm's law &amp; power</span></h2>
+    </div>
+    <div class="card-sub">U = I·R &nbsp;·&nbsp; P = U·I</div>
+
+    <div class="grid">
+      <div class="field">
+        <label><span class="sym">U</span> — <span data-lang-sk>napätie</span><span data-lang-en>voltage</span> <span class="unit">[V]</span></label>
+        <input type="text" inputmode="decimal" id="o_U" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">I</span> — <span data-lang-sk>prúd</span><span data-lang-en>current</span> <span class="unit">[A]</span></label>
+        <input type="text" inputmode="decimal" id="o_I" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">R</span> — <span data-lang-sk>odpor</span><span data-lang-en>resistance</span> <span class="unit">[Ω]</span></label>
+        <input type="text" inputmode="decimal" id="o_R" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">P</span> — <span data-lang-sk>výkon</span><span data-lang-en>power</span> <span class="unit">[W]</span></label>
+        <input type="text" inputmode="decimal" id="o_P" placeholder="—">
+      </div>
+    </div>
+
+    <div class="row-actions">
+      <button class="btn" onclick="solveOhm()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+      <button class="btn ghost" onclick="clearOhm()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+      <span class="hint"><span data-lang-sk>zadaj ľubovoľné 2</span><span data-lang-en>enter any 2</span></span>
+    </div>
+    <div class="err" id="o_err"></div>
+    <div class="results" id="o_res"></div>
+  </section>
+
+  <!-- ================= VOĽNÝ PÁD / VRH ================= -->
+  <section class="card">
+    <div class="card-head">
+      <div class="ico">↓</div>
+      <h2><span data-lang-sk>Voľný pád &amp; zvislý vrh</span><span data-lang-en>Free fall &amp; vertical throw</span></h2>
+    </div>
+    <div class="card-sub"><span data-lang-sk>bez odporu vzduchu</span><span data-lang-en>no air resistance</span> &nbsp;·&nbsp; g = <span id="g_label">9,81</span> m/s²</div>
+
+    <div class="grid">
+      <div class="field">
+        <label><span class="sym">h</span> — <span data-lang-sk>výška</span><span data-lang-en>height</span> <span class="unit">[m]</span></label>
+        <input type="text" inputmode="decimal" id="f_h" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">t</span> — <span data-lang-sk>čas pádu</span><span data-lang-en>fall time</span> <span class="unit">[s]</span></label>
+        <input type="text" inputmode="decimal" id="f_t" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">v</span> — <span data-lang-sk>dopadová rýchlosť</span><span data-lang-en>impact velocity</span> <span class="unit">[m/s]</span></label>
+        <input type="text" inputmode="decimal" id="f_v" placeholder="—">
+      </div>
+      <div class="field">
+        <label><span class="sym">g</span> — <span data-lang-sk>tiažové zrýchl.</span><span data-lang-en>gravity</span> <span class="unit">[m/s²]</span></label>
+        <input type="text" inputmode="decimal" id="f_g" placeholder="9.81">
+      </div>
+    </div>
+
+    <div class="row-actions">
+      <button class="btn" onclick="solveFall()"><span data-lang-sk>Dopočítať</span><span data-lang-en>Solve</span></button>
+      <button class="btn ghost" onclick="clearFall()"><span data-lang-sk>Vyčistiť</span><span data-lang-en>Clear</span></button>
+      <span class="hint"><span data-lang-sk>zadaj 1 z h/t/v (g voliteľné)</span><span data-lang-en>enter 1 of h/t/v (g optional)</span></span>
+    </div>
+    <div class="err" id="f_err"></div>
+    <div class="results" id="f_res"></div>
+  </section>
+
+  <footer>
+    <div>
+      <span data-lang-sk>Beží celé v tvojom prehliadači — žiadne požiadavky na tretie strany, nič sa neukladá ani neodosiela.</span>
+      <span data-lang-en class="block">Runs entirely in your browser — no third-party requests, nothing stored or sent.</span>
+    </div>
+    <div style="margin-top:8px">
+      <a href="/"><span data-lang-sk>← domov</span><span data-lang-en>← home</span></a>
+      &nbsp;·&nbsp;
+      <a href="/jednotky"><span data-lang-sk>prevodník jednotiek</span><span data-lang-en>unit converter</span></a>
+      &nbsp;·&nbsp;
+      <a href="/politika"><span data-lang-sk>súkromie</span><span data-lang-en>privacy</span></a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------- jazyk ---------- */
+function setLang(l){
+  document.documentElement.lang = l;
+  document.getElementById('lang-sk').classList.toggle('active', l==='sk');
+  document.getElementById('lang-en').classList.toggle('active', l==='en');
+}
+
+/* ---------- pomocné ---------- */
+// Prijme aj desatinnú čiarku (SK), vráti číslo alebo NaN.
+function num(id){
+  var raw = document.getElementById(id).value.trim();
+  if(raw === '') return NaN;
+  return parseFloat(raw.replace(',', '.'));
+}
+function has(id){ return !isNaN(num(id)); }
+// Formát: orežeme na rozumný počet platných číslic, čiarka podľa jazyka.
+function fmt(x){
+  if(!isFinite(x)) return '—';
+  var s;
+  if(x !== 0 && (Math.abs(x) >= 1e7 || Math.abs(x) < 1e-4)){
+    s = x.toExponential(4);
+  } else {
+    s = (Math.round(x*1e6)/1e6).toString();
+  }
+  if(document.documentElement.lang === 'sk') s = s.replace('.', ',');
+  return s;
+}
+function T(sk,en){ return document.documentElement.lang==='en' ? en : sk; }
+
+function showRes(boxId, items, computedKeys){
+  var box = document.getElementById(boxId);
+  box.innerHTML = '';
+  items.forEach(function(it){
+    var d = document.createElement('div');
+    d.className = 'res' + (computedKeys.indexOf(it.id) === -1 ? ' dim' : '');
+    d.innerHTML = '<div class="k">'+it.k+'</div><div class="v">'+it.v+'</div>';
+    box.appendChild(d);
+  });
+}
+
+/* ================= KINEMATIKA =================
+   Premenné: v0, v, a, t, s. Treba práve/aspoň 3 známe.
+   Vzťahy: v = v0 + a t ; s = v0 t + ½ a t²
+*/
+function solveKin(){
+  var err = document.getElementById('k_err');
+  err.textContent = '';
+  var V = {v0:num('k_v0'), v:num('k_v'), a:num('k_a'), t:num('k_t'), s:num('k_s')};
+  var known = Object.keys(V).filter(function(k){return !isNaN(V[k]);});
+  if(known.length < 3){
+    err.textContent = T('Zadaj aspoň 3 hodnoty.','Enter at least 3 values.');
+    return;
+  }
+
+  // Postupne dopĺňame, kým niečo pribúda. Každý vzorec použijeme, ak má dosť vstupov.
+  function known_(k){ return V[k]!==undefined && !isNaN(V[k]); }
+  for(var iter=0; iter<6; iter++){
+    // v = v0 + a t  (3 zo 4 → 4.)
+    if(!known_('v')  && known_('v0') && known_('a') && known_('t')) V.v  = V.v0 + V.a*V.t;
+    if(!known_('v0') && known_('v')  && known_('a') && known_('t')) V.v0 = V.v  - V.a*V.t;
+    if(!known_('a')  && known_('v')  && known_('v0')&& known_('t') && V.t!==0) V.a = (V.v - V.v0)/V.t;
+    if(!known_('t')  && known_('v')  && known_('v0')&& known_('a') && V.a!==0) V.t = (V.v - V.v0)/V.a;
+
+    // s = v0 t + ½ a t²
+    if(!known_('s') && known_('v0') && known_('a') && known_('t')) V.s = V.v0*V.t + 0.5*V.a*V.t*V.t;
+    // s = ½ (v0+v) t  (priemerná rýchlosť)
+    if(!known_('s') && known_('v0') && known_('v') && known_('t')) V.s = 0.5*(V.v0+V.v)*V.t;
+    // v² = v0² + 2 a s  → doplnenie chýbajúcich z energetického vzťahu
+    if(!known_('v')  && known_('v0') && known_('a') && known_('s')){
+      var vv = V.v0*V.v0 + 2*V.a*V.s; if(vv>=0) V.v = Math.sqrt(vv);
+    }
+    if(!known_('a')  && known_('v')  && known_('v0')&& known_('s') && V.s!==0) V.a = (V.v*V.v - V.v0*V.v0)/(2*V.s);
+    if(!known_('s')  && known_('v')  && known_('v0')&& known_('a') && V.a!==0) V.s = (V.v*V.v - V.v0*V.v0)/(2*V.a);
+    if(!known_('t')  && known_('s')  && known_('v0')&& known_('v') && (V.v0+V.v)!==0) V.t = 2*V.s/(V.v0+V.v);
+  }
+
+  var solved = ['v0','v','a','t','s'].filter(function(k){return known_(k);});
+  var computed = solved.filter(function(k){return known.indexOf(k)===-1;});
+  if(computed.length === 0){
+    err.textContent = T('Z týchto vstupov sa nedá nič dopočítať (alebo chýba čas).','Cannot derive anything from these inputs (time may be missing).');
+  }
+  showRes('k_res', [
+    {id:'v0', k:'v₀ [m/s]', v:fmt(V.v0)},
+    {id:'v',  k:'v [m/s]',  v:fmt(V.v)},
+    {id:'a',  k:'a [m/s²]', v:fmt(V.a)},
+    {id:'t',  k:'t [s]',    v:fmt(V.t)},
+    {id:'s',  k:'s [m]',    v:fmt(V.s)}
+  ], computed);
+}
+function clearKin(){
+  ['k_v0','k_v','k_a','k_t','k_s'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('k_res').innerHTML='';
+  document.getElementById('k_err').textContent='';
+}
+
+/* ================= OHMOV ZÁKON + VÝKON =================
+   U, I, R, P. Treba 2 nezávislé → dopočíta zvyšok.
+*/
+function solveOhm(){
+  var err = document.getElementById('o_err');
+  err.textContent='';
+  var U=num('o_U'), I=num('o_I'), R=num('o_R'), P=num('o_P');
+  var known = [['U',U],['I',I],['R',R],['P',P]].filter(function(p){return !isNaN(p[1]);}).map(function(p){return p[0];});
+  if(known.length < 2){
+    err.textContent = T('Zadaj aspoň 2 hodnoty.','Enter at least 2 values.');
+    return;
+  }
+
+  function k(x){return !isNaN(x);}
+  for(var i=0;i<6;i++){
+    // Ohm: U=I·R
+    if(!k(U) && k(I) && k(R)) U = I*R;
+    if(!k(I) && k(U) && k(R) && R!==0) I = U/R;
+    if(!k(R) && k(U) && k(I) && I!==0) R = U/I;
+    // Výkon: P=U·I
+    if(!k(P) && k(U) && k(I)) P = U*I;
+    if(!k(U) && k(P) && k(I) && I!==0) U = P/I;
+    if(!k(I) && k(P) && k(U) && U!==0) I = P/U;
+    // Kombinácie cez R: P=I²·R, P=U²/R
+    if(!k(P) && k(I) && k(R)) P = I*I*R;
+    if(!k(P) && k(U) && k(R) && R!==0) P = U*U/R;
+    if(!k(R) && k(P) && k(I) && I!==0) R = P/(I*I);
+    if(!k(R) && k(P) && k(U) && P!==0) R = U*U/P;
+    if(!k(I) && k(P) && k(R) && R!==0) I = Math.sqrt(P/R);
+    if(!k(U) && k(P) && k(R)) U = Math.sqrt(P*R);
+  }
+
+  var vals={U:U,I:I,R:R,P:P};
+  var computed = ['U','I','R','P'].filter(function(key){return k(vals[key]) && known.indexOf(key)===-1;});
+  showRes('o_res', [
+    {id:'U', k:'U [V]', v:fmt(U)},
+    {id:'I', k:'I [A]', v:fmt(I)},
+    {id:'R', k:'R [Ω]', v:fmt(R)},
+    {id:'P', k:'P [W]', v:fmt(P)}
+  ], computed);
+}
+function clearOhm(){
+  ['o_U','o_I','o_R','o_P'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('o_res').innerHTML='';
+  document.getElementById('o_err').textContent='';
+}
+
+/* ================= VOĽNÝ PÁD =================
+   h = ½ g t² ; v = g t ; v² = 2 g h. Stačí 1 z {h,t,v}.
+*/
+function solveFall(){
+  var err = document.getElementById('f_err');
+  err.textContent='';
+  var h=num('f_h'), t=num('f_t'), v=num('f_v');
+  var g=num('f_g'); if(isNaN(g)) g=9.81;
+  if(g<=0){ err.textContent=T('g musí byť kladné.','g must be positive.'); return; }
+
+  var primary = [['h',h],['t',t],['v',v]].filter(function(p){return !isNaN(p[1]);}).map(function(p){return p[0];});
+  if(primary.length === 0){
+    err.textContent = T('Zadaj aspoň jednu z h, t alebo v.','Enter at least one of h, t or v.');
+    return;
+  }
+
+  function k(x){return !isNaN(x);}
+  for(var i=0;i<5;i++){
+    if(!k(t) && k(h) && h>=0) t = Math.sqrt(2*h/g);
+    if(!k(t) && k(v)) t = v/g;
+    if(!k(v) && k(t)) v = g*t;
+    if(!k(v) && k(h) && h>=0) v = Math.sqrt(2*g*h);
+    if(!k(h) && k(t)) h = 0.5*g*t*t;
+    if(!k(h) && k(v)) h = v*v/(2*g);
+  }
+
+  var vals={h:h,t:t,v:v};
+  var computed = ['h','t','v'].filter(function(key){return k(vals[key]) && primary.indexOf(key)===-1;});
+  showRes('f_res', [
+    {id:'h', k:'h [m]',   v:fmt(h)},
+    {id:'t', k:'t [s]',   v:fmt(t)},
+    {id:'v', k:'v [m/s]', v:fmt(v)},
+    {id:'g', k:'g [m/s²]',v:fmt(g)}
+  ], computed.concat(isNaN(num('f_g'))?[]:['g']));
+}
+function clearFall(){
+  ['f_h','f_t','f_v','f_g'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('f_res').innerHTML='';
+  document.getElementById('f_err').textContent='';
+}
+</script>
+</body>
+</html>
