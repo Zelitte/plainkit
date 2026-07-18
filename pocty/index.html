@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>počty · plainkit</title>
+<meta name="description" content="Mentálna aritmetika — nekonečný beh od sčítania po chýbajúci člen. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+:root{
+  --bg:#07090f;
+  --panel:#0d1117;
+  --line:#1c2230;
+  --text:#e8ecf1;
+  --dim:#8a94a3;
+  --cyan:#00d4e8;
+  --yellow:#ffc629;
+  --lcd-bg:#9ca34b;
+  --lcd-px:#1a1f12;
+  --lcd-dim:rgba(26,31,18,.28);
+  --key:#2b2f37;
+  --key-line:#3d424b;
+  --key-hi:#363b45;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100dvh;padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;
+}
+.wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;flex:1}
+header{display:flex;align-items:baseline;gap:8px}
+.logo{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:20px;color:var(--text);text-decoration:none}
+.logo b{color:var(--cyan);font-weight:500}
+.tool{font-family:'IBM Plex Mono',monospace;color:var(--dim);font-size:14px}
+.lang{margin-left:auto;background:none;border:1px solid var(--line);color:var(--dim);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer}
+.lang:active{color:var(--cyan);border-color:var(--cyan)}
+
+/* Nokia LCD */
+.lcd{
+  background:var(--lcd-bg);border-radius:10px;padding:14px;
+  border:3px solid #0d0f13;
+  box-shadow:0 0 0 1px #3d424b, inset 0 2px 8px rgba(0,0,0,.35);
+  font-family:'IBM Plex Mono',monospace;color:var(--lcd-px);
+  display:flex;flex-direction:column;gap:10px;min-height:190px;
+}
+.lcd-top{display:flex;justify-content:space-between;font-size:13px;font-weight:500;letter-spacing:.5px}
+.lcd-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.problem{font-size:30px;font-weight:500;letter-spacing:1px;line-height:1.3;word-break:break-word}
+.inp{border-bottom:3px solid var(--lcd-px);min-width:38px;display:inline-block;padding:0 2px}
+.inp.empty{color:var(--lcd-dim)}
+.msg{font-size:15px;line-height:1.5;white-space:pre-line}
+.big{font-size:26px;font-weight:500;letter-spacing:2px}
+.timebar{height:8px;background:var(--lcd-dim);border-radius:2px;overflow:hidden}
+.timebar i{display:block;height:100%;background:var(--lcd-px);width:100%}
+.lvlbar{display:flex;gap:4px;justify-content:center}
+.lvlbar i{width:14px;height:6px;background:var(--lcd-dim);border-radius:1px}
+.lvlbar i.on{background:var(--lcd-px)}
+.flash-ok{animation:fok .35s}
+.flash-bad{animation:fbad .35s}
+@keyframes fok{50%{filter:brightness(1.18)}}
+@keyframes fbad{25%,75%{filter:brightness(.75)}}
+@media (prefers-reduced-motion:reduce){.flash-ok,.flash-bad{animation:none}}
+
+/* numpad */
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{
+  background:var(--key);border:1px solid var(--key-line);border-radius:14px;
+  color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;
+  padding:16px 0;cursor:pointer;
+  box-shadow:0 3px 0 #14171c;
+}
+.key:active{background:var(--key-hi);transform:translateY(2px);box-shadow:0 1px 0 #14171c}
+.key.ok{color:var(--cyan);border-color:var(--cyan)}
+.key.del{color:var(--yellow)}
+footer{text-align:center;font-size:12px;color:var(--dim);line-height:1.6}
+footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="/">plainkit<b>.</b></a>
+    <span class="tool">/pocty</span>
+    <button class="lang" id="langBtn">EN</button>
+  </header>
+
+  <div class="lcd" id="lcd">
+    <div class="lcd-top">
+      <span id="tL"></span><span id="tM"></span><span id="tR"></span>
+    </div>
+    <div class="lcd-mid" id="mid"></div>
+    <div class="timebar" id="tbar" hidden><i id="tfill"></i></div>
+    <div class="lvlbar" id="lbar" hidden></div>
+  </div>
+
+  <div class="pad">
+    <button class="key" data-k="1">1</button>
+    <button class="key" data-k="2">2</button>
+    <button class="key" data-k="3">3</button>
+    <button class="key" data-k="4">4</button>
+    <button class="key" data-k="5">5</button>
+    <button class="key" data-k="6">6</button>
+    <button class="key" data-k="7">7</button>
+    <button class="key" data-k="8">8</button>
+    <button class="key" data-k="9">9</button>
+    <button class="key del" data-k="del">⌫</button>
+    <button class="key" data-k="0">0</button>
+    <button class="key ok" data-k="ok">OK</button>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+'use strict';
+(function(){
+var LS_BEST='pk_pocty_best', LS_BLVL='pk_pocty_bestlvl', LS_LANG='pk_pocty_lang';
+var STR={
+ sk:{title:'POČTY', start:'stlač OK a hraj', rules:'3 životy\nrýchlejšia odpoveď = viac bodov\nkaždých 8 správnych → vyššia úroveň',
+     best:'rekord', lvl:'úr.', bestlvl:'najvyššia úroveň', over:'KONIEC', score:'skóre',
+     newrec:'nový rekord!', again:'OK = hraj znova', foot:'beží len u teba v prehliadači · skóre v localStorage',
+     lvlup:'ÚROVEŇ'},
+ en:{title:'MATH RUN', start:'press OK to play', rules:'3 lives\nfaster answer = more points\nevery 8 correct → level up',
+     best:'best', lvl:'lv.', bestlvl:'highest level', over:'GAME OVER', score:'score',
+     newrec:'new record!', again:'OK = play again', foot:'runs only in your browser · scores in localStorage',
+     lvlup:'LEVEL'},
+};
+var lang=localStorage.getItem(LS_LANG)||'sk';
+var T=function(k){return STR[lang][k];};
+
+var state='menu', lvl=1, score=0, lives=3, streak=0, cur=null, input='';
+var tStart=0, tLimit=0, tTimer=null;
+
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(arr){return arr[ri(0,arr.length-1)];}
+
+function genAdd(m){var a=ri(1,m-1),b=ri(1,m-a);return{pre:a+' + '+b+' = ',post:'',ans:a+b};}
+function genSub(m){var a=ri(2,m),b=ri(1,a-1);return{pre:a+' − '+b+' = ',post:'',ans:a-b};}
+function genMul(){var a=ri(2,9),b=ri(2,9);return{pre:a+' × '+b+' = ',post:'',ans:a*b};}
+function genDiv(){var b=ri(2,9),q=ri(2,9);return{pre:(b*q)+' ÷ '+b+' = ',post:'',ans:q};}
+function genMul2(){var a=ri(12,99),b=ri(2,9);return{pre:a+' × '+b+' = ',post:'',ans:a*b};}
+function genMiss(){
+  var op=pick(['+','−','×']);
+  if(op==='+'){var a=ri(2,50),x=ri(2,50);return{pre:a+' + ',post:' = '+(a+x),ans:x};}
+  if(op==='−'){var a2=ri(10,99),x2=ri(1,a2-1);return{pre:a2+' − ',post:' = '+(a2-x2),ans:x2};}
+  var a3=ri(2,9),x3=ri(2,9);return{pre:a3+' × ',post:' = '+(a3*x3),ans:x3};
+}
+function gen(l){
+  if(l===1)return pick([genAdd,genSub])(10);
+  if(l===2)return pick([genAdd,genSub])(20);
+  if(l===3)return pick([genAdd,genSub])(100);
+  if(l===4)return genMul();
+  if(l===5)return genDiv();
+  if(l===6){var f=pick(['a','s','m','d']);return f==='a'?genAdd(100):f==='s'?genSub(100):f==='m'?genMul():genDiv();}
+  if(l===7)return genMul2();
+  var g=pick(['x','y','z']);return g==='x'?genMiss():g==='y'?genMul2():genDiv();
+}
+
+var lcd=document.getElementById('lcd'), mid=document.getElementById('mid');
+var tL=document.getElementById('tL'), tM=document.getElementById('tM'), tR=document.getElementById('tR');
+var tbar=document.getElementById('tbar'), tfill=document.getElementById('tfill');
+var lbar=document.getElementById('lbar'), foot=document.getElementById('foot');
+var langBtn=document.getElementById('langBtn');
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function hearts(){var h='';for(var i=0;i<3;i++)h+=(i<lives?'♥':'♡');return h;}
+function best(){return parseInt(localStorage.getItem(LS_BEST)||'0',10);}
+function bestLvl(){return parseInt(localStorage.getItem(LS_BLVL)||'0',10);}
+
+function drawStatic(){
+  langBtn.textContent=(lang==='sk')?'EN':'SK';
+  foot.textContent=T('foot');
+}
+
+function drawMenu(){
+  state='menu';
+  tL.textContent='';tM.textContent='';tR.textContent='';
+  tbar.hidden=true;lbar.hidden=true;
+  var b=best(), bl=bestLvl();
+  mid.innerHTML='<div class="big">'+esc(T('title'))+'</div>'+
+    '<div class="msg">'+esc(T('rules'))+'</div>'+
+    (b>0?'<div class="msg">'+esc(T('best'))+': '+b+' · '+esc(T('bestlvl'))+': '+bl+'</div>':'')+
+    '<div class="msg">▶ '+esc(T('start'))+'</div>';
+}
+
+function drawHud(){
+  tL.textContent=T('lvl')+lvl;
+  tM.textContent=hearts();
+  tR.textContent=score;
+  lbar.hidden=false;
+  var html='';
+  for(var i=0;i<8;i++)html+='<i class="'+(i<streak?'on':'')+'"></i>';
+  lbar.innerHTML=html;
+}
+
+function drawProblem(){
+  var shown=input===''?'_':input;
+  mid.innerHTML='<div class="problem">'+esc(cur.pre)+
+    '<span class="inp'+(input===''?' empty':'')+'">'+esc(shown)+'</span>'+
+    esc(cur.post)+'</div>';
+}
+
+function nextQ(){
+  cur=gen(lvl); input='';
+  state='play';
+  drawHud(); drawProblem();
+  tLimit=10000+lvl*1000; tStart=Date.now();
+  tbar.hidden=false; tfill.style.width='100%';
+  clearInterval(tTimer);
+  tTimer=setInterval(function(){
+    var rem=1-(Date.now()-tStart)/tLimit;
+    if(rem<=0){clearInterval(tTimer);wrong();return;}
+    tfill.style.width=(rem*100)+'%';
+  },100);
+}
+
+function startGame(){
+  lvl=1;score=0;lives=3;streak=0;
+  nextQ();
+}
+
+function correct(){
+  clearInterval(tTimer);
+  var rem=Math.max(0,1-(Date.now()-tStart)/tLimit);
+  score+=10*lvl+Math.round(rem*10*lvl);
+  streak++;
+  lcd.classList.remove('flash-ok');void lcd.offsetWidth;lcd.classList.add('flash-ok');
+  if(streak>=8){
+    streak=0;lvl++;
+    state='reveal';drawHud();
+    mid.innerHTML='<div class="big">'+esc(T('lvlup'))+' '+lvl+'</div>';
+    tbar.hidden=true;
+    setTimeout(nextQ,900);
+  }else{
+    nextQ();
+  }
+}
+
+function wrong(){
+  clearInterval(tTimer);
+  lives--;
+  lcd.classList.remove('flash-bad');void lcd.offsetWidth;lcd.classList.add('flash-bad');
+  state='reveal';drawHud();
+  mid.innerHTML='<div class="problem">'+esc(cur.pre)+'<span class="inp">'+cur.ans+'</span>'+esc(cur.post)+'</div>';
+  tbar.hidden=true;
+  setTimeout(function(){ if(lives<=0){gameOver();}else{nextQ();} },1400);
+}
+
+function gameOver(){
+  state='over';
+  var b=best(), bl=bestLvl(), rec=score>b;
+  if(rec)localStorage.setItem(LS_BEST,String(score));
+  if(lvl>bl)localStorage.setItem(LS_BLVL,String(lvl));
+  tbar.hidden=true;lbar.hidden=true;
+  mid.innerHTML='<div class="big">'+esc(T('over'))+'</div>'+
+    '<div class="msg">'+esc(T('score'))+': '+score+' · '+esc(T('lvl'))+lvl+'</div>'+
+    (rec?'<div class="msg">★ '+esc(T('newrec'))+'</div>':'<div class="msg">'+esc(T('best'))+': '+Math.max(b,score)+'</div>')+
+    '<div class="msg">▶ '+esc(T('again'))+'</div>';
+}
+
+function press(k){
+  if(state==='menu'||state==='over'){ if(k==='ok')startGame(); return; }
+  if(state!=='play')return;
+  if(k==='del'){ input=input.slice(0,-1); drawProblem(); return; }
+  if(k==='ok'){
+    if(input==='')return;
+    if(parseInt(input,10)===cur.ans)correct();else wrong();
+    return;
+  }
+  if(input.length<4){ input+=k; drawProblem(); }
+}
+
+document.querySelectorAll('.key').forEach(function(btn){
+  btn.addEventListener('click',function(){press(btn.dataset.k);});
+});
+document.addEventListener('keydown',function(e){
+  if(e.key>='0'&&e.key<='9')press(e.key);
+  else if(e.key==='Backspace'){e.preventDefault();press('del');}
+  else if(e.key==='Enter')press('ok');
+});
+langBtn.addEventListener('click',function(){
+  lang=(lang==='sk')?'en':'sk';
+  localStorage.setItem(LS_LANG,lang);
+  document.documentElement.lang=lang;
+  drawStatic();
+  if(state==='menu')drawMenu();
+});
+
+document.documentElement.lang=lang;
+drawStatic();
+drawMenu();
+})();
+</script>
+</body>
+</html>
