@@ -164,6 +164,7 @@ h3.section-title {
 .home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
 .home-logo .dot { color: var(--accent); }
+.home-logo .ver { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0; margin-left: 8px; vertical-align: middle; }
 
 /* ═══ Svetové hodiny ═══ */
 .clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -351,7 +352,7 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span></div>
+      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver">v1.2</span></div>
     </div>
 
     <!-- Svetové hodiny -->
@@ -465,6 +466,11 @@ h3.section-title {
             <div class="label"><span data-i18n="thad">Had</span><span style="color:var(--text-dim)">↗</span></div>
             <div class="url">plainkit.app/had</div>
           </a>
+          <!-- HRA: Počty -->
+          <a href="/pocty" class="tool-link">
+            <div class="label"><span data-i18n="tpocty">Počty</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/pocty</div>
+          </a>
         </div>
       </details>
 
@@ -548,7 +554,22 @@ h3.section-title {
               <!-- ↓ ĎALŠÍ NÁSTROJ CHÉMIE sem ↓ -->
             </div>
           </details>
-          <!-- ↓ ĎALŠÍ PREDMET (Matematika, Fyzika…) = skopíruj celý <details> blok vyššie ↓ -->
+          <!-- PREDMET: Fyzika -->
+          <details class="tool-group">
+            <summary>
+              <div class="label"><span data-i18n="tFyz">Fyzika</span><span class="chev">›</span></div>
+              <div class="url" data-i18n="tFyzSub">Fyzikálna kalkulačka</div>
+            </summary>
+            <div class="group-body">
+              <!-- FYZIKA: Kalkulačka -->
+              <a href="/fyzika/kalkulacka/" class="tool-link">
+                <div class="label"><span data-i18n="tFyzKalk">Fyzikálna kalkulačka</span><span style="color:var(--text-dim)">↗</span></div>
+                <div class="url">plainkit.app/fyzika/kalkulacka</div>
+              </a>
+              <!-- ↓ ĎALŠÍ NÁSTROJ FYZIKY sem ↓ -->
+            </div>
+          </details>
+          <!-- ↓ ĎALŠÍ PREDMET (Matematika…) = skopíruj celý <details> blok vyššie ↓ -->
         </div>
       </details>
 
@@ -644,8 +665,9 @@ const I18N = {
     iosTitle:'Pridať na plochu', iosStep1:'Klepni na ikonu Zdieľať v Safari (štvorček so šípkou nahor).', iosStep2:'Vyber „Pridať na plochu".', iosStep3:'Potvrď „Pridať" vpravo hore.', iosClose:'Rozumiem',
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
-    tGames:'Hry', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Šach',
-    tEdu:'Vzdelávanie', tEduSub:'Chémia', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
+    tGames:'Hry', tGamesSub:'9 hier · od Hada po Šach', tpocty:'Počty',
+    tEdu:'Vzdelávanie', tEduSub:'Chémia · Fyzika', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
+    tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
@@ -663,8 +685,9 @@ const I18N = {
     iosTitle:'Add to Home Screen', iosStep1:'Tap the Share icon in Safari (a square with an up arrow).', iosStep2:'Choose "Add to Home Screen".', iosStep3:'Confirm with "Add" at the top right.', iosClose:'Got it',
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
-    tGames:'Games', tGamesSub:'Hopko · Skokan · Tetris · Bludisko · Chess',
-    tEdu:'Education', tEduSub:'Chemistry', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
+    tGames:'Games', tGamesSub:'9 games · from Snake to Chess', tpocty:'Mental math',
+    tEdu:'Education', tEduSub:'Chemistry · Physics', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
+    tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
     footTag:'plainkit.app · no ads, no signup, no tracking',
