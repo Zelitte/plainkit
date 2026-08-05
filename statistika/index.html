@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Štatistika — plainkit.</title>
+<meta name="description" content="Deskriptívna štatistika, porovnanie datasetov a lineárna regresia. Všetko offline v prehliadači. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+:root{
+  --bg:#07090f; --panel:#0d1117; --panel2:#111826; --line:#1c2536;
+  --txt:#e8edf4; --dim:#8b97a8; --cyan:#00d4e8; --yellow:#ffc629; --magenta:#ff3df2;
+  --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.55;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+header{display:flex;align-items:baseline;gap:14px;padding:22px 28px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{font-family:var(--mono);font-weight:500;font-size:22px;color:var(--txt)}
+.logo:hover{text-decoration:none}
+.logo .dot{color:var(--cyan)}
+.page-title{font-family:var(--mono);color:var(--dim);font-size:14px}
+.lang{margin-left:auto;display:flex;gap:6px}
+.lang button{background:none;border:1px solid var(--line);color:var(--dim);font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:4px;cursor:pointer}
+.lang button.on{color:var(--cyan);border-color:var(--cyan)}
+main{display:grid;grid-template-columns:280px 1fr;gap:24px;padding:24px 28px;max-width:1280px;margin:0 auto}
+aside{position:sticky;top:20px;align-self:start;display:flex;flex-direction:column;gap:12px}
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:6px;padding:12px 14px;font-size:13px;color:var(--dim)}
+.note b{color:var(--txt);font-weight:500;display:block;margin-bottom:4px}
+.note.y{border-left-color:var(--yellow)}
+.note.m{border-left-color:var(--magenta)}
+section.content{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}
+.card h2{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--cyan);margin-bottom:12px;letter-spacing:.5px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:5px 10px;font-family:var(--mono);font-size:13px;cursor:pointer;color:var(--dim)}
+.tab.on{color:var(--txt);border-color:var(--dsc,var(--cyan))}
+.tab .sw{width:9px;height:9px;border-radius:2px;background:var(--dsc,var(--cyan))}
+.tab .x{color:var(--dim);margin-left:2px;padding:0 2px}
+.tab .x:hover{color:var(--magenta)}
+.tab.add{color:var(--dim);border-style:dashed}
+.tab.add:hover{color:var(--cyan)}
+.ds-name{background:none;border:none;border-bottom:1px dashed var(--line);color:var(--txt);font-family:var(--mono);font-size:14px;width:140px;padding:2px 0;margin-bottom:8px}
+.ds-name:focus{outline:none;border-bottom-color:var(--cyan)}
+textarea{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-family:var(--mono);font-size:14px;padding:10px;resize:vertical}
+textarea:focus{outline:none;border-color:var(--cyan)}
+.echo{font-family:var(--mono);font-size:12.5px;margin-top:8px;color:var(--dim);word-break:break-word}
+.echo .ok{color:var(--cyan)}
+.echo .warn{color:var(--yellow)}
+.echo .err{color:var(--magenta)}
+.commamode{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--dim);flex-wrap:wrap}
+.commamode button{background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:4px;cursor:pointer}
+.commamode button.on{color:var(--yellow);border-color:var(--yellow)}
+.commamode.alert button.on{color:var(--yellow)}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--dim);font-weight:400}
+td:first-child,th:first-child{text-align:left;color:var(--dim)}
+.statwrap{overflow-x:auto}
+.hdr-sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+canvas{width:100%;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
+.chart-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:13px;padding:5px 8px;border-radius:5px}
+select:focus{outline:none;border-color:var(--cyan)}
+.btn{background:var(--panel2);border:1px solid var(--cyan);color:var(--cyan);font-family:var(--mono);font-size:13px;padding:7px 14px;border-radius:5px;cursor:pointer}
+.btn:hover{background:var(--cyan);color:var(--bg)}
+.reg-out{font-family:var(--mono);font-size:13.5px;margin:10px 0;line-height:1.9}
+.reg-out .v{color:var(--cyan)}
+.reg-out .warn{color:var(--yellow);font-size:12.5px}
+.muted{color:var(--dim);font-size:13px}
+footer{padding:20px 28px;border-top:1px solid var(--line);color:var(--dim);font-size:12.5px;font-family:var(--mono)}
+@media (max-width:900px){
+  main{grid-template-columns:1fr}
+  aside{position:static;order:2}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">plainkit<span class="dot">.</span></a>
+  <span class="page-title" data-i18n="title">/statistika</span>
+  <div class="lang">
+    <button id="btn-sk">SK</button>
+    <button id="btn-en">EN</button>
+  </div>
+</header>
+
+<main>
+<aside>
+  <div class="note"><b data-i18n="n1t"></b><span data-i18n="n1"></span></div>
+  <div class="note y"><b data-i18n="n2t"></b><span data-i18n="n2"></span></div>
+  <div class="note"><b data-i18n="n3t"></b><span data-i18n="n3"></span></div>
+  <div class="note y"><b data-i18n="n4t"></b><span data-i18n="n4"></span></div>
+  <div class="note m"><b data-i18n="n5t"></b><span data-i18n="n5"></span></div>
+  <div class="note"><b data-i18n="n6t"></b><span data-i18n="n6"></span></div>
+</aside>
+
+<section class="content">
+  <div class="card">
+    <h2 data-i18n="h_data"></h2>
+    <div class="tabs" id="tabs"></div>
+    <input class="ds-name" id="ds-name" maxlength="24">
+    <textarea id="input" spellcheck="false"></textarea>
+    <div class="echo" id="echo"></div>
+    <div class="commamode" id="commamode">
+      <span data-i18n="comma_lbl"></span>
+      <button data-m="auto"></button>
+      <button data-m="dec"></button>
+      <button data-m="sep"></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="h_stats"></h2>
+    <div class="statwrap"><table id="stat-table"></table></div>
+    <p class="muted" id="stats-empty" data-i18n="empty"></p>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="h_hist"></h2>
+    <div class="chart-row">
+      <label class="muted" data-i18n="hist_pick"></label>
+      <select id="hist-sel"></select>
+    </div>
+    <canvas id="hist" height="240"></canvas>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="h_box"></h2>
+    <canvas id="box" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="h_reg"></h2>
+    <div class="chart-row">
+      <label class="muted">X:</label><select id="reg-x"></select>
+      <label class="muted">Y:</label><select id="reg-y"></select>
+    </div>
+    <div class="reg-out" id="reg-out"></div>
+    <canvas id="scatter" height="280"></canvas>
+  </div>
+
+  <div class="card">
+    <button class="btn" id="export" data-i18n="export"></button>
+  </div>
+</section>
+</main>
+
+<footer><span data-i18n="foot"></span> · <a href="/politika" data-i18n="foot_pol"></a></footer>
+
+<script>
+'use strict';
+/* ================= i18n ================= */
+const I18N = {
+sk:{
+  title:'/statistika — deskriptívna štatistika a regresia',
+  h_data:'DÁTA', h_stats:'ŠTATISTIKY', h_hist:'HISTOGRAM', h_box:'BOXPLOTY', h_reg:'KORELÁCIA A LINEÁRNA REGRESIA',
+  export:'Stiahnuť výsledky (.txt)', empty:'Zatiaľ žiadne dáta — vlož čísla vyššie.',
+  comma_lbl:'čiarka:', m_auto:'auto', m_dec:'desatinná', m_sep:'oddeľovač',
+  echo_n:n=>`načítaných ${n} hodnôt`, echo_first:'prvé', echo_none:'žiadne dáta',
+  echo_amb:'nejednoznačný vstup — alternatívne čítanie:', echo_amb2:'Ak automatika pochopila zle, prepni význam čiarky nižšie.',
+  echo_amb_hint:'čiarky čítam ako oddeľovač (celé čísla). Ak sú to desatinné čísla, oddeľ hodnoty medzerou alebo novým riadkom.',
+  err_mixed:t=>`zmiešaný zápis („${t}") — bodka aj čiarka v jednom čísle. Použi jednotný formát, tisíce neoddeľuj.`,
+  err_invalid:t=>`nečíselné hodnoty: ${t}`,
+  add_ds:'+ dataset', ds:'Dataset',
+  s_n:'počet (n)', s_sum:'súčet', s_mean:'priemer', s_med:'medián', s_mode:'modus',
+  s_sdS:'s (výberová sm. odch.)', s_sdP:'σ (populačná sm. odch.)', s_varS:'s² (výberový rozptyl)', s_varP:'σ² (populačný rozptyl)',
+  s_min:'minimum', s_q1:'Q1', s_q3:'Q3', s_iqr:'IQR', s_max:'maximum', s_out:'odľahlé hodnoty',
+  no_mode:'žiadny', none:'—',
+  hist_pick:'dataset:',
+  reg_pick:'Vyber X a Y (dva datasety rovnakej dĺžky, aspoň 3 hodnoty).',
+  reg_len:(a,b)=>`Dĺžky nesedia (X: ${a}, Y: ${b} hodnôt) — regresia by bola zavádzajúca, hodnoty musia byť párové. Neorezávam.`,
+  reg_few:'Príliš málo bodov (potrebné aspoň 3).',
+  reg_constx:'Všetky X sú rovnaké — priamka sa nedá určiť.',
+  reg_same:'X a Y je ten istý dataset — výsledok by bol triviálny (r = 1).',
+  reg_eq:'rovnica', reg_r:'korelácia (Pearson r)', reg_r2:'determinácia (R²)',
+  reg_note:'r meria len lineárny vzťah. r ≈ 0 neznamená „žiadny vzťah" — môže byť nelineárny. Korelácia nie je príčinnosť.',
+  foot:'všetko beží offline v tvojom prehliadači — žiadne dáta neopúšťajú zariadenie', foot_pol:'súkromie a podmienky',
+  n1t:'Všetko offline', n1:'Výpočty bežia v prehliadači. Po načítaní stránky neodchádza žiadna požiadavka — over v DevTools → Network.',
+  n2t:'s vs. σ', n2:'Výberová (s, delí n−1) odhaduje odchýlku populácie z vzorky — tá sa väčšinou chce v škole. Populačná (σ, delí n) platí, keď máš úplné dáta. Ukazujeme obe.',
+  n3t:'Kvartily', n3:'Lineárna interpolácia (typ 7 — ako Excel a Google Sheets). Učebnice používajú aj iné metódy, pri malých n sa výsledky môžu líšiť.',
+  n4t:'Modus', n4:'Ak sa žiadna hodnota neopakuje, modus neexistuje — ukážeme „žiadny", nevymýšľame.',
+  n5t:'Odľahlé hodnoty', n5:'Hodnoty mimo Q1 − 1,5×IQR a Q3 + 1,5×IQR (Tukeyho pravidlo). Je to konvencia na upozornenie, nie dôkaz chyby v dátach.',
+  n6t:'Desatinná čiarka', n6:'Parser zvládne čiarku aj bodku a vždy ukáže, ako vstup pochopil. Výsledky píšeme s desatinnou bodkou, aby boli jednoznačné.'
+},
+en:{
+  title:'/statistika — descriptive statistics & regression',
+  h_data:'DATA', h_stats:'STATISTICS', h_hist:'HISTOGRAM', h_box:'BOX PLOTS', h_reg:'CORRELATION & LINEAR REGRESSION',
+  export:'Download results (.txt)', empty:'No data yet — paste numbers above.',
+  comma_lbl:'comma:', m_auto:'auto', m_dec:'decimal', m_sep:'separator',
+  echo_n:n=>`parsed ${n} values`, echo_first:'first', echo_none:'no data',
+  echo_amb:'ambiguous input — alternative reading:', echo_amb2:'If the auto-detection got it wrong, switch the comma meaning below.',
+  echo_amb_hint:'commas read as separators (integers). If these are decimal numbers, separate values with spaces or newlines.',
+  err_mixed:t=>`mixed notation ("${t}") — both dot and comma inside one number. Use one format, no thousands separators.`,
+  err_invalid:t=>`non-numeric values: ${t}`,
+  add_ds:'+ dataset', ds:'Dataset',
+  s_n:'count (n)', s_sum:'sum', s_mean:'mean', s_med:'median', s_mode:'mode',
+  s_sdS:'s (sample std. dev.)', s_sdP:'σ (population std. dev.)', s_varS:'s² (sample variance)', s_varP:'σ² (population variance)',
+  s_min:'minimum', s_q1:'Q1', s_q3:'Q3', s_iqr:'IQR', s_max:'maximum', s_out:'outliers',
+  no_mode:'none', none:'—',
+  hist_pick:'dataset:',
+  reg_pick:'Pick X and Y (two datasets of equal length, at least 3 values).',
+  reg_len:(a,b)=>`Lengths differ (X: ${a}, Y: ${b} values) — regression needs paired values; refusing rather than silently truncating.`,
+  reg_few:'Too few points (need at least 3).',
+  reg_constx:'All X values are identical — a line cannot be fitted.',
+  reg_same:'X and Y are the same dataset — the result would be trivial (r = 1).',
+  reg_eq:'equation', reg_r:'correlation (Pearson r)', reg_r2:'determination (R²)',
+  reg_note:'r measures only linear association. r ≈ 0 does not mean "no relationship" — it may be nonlinear. Correlation is not causation.',
+  foot:'everything runs offline in your browser — no data leaves your device', foot_pol:'privacy & terms',
+  n1t:'Everything offline', n1:'All computation happens in your browser. After page load, no request leaves — verify in DevTools → Network.',
+  n2t:'s vs. σ', n2:'Sample (s, divides by n−1) estimates population spread from a sample — usually what school wants. Population (σ, divides by n) applies when you have complete data. We show both.',
+  n3t:'Quartiles', n3:'Linear interpolation (type 7 — same as Excel and Google Sheets). Textbooks use other methods too; results may differ for small n.',
+  n4t:'Mode', n4:'If no value repeats, the mode does not exist — we show "none" instead of inventing one.',
+  n5t:'Outliers', n5:'Values outside Q1 − 1.5×IQR and Q3 + 1.5×IQR (Tukey rule). A convention for flagging, not proof of an error.',
+  n6t:'Decimal comma', n6:'The parser handles both comma and dot and always echoes how it read your input. Results use a decimal point to stay unambiguous.'
+}};
+let LANG = localStorage.getItem('pk-lang') === 'en' ? 'en' : 'sk';
+const T = k => I18N[LANG][k];
+
+/* ================= core (tested standalone: 45/45) ================= */
+const NUM_RE = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+function parseInput(raw, mode) {
+  mode = mode || 'auto';
+  const out = { values: [], count: 0, error: null, ambiguous: false, resolved: 'sep', altValues: null };
+  const text = (raw || '').trim();
+  if (!text) return out;
+  const norm = text.replace(/[;\t]/g, ' ');
+  const tokens = norm.split(/\s+/).filter(Boolean);
+  for (const tok of tokens) {
+    if (tok.indexOf('.') !== -1 && /\d,\d/.test(tok)) {
+      return Object.assign(out, { error: { type: 'mixed', token: tok } });
+    }
+  }
+  const hasDot = tokens.some(t => t.indexOf('.') !== -1);
+  const commaTokens = tokens.filter(t => t.indexOf(',') !== -1);
+  let resolved, ambiguous = false;
+  if (mode !== 'auto') { resolved = mode; }
+  else if (hasDot || commaTokens.length === 0) { resolved = 'sep'; }
+  else {
+    const edgeComma = commaTokens.some(t => /^,|,$/.test(t) || t.indexOf(',,') !== -1);
+    if (edgeComma) { resolved = 'sep'; }
+    else if (tokens.length >= 2) {
+      const allSingleComma = commaTokens.every(t => t.split(',').length === 2);
+      resolved = allSingleComma ? 'dec' : 'sep';
+    } else {
+      const parts = tokens[0].split(',');
+      const leadingZero = parts.some(p => /^0\d/.test(p.replace(/^[+-]/, '')));
+      if (leadingZero) { resolved = 'dec'; }
+      else { ambiguous = true; resolved = (parts.length === 2) ? 'dec' : 'sep'; }
+    }
+  }
+  function build(rmode) {
+    const vals = [], bad = [];
+    if (rmode === 'sep') {
+      for (const tok of tokens) for (const seg of tok.split(',')) {
+        if (!seg) continue;
+        if (NUM_RE.test(seg)) vals.push(parseFloat(seg)); else bad.push(seg);
+      }
+    } else {
+      for (const tok of tokens) {
+        if (tok.split(',').length > 2) { bad.push(tok); continue; }
+        const seg = tok.replace(',', '.');
+        if (NUM_RE.test(seg)) vals.push(parseFloat(seg)); else bad.push(tok);
+      }
+    }
+    return { vals, bad };
+  }
+  const main = build(resolved);
+  if (main.bad.length) {
+    return Object.assign(out, { resolved, ambiguous, error: { type: 'invalid', tokens: main.bad.slice(0, 5) } });
+  }
+  out.values = main.vals; out.count = main.vals.length;
+  out.resolved = resolved; out.ambiguous = ambiguous;
+  if (ambiguous) {
+    const alt = build(resolved === 'dec' ? 'sep' : 'dec');
+    out.altValues = alt.bad.length ? null : alt.vals;
+  }
+  return out;
+}
+function describeVals(vals) {
+  const n = vals.length;
+  if (n === 0) return null;
+  let mean = 0, M2 = 0;
+  for (let i = 0; i < n; i++) {
+    const d = vals[i] - mean;
+    mean += d / (i + 1);
+    M2 += d * (vals[i] - mean);
+  }
+  const varP = M2 / n;
+  const varS = n > 1 ? M2 / (n - 1) : NaN;
+  const sorted = vals.slice().sort((a, b) => a - b);
+  const q = p => {
+    const h = (n - 1) * p, lo = Math.floor(h), fr = h - lo;
+    return lo + 1 < n ? sorted[lo] + fr * (sorted[lo + 1] - sorted[lo]) : sorted[lo];
+  };
+  const q1 = q(0.25), med = q(0.5), q3 = q(0.75), iqr = q3 - q1;
+  const loF = q1 - 1.5 * iqr, hiF = q3 + 1.5 * iqr;
+  const outliers = sorted.filter(v => v < loF || v > hiF);
+  const freq = new Map();
+  for (const v of vals) freq.set(v, (freq.get(v) || 0) + 1);
+  let maxF = 0; freq.forEach(c => { if (c > maxF) maxF = c; });
+  let modes = [];
+  if (maxF > 1) { freq.forEach((c, v) => { if (c === maxF) modes.push(v); }); modes.sort((a, b) => a - b); }
+  return { n, mean, varP, varS, sdP: Math.sqrt(varP), sdS: n > 1 ? Math.sqrt(varS) : NaN,
+    min: sorted[0], max: sorted[n - 1], sum: vals.reduce((a, b) => a + b, 0),
+    q1, med, q3, iqr, loF, hiF, outliers, modes, sorted };
+}
+function regression(xs, ys) {
+  const n = xs.length;
+  if (n !== ys.length) return { error: 'len' };
+  if (n < 3) return { error: 'few' };
+  let mx = 0, my = 0;
+  for (let i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; }
+  mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - mx, dy = ys[i] - my;
+    sxy += dx * dy; sxx += dx * dx; syy += dy * dy;
+  }
+  if (sxx === 0) return { error: 'constx' };
+  const slope = sxy / sxx, intercept = my - slope * mx;
+  const r = syy === 0 ? NaN : sxy / Math.sqrt(sxx * syy);
+  return { slope, intercept, r, r2: r * r, n };
+}
+
+/* ================= state ================= */
+const COLORS = ['#00d4e8', '#ffc629', '#ff3df2', '#7dff8a', '#9d8cff', '#ff8c42'];
+const MAX_DS = 6, MAX_VALS = 100000;
+let datasets = [{ name: 'A', raw: '', mode: 'auto', parsed: parseInput('') }];
+let active = 0;
+
+const $ = id => document.getElementById(id);
+const fmt = x => {
+  if (x === null || x === undefined || Number.isNaN(x)) return T('none');
+  if (Number.isInteger(x) && Math.abs(x) < 1e15) return String(x);
+  let s = x.toPrecision(6);
+  if (s.indexOf('e') === -1 && s.indexOf('.') !== -1) s = s.replace(/\.?0+$/, '');
+  return s;
+};
+
+/* ================= UI: datasets ================= */
+function renderTabs() {
+  const tabs = $('tabs');
+  tabs.innerHTML = '';
+  datasets.forEach((d, i) => {
+    const t = document.createElement('div');
+    t.className = 'tab' + (i === active ? ' on' : '');
+    t.style.setProperty('--dsc', COLORS[i]);
+    const sw = document.createElement('span'); sw.className = 'sw';
+    const nm = document.createElement('span'); nm.textContent = d.name + ' (' + d.parsed.count + ')';
+    t.appendChild(sw); t.appendChild(nm);
+    if (datasets.length > 1) {
+      const x = document.createElement('span'); x.className = 'x'; x.textContent = '×';
+      x.addEventListener('click', e => { e.stopPropagation(); removeDs(i); });
+      t.appendChild(x);
+    }
+    t.addEventListener('click', () => { active = i; syncEditor(); });
+    tabs.appendChild(t);
+  });
+  if (datasets.length < MAX_DS) {
+    const add = document.createElement('div');
+    add.className = 'tab add'; add.textContent = T('add_ds');
+    add.addEventListener('click', addDs);
+    tabs.appendChild(add);
+  }
+}
+function nextName() {
+  const used = new Set(datasets.map(d => d.name));
+  for (let c = 65; c < 91; c++) { const n = String.fromCharCode(c); if (!used.has(n)) return n; }
+  return 'X';
+}
+function addDs() {
+  if (datasets.length >= MAX_DS) return;
+  datasets.push({ name: nextName(), raw: '', mode: 'auto', parsed: parseInput('') });
+  active = datasets.length - 1;
+  syncEditor(); refreshAll();
+}
+function removeDs(i) {
+  datasets.splice(i, 1);
+  if (active >= datasets.length) active = datasets.length - 1;
+  syncEditor(); refreshAll();
+}
+function syncEditor() {
+  const d = datasets[active];
+  $('ds-name').value = d.name;
+  $('input').value = d.raw;
+  renderTabs(); renderEcho(); renderCommaMode();
+}
+function reparse() {
+  const d = datasets[active];
+  let p = parseInput(d.raw, d.mode);
+  if (p.count > MAX_VALS) { p.values = p.values.slice(0, MAX_VALS); p.count = MAX_VALS; }
+  d.parsed = p;
+}
+function renderEcho() {
+  const d = datasets[active], p = d.parsed, e = $('echo');
+  if (p.error) {
+    e.innerHTML = '<span class="err">✗ ' +
+      (p.error.type === 'mixed' ? T('err_mixed')(esc(p.error.token)) : T('err_invalid')(esc(p.error.tokens.join(', ')))) + '</span>';
+    return;
+  }
+  if (p.count === 0) { e.innerHTML = '<span>' + T('echo_none') + '</span>'; return; }
+  const first = p.values.slice(0, 8).map(fmt).join(', ') + (p.count > 8 ? ', …' : '');
+  let h = '<span class="ok">✓ ' + T('echo_n')(p.count) + '</span> — ' + T('echo_first') + ': ' + first;
+  if (p.ambiguous) {
+    if (p.altValues) {
+      const alt = p.altValues.slice(0, 8).map(fmt).join(', ') + (p.altValues.length > 8 ? ', …' : '');
+      h += '<br><span class="warn">⚠ ' + T('echo_amb') + ' ' + alt + ' (' + p.altValues.length + '). ' + T('echo_amb2') + '</span>';
+    } else {
+      h += '<br><span class="warn">⚠ ' + T('echo_amb_hint') + '</span>';
+    }
+  }
+  e.innerHTML = h;
+}
+function renderCommaMode() {
+  const d = datasets[active];
+  const box = $('commamode');
+  box.classList.toggle('alert', d.parsed.ambiguous);
+  box.querySelectorAll('button').forEach(b => {
+    const m = b.dataset.m;
+    b.textContent = T('m_' + m) + (m !== 'auto' && d.mode === 'auto' && d.parsed.resolved === m && d.parsed.count > 0 ? ' •' : '');
+    b.classList.toggle('on', d.mode === m);
+  });
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* ================= stats table ================= */
+function refreshStats() {
+  const withData = datasets.filter(d => d.parsed.count > 0);
+  $('stats-empty').style.display = withData.length ? 'none' : 'block';
+  const tbl = $('stat-table');
+  if (!withData.length) { tbl.innerHTML = ''; return; }
+  const rows = [
+    ['s_n', s => String(s.n)], ['s_sum', s => fmt(s.sum)], ['s_mean', s => fmt(s.mean)],
+    ['s_med', s => fmt(s.med)],
+    ['s_mode', s => s.modes.length ? s.modes.slice(0, 4).map(fmt).join(', ') + (s.modes.length > 4 ? ', …' : '') : T('no_mode')],
+    ['s_sdS', s => fmt(s.sdS)], ['s_sdP', s => fmt(s.sdP)],
+    ['s_varS', s => fmt(s.varS)], ['s_varP', s => fmt(s.varP)],
+    ['s_min', s => fmt(s.min)], ['s_q1', s => fmt(s.q1)], ['s_q3', s => fmt(s.q3)],
+    ['s_iqr', s => fmt(s.iqr)], ['s_max', s => fmt(s.max)],
+    ['s_out', s => s.outliers.length ? s.outliers.slice(0, 4).map(fmt).join(', ') + (s.outliers.length > 4 ? ', …' : '') : T('none')]
+  ];
+  let h = '<tr><th></th>';
+  withData.forEach(d => {
+    const ci = datasets.indexOf(d);
+    h += '<th><span class="hdr-sw" style="background:' + COLORS[ci] + '"></span>' + esc(d.name) + '</th>';
+  });
+  h += '</tr>';
+  const stats = withData.map(d => describeVals(d.parsed.values));
+  rows.forEach(([k, f]) => {
+    h += '<tr><td>' + T(k) + '</td>';
+    stats.forEach(s => { h += '<td>' + f(s) + '</td>'; });
+    h += '</tr>';
+  });
+  tbl.innerHTML = h;
+}
+
+/* ================= charts ================= */
+function setupCanvas(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = parseInt(c.getAttribute('height'), 10);
+  c.width = w * dpr; c.height = h * dpr; c.style.height = h + 'px';
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '11px "IBM Plex Mono", monospace';
+  return { ctx, w, h };
+}
+function niceTicks(lo, hi, target) {
+  if (lo === hi) { lo -= 1; hi += 1; }
+  const span = hi - lo, step0 = span / target;
+  const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  let step = mag;
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * mag >= step0) { step = m * mag; break; }
+  const ticks = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) ticks.push(v);
+  return ticks;
+}
+function refreshHistSel() {
+  const sel = $('hist-sel'); const prev = sel.value;
+  sel.innerHTML = '';
+  datasets.forEach((d, i) => {
+    if (d.parsed.count === 0) return;
+    const o = document.createElement('option');
+    o.value = i; o.textContent = d.name;
+    sel.appendChild(o);
+  });
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+function drawHist() {
+  const { ctx, w, h } = setupCanvas($('hist'));
+  const i = parseInt($('hist-sel').value, 10);
+  const d = datasets[i];
+  if (!d || d.parsed.count === 0) return;
+  const vals = d.parsed.values, s = describeVals(vals);
+  const bins = Math.max(4, Math.min(30, Math.ceil(Math.sqrt(s.n))));
+  const lo = s.min, hi = s.max === s.min ? s.min + 1 : s.max;
+  const bw = (hi - lo) / bins, counts = new Array(bins).fill(0);
+  for (const v of vals) counts[Math.min(bins - 1, Math.floor((v - lo) / bw))]++;
+  const maxC = Math.max(...counts);
+  const padL = 40, padB = 26, padT = 10, padR = 10;
+  const pw = w - padL - padR, ph = h - padT - padB;
+  ctx.strokeStyle = '#1c2536'; ctx.fillStyle = '#8b97a8';
+  niceTicks(0, maxC, 4).forEach(t => {
+    const y = padT + ph - (t / maxC) * ph;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.fillText(fmt(t), padL - 6, y + 4);
+  });
+  ctx.fillStyle = COLORS[i] + 'cc';
+  counts.forEach((c, b) => {
+    const x = padL + (b / bins) * pw, bwpx = pw / bins;
+    const bh = maxC ? (c / maxC) * ph : 0;
+    ctx.fillRect(x + 1, padT + ph - bh, bwpx - 2, bh);
+  });
+  ctx.fillStyle = '#8b97a8'; ctx.textAlign = 'center';
+  niceTicks(lo, hi, 6).forEach(t => {
+    if (t < lo - 1e-9 || t > hi + 1e-9) return;
+    const x = padL + ((t - lo) / (hi - lo)) * pw;
+    ctx.fillText(fmt(t), x, h - 8);
+  });
+}
+function drawBox() {
+  const withData = datasets.map((d, i) => ({ d, i })).filter(o => o.d.parsed.count > 0);
+  const c = $('box');
+  c.setAttribute('height', String(Math.max(120, 40 + withData.length * 46)));
+  const { ctx, w, h } = setupCanvas(c);
+  if (!withData.length) return;
+  let lo = Infinity, hi = -Infinity;
+  const stats = withData.map(o => { const s = describeVals(o.d.parsed.values); lo = Math.min(lo, s.min); hi = Math.max(hi, s.max); return s; });
+  if (lo === hi) { lo -= 1; hi += 1; }
+  const padL = 60, padR = 16, padB = 24, padT = 8;
+  const pw = w - padL - padR;
+  const X = v => padL + ((v - lo) / (hi - lo)) * pw;
+  ctx.strokeStyle = '#1c2536'; ctx.fillStyle = '#8b97a8'; ctx.textAlign = 'center';
+  niceTicks(lo, hi, 6).forEach(t => {
+    if (t < lo - 1e-9 || t > hi + 1e-9) return;
+    ctx.beginPath(); ctx.moveTo(X(t), padT); ctx.lineTo(X(t), h - padB); ctx.stroke();
+    ctx.fillText(fmt(t), X(t), h - 8);
+  });
+  withData.forEach((o, k) => {
+    const s = stats[k], col = COLORS[o.i];
+    const cy = padT + 20 + k * 46, bh = 20;
+    const wLo = Math.max(s.min, s.loF) , wHi = Math.min(s.max, s.hiF);
+    const inLo = s.sorted.find(v => v >= s.loF), inHi = [...s.sorted].reverse().find(v => v <= s.hiF);
+    const wl = inLo !== undefined ? inLo : s.min, wh = inHi !== undefined ? inHi : s.max;
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(X(wl), cy); ctx.lineTo(X(s.q1), cy); ctx.moveTo(X(s.q3), cy); ctx.lineTo(X(wh), cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(wl), cy - 6); ctx.lineTo(X(wl), cy + 6); ctx.moveTo(X(wh), cy - 6); ctx.lineTo(X(wh), cy + 6); ctx.stroke();
+    ctx.fillStyle = col + '33';
+    ctx.fillRect(X(s.q1), cy - bh / 2, Math.max(1, X(s.q3) - X(s.q1)), bh);
+    ctx.strokeRect(X(s.q1), cy - bh / 2, Math.max(1, X(s.q3) - X(s.q1)), bh);
+    ctx.beginPath(); ctx.moveTo(X(s.med), cy - bh / 2); ctx.lineTo(X(s.med), cy + bh / 2); ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1.5;
+    ctx.fillStyle = col;
+    s.outliers.forEach(v => { ctx.beginPath(); ctx.arc(X(v), cy, 2.5, 0, 7); ctx.fill(); });
+    ctx.textAlign = 'right'; ctx.fillText(o.d.name, padL - 10, cy + 4);
+    ctx.textAlign = 'center';
+  });
+  ctx.lineWidth = 1;
+}
+function drawScatterAndReg() {
+  const xi = parseInt($('reg-x').value, 10), yi = parseInt($('reg-y').value, 10);
+  const out = $('reg-out');
+  const { ctx, w, h } = setupCanvas($('scatter'));
+  const dx = datasets[xi], dy = datasets[yi];
+  if (!dx || !dy || dx.parsed.count === 0 || dy.parsed.count === 0) {
+    out.innerHTML = '<span class="muted">' + T('reg_pick') + '</span>'; return;
+  }
+  if (xi === yi) { out.innerHTML = '<span class="warn">' + T('reg_same') + '</span>'; return; }
+  const xs = dx.parsed.values, ys = dy.parsed.values;
+  const r = regression(xs, ys);
+  if (r.error) {
+    const msg = r.error === 'len' ? T('reg_len')(xs.length, ys.length) : r.error === 'few' ? T('reg_few') : T('reg_constx');
+    out.innerHTML = '<span class="warn">⚠ ' + msg + '</span>'; return;
+  }
+  const sgn = r.intercept < 0 ? '− ' + fmt(Math.abs(r.intercept)) : '+ ' + fmt(r.intercept);
+  out.innerHTML =
+    T('reg_eq') + ': <span class="v">y = ' + fmt(r.slope) + '·x ' + sgn + '</span><br>' +
+    T('reg_r') + ': <span class="v">' + fmt(r.r) + '</span> · ' + T('reg_r2') + ': <span class="v">' + fmt(r.r2) + '</span> · n = ' + r.n + '<br>' +
+    '<span class="warn">' + T('reg_note') + '</span>';
+  let xlo = Math.min(...xs), xhi = Math.max(...xs), ylo = Math.min(...ys), yhi = Math.max(...ys);
+  if (xlo === xhi) { xlo -= 1; xhi += 1; } if (ylo === yhi) { ylo -= 1; yhi += 1; }
+  const mx = (xhi - xlo) * 0.06, my2 = (yhi - ylo) * 0.06;
+  xlo -= mx; xhi += mx; ylo -= my2; yhi += my2;
+  const padL = 48, padR = 12, padB = 26, padT = 10;
+  const pw = w - padL - padR, ph = h - padT - padB;
+  const X = v => padL + ((v - xlo) / (xhi - xlo)) * pw;
+  const Y = v => padT + ph - ((v - ylo) / (yhi - ylo)) * ph;
+  ctx.strokeStyle = '#1c2536'; ctx.fillStyle = '#8b97a8';
+  niceTicks(xlo, xhi, 6).forEach(t => {
+    ctx.beginPath(); ctx.moveTo(X(t), padT); ctx.lineTo(X(t), padT + ph); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.fillText(fmt(t), X(t), h - 8);
+  });
+  niceTicks(ylo, yhi, 5).forEach(t => {
+    ctx.beginPath(); ctx.moveTo(padL, Y(t)); ctx.lineTo(w - padR, Y(t)); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.fillText(fmt(t), padL - 6, Y(t) + 4);
+  });
+  ctx.strokeStyle = '#ffc629'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(X(xlo), Y(r.slope * xlo + r.intercept));
+  ctx.lineTo(X(xhi), Y(r.slope * xhi + r.intercept));
+  ctx.stroke(); ctx.lineWidth = 1;
+  ctx.fillStyle = '#00d4e8';
+  for (let i = 0; i < xs.length; i++) { ctx.beginPath(); ctx.arc(X(xs[i]), Y(ys[i]), 3, 0, 7); ctx.fill(); }
+}
+function refreshRegSel() {
+  ['reg-x', 'reg-y'].forEach((id, idx) => {
+    const sel = $(id); const prev = sel.value;
+    sel.innerHTML = '';
+    datasets.forEach((d, i) => {
+      if (d.parsed.count === 0) return;
+      const o = document.createElement('option');
+      o.value = i; o.textContent = d.name + ' (' + d.parsed.count + ')';
+      sel.appendChild(o);
+    });
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    else if (idx === 1 && sel.options.length > 1) sel.value = sel.options[1].value;
+  });
+}
+
+/* ================= export ================= */
+function doExport() {
+  const L = [];
+  L.push('plainkit. /statistika — ' + new Date().toISOString().slice(0, 10));
+  L.push('='.repeat(50));
+  datasets.forEach(d => {
+    if (d.parsed.count === 0) return;
+    const s = describeVals(d.parsed.values);
+    L.push('');
+    L.push('[' + d.name + '] n = ' + s.n);
+    L.push(T('s_mean') + ' = ' + fmt(s.mean) + ' | ' + T('s_med') + ' = ' + fmt(s.med) +
+      ' | ' + T('s_mode') + ' = ' + (s.modes.length ? s.modes.map(fmt).join(', ') : T('no_mode')));
+    L.push('s = ' + fmt(s.sdS) + ' | σ = ' + fmt(s.sdP) + ' | s² = ' + fmt(s.varS) + ' | σ² = ' + fmt(s.varP));
+    L.push('min = ' + fmt(s.min) + ' | Q1 = ' + fmt(s.q1) + ' | Q3 = ' + fmt(s.q3) +
+      ' | IQR = ' + fmt(s.iqr) + ' | max = ' + fmt(s.max));
+    L.push(T('s_out') + ': ' + (s.outliers.length ? s.outliers.map(fmt).join(', ') : T('none')));
+    L.push(T('h_data').toLowerCase() + ': ' + d.parsed.values.map(fmt).join(', '));
+  });
+  const xi = parseInt($('reg-x').value, 10), yi = parseInt($('reg-y').value, 10);
+  if (datasets[xi] && datasets[yi] && xi !== yi) {
+    const r = regression(datasets[xi].parsed.values, datasets[yi].parsed.values);
+    if (!r.error) {
+      L.push('');
+      L.push(T('h_reg') + ' (X = ' + datasets[xi].name + ', Y = ' + datasets[yi].name + ')');
+      L.push('y = ' + fmt(r.slope) + '·x + ' + fmt(r.intercept) + ' | r = ' + fmt(r.r) + ' | R² = ' + fmt(r.r2));
+    }
+  }
+  L.push('');
+  L.push(T('foot'));
+  const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'statistika.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ================= wiring ================= */
+function refreshAll() {
+  renderTabs(); renderEcho(); renderCommaMode();
+  refreshStats(); refreshHistSel(); refreshRegSel();
+  drawHist(); drawBox(); drawScatterAndReg();
+}
+function applyLang() {
+  document.documentElement.lang = LANG;
+  $('btn-sk').classList.toggle('on', LANG === 'sk');
+  $('btn-en').classList.toggle('on', LANG === 'en');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = I18N[LANG][el.dataset.i18n];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  document.title = (LANG === 'sk' ? 'Štatistika' : 'Statistics') + ' — plainkit.';
+  refreshAll();
+}
+$('btn-sk').addEventListener('click', () => { LANG = 'sk'; localStorage.setItem('pk-lang', 'sk'); applyLang(); });
+$('btn-en').addEventListener('click', () => { LANG = 'en'; localStorage.setItem('pk-lang', 'en'); applyLang(); });
+let debounce;
+$('input').addEventListener('input', () => {
+  datasets[active].raw = $('input').value;
+  clearTimeout(debounce);
+  debounce = setTimeout(() => { reparse(); refreshAll(); }, 200);
+});
+$('ds-name').addEventListener('input', () => {
+  datasets[active].name = $('ds-name').value.trim() || T('ds') + ' ' + (active + 1);
+  renderTabs(); refreshStats(); refreshHistSel(); refreshRegSel();
+});
+$('commamode').querySelectorAll('button').forEach(b => {
+  b.addEventListener('click', () => {
+    datasets[active].mode = b.dataset.m;
+    reparse(); refreshAll();
+  });
+});
+$('hist-sel').addEventListener('change', drawHist);
+$('reg-x').addEventListener('change', drawScatterAndReg);
+$('reg-y').addEventListener('change', drawScatterAndReg);
+$('export').addEventListener('click', doExport);
+let rdb;
+window.addEventListener('resize', () => { clearTimeout(rdb); rdb = setTimeout(() => { drawHist(); drawBox(); drawScatterAndReg(); }, 150); });
+applyLang();
+syncEditor();
+</script>
+</body>
+</html>
