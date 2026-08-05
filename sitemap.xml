@@ -64,6 +64,13 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Štatistika -->
+  <url>
+    <loc>https://plainkit.app/statistika</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Hry: Hopko -->
   <url>
     <loc>https://plainkit.app/hopko</loc>
@@ -120,6 +127,13 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Hry: Počty -->
+  <url>
+    <loc>https://plainkit.app/pocty</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- MOLARNA -->
   <url>
     <loc>https://plainkit.app/chemia/molarna</loc>
@@ -132,6 +146,34 @@
     <loc>https://plainkit.app/chemia/tabulka</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <!-- Tabuľka rozpustnosti -->
+  <url>
+    <loc>https://plainkit.app/chemia/rozpustnost</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Vyrovnávanie rovníc -->
+  <url>
+    <loc>https://plainkit.app/chemia/rovnice</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- pH a koncentrácia -->
+  <url>
+    <loc>https://plainkit.app/chemia/ph</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Fyzikálna kalkulačka -->
+  <url>
+    <loc>https://plainkit.app/fyzika/kalkulacka</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 
   <!-- Súkromie a podmienky -->
