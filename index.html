@@ -165,6 +165,9 @@ h3.section-title {
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
 .home-logo .dot { color: var(--accent); }
 .home-logo .ver { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0; margin-left: 8px; vertical-align: middle; }
+.home-logo .ver { position: relative; cursor: help; }
+.home-logo .ver-tip { display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: max-content; max-width: 260px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 6px; padding: 8px 12px; font-size: 0.72rem; line-height: 1.5; color: var(--text); white-space: normal; text-align: left; }
+.home-logo .ver:hover .ver-tip, .home-logo .ver:focus .ver-tip { display: block; }
 
 /* ═══ Svetové hodiny ═══ */
 .clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -352,7 +355,7 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver">v1.2</span></div>
+      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.3<span class="ver-tip" data-i18n="verTip">Nové vo v1.3: Štatistika — priemer, odchýlka, boxploty, regresia</span></span></div>
     </div>
 
     <!-- Svetové hodiny -->
@@ -504,6 +507,13 @@ h3.section-title {
       <a href="/qr" class="tool-link">
         <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/qr</div>
+      </a>
+
+      <!-- ── Š ── -->
+      <!-- NÁSTROJ: Štatistika -->
+      <a href="/statistika" class="tool-link">
+        <div class="label"><span data-i18n="tstatistika">Štatistika</span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/statistika</div>
       </a>
 
       <!-- ╔══════════════════════════════════════════════════════════╗
@@ -670,6 +680,7 @@ const I18N = {
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
+    tstatistika:'Štatistika', verTip:'Nové vo v1.3: Štatistika — priemer, odchýlka, boxploty, regresia',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
@@ -690,6 +701,7 @@ const I18N = {
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
+    tstatistika:'Statistics', verTip:'New in v1.3: Statistics — mean, deviation, box plots, regression',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
