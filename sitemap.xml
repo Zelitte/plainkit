@@ -183,6 +183,13 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Kancelária: Tabuľka -->
+  <url>
+    <loc>https://plainkit.app/kancelaria/tabulka</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
   <!-- ↓↓↓ KEĎ PRIDÁŠ NOVÝ NÁSTROJ, SKOPÍRUJ BLOK <url>...</url> A ZMEŇ <loc> ↓↓↓ -->
 
 </urlset>
