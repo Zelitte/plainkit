@@ -355,7 +355,7 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.4<span class="ver-tip" data-i18n="verTip">Nové vo v1.4: Tabuľka — vzorce, export do Excelu, všetko v prehliadači</span></span></div>
+      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.4<span class="ver-tip" data-i18n="verTip">Nové vo v1.4: Tabuľka so vzorcami + prehľadnejšie skupiny Kancelária a Vzdelávanie</span></span></div>
     </div>
 
     <!-- Svetové hodiny -->
@@ -477,12 +477,6 @@ h3.section-title {
         </div>
       </details>
 
-      <!-- ── P ── -->
-      <!-- NÁSTROJ: PDF -->
-      <a href="/pdf" class="tool-link">
-        <div class="label"><span data-i18n="tpdf">Pdf</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/pdf</div>
-      </a>
 
       <!-- NÁSTROJ: Počasie -->
       <a href="/pocasie" class="tool-link">
@@ -490,31 +484,15 @@ h3.section-title {
         <div class="url">plainkit.app/pocasie</div>
       </a>
 
-      <!-- NÁSTROJ: Prekladač -->
-      <a href="/preklad" class="tool-link">
-        <div class="label"><span data-i18n="tPreklad">Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/preklad</div>
-      </a>
 
-      <!-- NÁSTROJ: Prevodník jednotiek -->
-      <a href="/jednotky" class="tool-link">
-        <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/jednotky</div>
-      </a>
 
-      <!-- ── Q ── -->
-      <!-- NÁSTROJ: QR generátor -->
-      <a href="/qr" class="tool-link">
-        <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
-        <div class="url">plainkit.app/qr</div>
-      </a>
 
       <!-- ── K ── -->
       <!-- SKUPINA: Kancelária (Tabuľka + Štatistika) -->
       <details class="tool-group">
         <summary>
           <div class="label"><span data-i18n="tKanc">Kancelária</span><span class="chev">›</span></div>
-          <div class="url" data-i18n="tKancSub">Tabuľka · Štatistika</div>
+          <div class="url" data-i18n="tKancSub">Tabuľka · Štatistika · PDF · Prekladač · QR</div>
         </summary>
         <div class="group-body">
           <!-- KANCELÁRIA: Tabuľka -->
@@ -526,6 +504,21 @@ h3.section-title {
           <a href="/statistika" class="tool-link">
             <div class="label"><span data-i18n="tstatistika">Štatistika</span><span style="color:var(--text-dim)">↗</span></div>
             <div class="url">plainkit.app/statistika</div>
+          </a>
+          <!-- NÁSTROJ: PDF -->
+          <a href="/pdf" class="tool-link">
+            <div class="label"><span data-i18n="tpdf">Pdf</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/pdf</div>
+          </a>
+          <!-- NÁSTROJ: Prekladač -->
+          <a href="/preklad" class="tool-link">
+            <div class="label"><span data-i18n="tPreklad">Prekladač</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/preklad</div>
+          </a>
+          <!-- NÁSTROJ: QR generátor -->
+          <a href="/qr" class="tool-link">
+            <div class="label"><span data-i18n="tQr">QR generátor</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/qr</div>
           </a>
           <!-- ↓ ĎALŠÍ KANCELÁRSKY NÁSTROJ sem ↓ -->
         </div>
@@ -541,7 +534,7 @@ h3.section-title {
       <details class="tool-group">
         <summary>
           <div class="label"><span data-i18n="tEdu">Vzdelávanie</span><span class="chev">›</span></div>
-          <div class="url" data-i18n="tEduSub">Chémia</div>
+          <div class="url" data-i18n="tEduSub">Chémia · Fyzika · Jednotky</div>
         </summary>
         <div class="group-body">
           <!-- PREDMET: Chémia -->
@@ -594,6 +587,11 @@ h3.section-title {
               <!-- ↓ ĎALŠÍ NÁSTROJ FYZIKY sem ↓ -->
             </div>
           </details>
+          <!-- NÁSTROJ: Prevodník jednotiek -->
+          <a href="/jednotky" class="tool-link">
+            <div class="label"><span data-i18n="tJednotky">Prevodník jednotiek</span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/jednotky</div>
+          </a>
           <!-- ↓ ĎALŠÍ PREDMET (Matematika…) = skopíruj celý <details> blok vyššie ↓ -->
         </div>
       </details>
@@ -691,11 +689,11 @@ const I18N = {
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
     tGames:'Hry', tGamesSub:'9 hier · od Hada po Šach', tpocty:'Počty',
-    tEdu:'Vzdelávanie', tEduSub:'Chémia · Fyzika', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
+    tEdu:'Vzdelávanie', tEduSub:'Chémia · Fyzika · Jednotky', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika', tTabulka:'Tabuľka', verTip:'Nové vo v1.4: Tabuľka — vzorce, export do Excelu, všetko v prehliadači',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.4: Tabuľka so vzorcami + prehľadnejšie skupiny Kancelária a Vzdelávanie',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
@@ -712,11 +710,11 @@ const I18N = {
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
     tGames:'Games', tGamesSub:'9 games · from Snake to Chess', tpocty:'Mental math',
-    tEdu:'Education', tEduSub:'Chemistry · Physics', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
+    tEdu:'Education', tEduSub:'Chemistry · Physics · Units', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics', tTabulka:'Spreadsheet', verTip:'New in v1.4: Spreadsheet — formulas, Excel export, all in your browser',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.4: Spreadsheet with formulas + tidier Office and Education groups',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
