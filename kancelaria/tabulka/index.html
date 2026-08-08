@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#07090f">
+<title>Tabuľka — plainkit.</title>
+<meta name="description" content="Jednoduchá tabuľka so vzorcami priamo v prehliadači — SUM, AVERAGE, IF a ďalšie. Export do Excelu (.xlsx), kopírovanie so živými vzorcami. Bez reklám, bez registrácie, bez sledovania.">
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/IBMPlexMono-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+:root{
+  --bg:#07090f; --panel:#0d1117; --panel2:#111826; --line:#1c2536;
+  --txt:#e8edf4; --dim:#8b97a8; --cyan:#00d4e8; --yellow:#ffc629; --magenta:#ff3df2;
+  --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+  --barH:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;display:flex;flex-direction:column;overflow:hidden}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+header{display:flex;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;flex-shrink:0}
+.logo{font-family:var(--mono);font-weight:500;font-size:20px;color:var(--txt)}
+.logo:hover{text-decoration:none}
+.logo .dot{color:var(--cyan)}
+.page-title{font-family:var(--mono);color:var(--dim);font-size:13px}
+.lang{margin-left:auto;display:flex;gap:6px}
+.lang button{background:none;border:1px solid var(--line);color:var(--dim);font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:4px;cursor:pointer}
+.lang button.on{color:var(--cyan);border-color:var(--cyan)}
+/* lišta nástrojov */
+.toolbar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto;flex-shrink:0;align-items:center;scrollbar-width:none}
+.toolbar::-webkit-scrollbar{display:none}
+.tbtn{background:var(--panel);border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:13px;padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;min-height:38px}
+.tbtn:active{background:var(--panel2)}
+.tbtn.on{color:var(--cyan);border-color:var(--cyan)}
+.tbtn.warn{color:var(--yellow)}
+.tsep{width:1px;background:var(--line);align-self:stretch;flex-shrink:0}
+/* mriežka */
+#gridWrap{flex:1;overflow:auto;position:relative;overscroll-behavior:contain}
+table{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:13px}
+th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0}
+thead th{position:sticky;top:0;background:var(--panel2);color:var(--dim);font-weight:500;font-size:11px;height:30px;min-width:88px;z-index:3}
+thead th:first-child{left:0;z-index:4;min-width:38px}
+tbody th{position:sticky;left:0;background:var(--panel2);color:var(--dim);font-weight:400;font-size:11px;min-width:38px;z-index:2}
+td{min-width:88px;max-width:88px;height:34px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 6px;vertical-align:middle;cursor:cell;background:var(--bg)}
+td.num{text-align:right}
+td.b{font-weight:700}
+td.err{color:var(--magenta)}
+td.sel{outline:2px solid var(--cyan);outline-offset:-2px;background:var(--panel)}
+/* spodná editačná lišta */
+#editbar{flex-shrink:0;border-top:1px solid var(--line);background:var(--panel);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;gap:6px;align-items:center}
+#cellName{font-family:var(--mono);font-size:12px;color:var(--cyan);min-width:36px;text-align:center}
+#fx{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-family:var(--mono);font-size:16px;padding:9px 10px;min-width:0}
+#fx:focus{outline:none;border-color:var(--cyan)}
+.nav{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:15px;border-radius:6px;cursor:pointer;width:40px;height:40px;flex-shrink:0}
+.nav:active{border-color:var(--cyan)}
+/* nápoveda + pätička */
+#helpWrap{flex-shrink:0;overflow-y:auto;max-height:40vh;display:none;border-top:1px solid var(--line);background:var(--panel);padding:14px 16px;font-size:13px;color:var(--dim)}
+#helpWrap.show{display:block}
+#helpWrap h3{font-family:var(--mono);font-size:13px;color:var(--cyan);margin:10px 0 4px}
+#helpWrap h3:first-child{margin-top:0}
+#helpWrap code{font-family:var(--mono);color:var(--txt);background:var(--panel2);padding:1px 5px;border-radius:3px}
+#helpWrap p{margin:4px 0}
+#helpWrap .y{color:var(--yellow)}
+#toast{position:fixed;left:50%;bottom:calc(var(--barH) + 24px);transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cyan);color:var(--txt);font-family:var(--mono);font-size:13px;padding:9px 16px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:10;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+@media(min-width:700px){
+  td,thead th{min-width:110px}
+  td{max-width:110px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">plainkit<span class="dot">.</span></a>
+  <span class="page-title">/kancelaria/tabulka</span>
+  <div class="lang">
+    <button id="langSk" onclick="setLang('sk')">SK</button>
+    <button id="langEn" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button class="tbtn" id="btnBold" data-i18n="bBold" onclick="toggleBold()">B</button>
+  <button class="tbtn" onclick="decChange(-1)" data-i18n="bDecMinus">,0−</button>
+  <button class="tbtn" onclick="decChange(1)" data-i18n="bDecPlus">,00+</button>
+  <div class="tsep"></div>
+  <button class="tbtn" onclick="copyAll()" data-i18n="bCopy">Kopírovať</button>
+  <button class="tbtn" onclick="exportXlsx()" data-i18n="bXlsx">.xlsx</button>
+  <button class="tbtn" onclick="exportHtml()" data-i18n="bHtml">.html</button>
+  <div class="tsep"></div>
+  <button class="tbtn warn" id="btnClear" onclick="clearAll()" data-i18n="bClear">Vymazať</button>
+  <button class="tbtn" onclick="toggleHelp()" data-i18n="bHelp">? Nápoveda</button>
+</div>
+
+<div id="gridWrap"></div>
+
+<div id="helpWrap">
+  <h3 data-i18n="hFnT">Vzorce</h3>
+  <p data-i18n="hFn">Vzorec začína znakom <code>=</code>. Funkcie: <code>SUM</code>, <code>AVERAGE</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code>, <code>ROUND</code>, <code>IF</code>. Operátory <code>+ − * / ^ %</code>, porovnania <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>. Rozsah buniek: <code>A1:B5</code>.</p>
+  <p data-i18n="hSep">Argumenty oddeľuje bodkočiarka, desatinná čiarka aj bodka fungujú — rovnako ako v slovenskom Exceli: <code>=IF(A1&gt;2,5;"veľa";"málo")</code></p>
+  <h3 data-i18n="hShareT">Zdieľanie</h3>
+  <p data-i18n="hShare"><b>Kopírovať</b> vloží do schránky tabuľku aj so živými vzorcami — v Exceli na počítači stačí prilepiť. <b>.xlsx</b> stiahne súbor pre Excel (aj v telefóne). <b>.html</b> stiahne úplnú editovateľnú kópiu tohto nástroja s tvojimi dátami — funguje offline, dá sa poslať ďalej.</p>
+  <h3 data-i18n="hLimT">Čestné limity</h3>
+  <p class="y" data-i18n="hLim">Toto nie je Excel: žiadne grafy, podmienené formátovanie, viac hárkov ani krok späť. Prilepenie so vzorcami funguje v Exceli na počítači; mobilný Excel spoľahlivo otvorí až súbor .xlsx. Dáta sa ukladajú len v tomto prehliadači (localStorage).</p>
+</div>
+
+<div id="editbar">
+  <span id="cellName">A1</span>
+  <input id="fx" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="=SUM(A1:A5)">
+  <button class="nav" onclick="move(0,-1)" aria-label="hore">↑</button>
+  <button class="nav" onclick="move(0,1)" aria-label="dole">↓</button>
+  <button class="nav" onclick="move(-1,0)" aria-label="vľavo">←</button>
+  <button class="nav" onclick="move(1,0)" aria-label="vpravo">→</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="/exceljs.min.js" defer></script>
+<script>
+/* plainkit /kancelaria/tabulka — výpočtové jadro (bez DOM, testovateľné v Node)
+   Konvencie zhodné so slovenským Excelom:
+   - oddeľovač argumentov je ; (bodkočiarka)
+   - desatinná čiarka aj bodka sú platné (1,5 = 1.5)
+   - názvy funkcií anglické (SUM…) — tak ich má aj slovenský Excel
+   Chybové kódy: #NAME? #VALUE! #DIV/0! #REF! #CYCLE! #ERROR!
+*/
+const PK = (() => {
+  const COLS = 26, ROWS = 200;
+
+  const colName = c => String.fromCharCode(65 + c);
+  const refName = (c, r) => colName(c) + (r + 1);
+  function parseRef(s) {
+    const m = /^([A-Z])([0-9]{1,3})$/.exec(s.toUpperCase());
+    if (!m) return null;
+    const c = m[1].charCodeAt(0) - 65, r = parseInt(m[2], 10) - 1;
+    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return null;
+    return { c, r };
+  }
+
+  // "1 234,5" | "1234.5" | "-3,14" → číslo, inak null
+  function parseNumber(str) {
+    if (typeof str !== 'string') return null;
+    let s = str.trim().replace(/\s+/g, '');
+    if (!s) return null;
+    if (/^[+-]?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?$/.test(s)) {
+      return parseFloat(s.replace(',', '.'));
+    }
+    return null;
+  }
+
+  // ── Tokenizér ──
+  function tokenize(src) {
+    const toks = [];
+    let i = 0;
+    const push = (t, v) => toks.push({ t, v });
+    while (i < src.length) {
+      const ch = src[i];
+      if (ch === ' ' || ch === '\t') { i++; continue; }
+      if (ch === '"') { // reťazec, "" = escapovaná úvodzovka
+        let j = i + 1, out = '';
+        while (j < src.length) {
+          if (src[j] === '"') {
+            if (src[j + 1] === '"') { out += '"'; j += 2; continue; }
+            break;
+          }
+          out += src[j++];
+        }
+        if (j >= src.length) throw new Error('#ERROR!');
+        push('str', out); i = j + 1; continue;
+      }
+      let m;
+      if ((m = /^[0-9]+(?:[.,][0-9]+)?(?:[eE][+-]?[0-9]+)?/.exec(src.slice(i)))) {
+        push('num', parseFloat(m[0].replace(',', '.'))); i += m[0].length; continue;
+      }
+      if ((m = /^[A-Za-z][A-Za-z0-9]*/.exec(src.slice(i)))) {
+        const word = m[0].toUpperCase();
+        i += m[0].length;
+        // rozsah A1:B5
+        if (parseRef(word) && src[i] === ':') {
+          const m2 = /^[A-Za-z][0-9]{1,3}/.exec(src.slice(i + 1));
+          if (m2 && parseRef(m2[0])) { push('range', [word, m2[0].toUpperCase()]); i += 1 + m2[0].length; continue; }
+          throw new Error('#REF!');
+        }
+        if (src[i] === '(') { push('func', word); continue; }
+        if (parseRef(word)) { push('ref', word); continue; }
+        if (word === 'TRUE') { push('bool', true); continue; }
+        if (word === 'FALSE') { push('bool', false); continue; }
+        throw new Error('#NAME?');
+      }
+      if ((m = /^(<=|>=|<>|[=<>+\-*/^%();])/.exec(src.slice(i)))) {
+        push('op', m[1]); i += m[1].length; continue;
+      }
+      throw new Error('#ERROR!');
+    }
+    return toks;
+  }
+
+  // ── Parser (rekurzívny zostup) ──
+  // cmp → add → mul → pow(pravá asoc.) → unárne → postfix % → atóm
+  function parse(src) {
+    const toks = tokenize(src);
+    let p = 0;
+    const peek = () => toks[p];
+    const isOp = v => toks[p] && toks[p].t === 'op' && toks[p].v === v;
+    const anyOp = arr => toks[p] && toks[p].t === 'op' && arr.includes(toks[p].v) ? toks[p].v : null;
+
+    function cmp() {
+      let l = add(), o;
+      while ((o = anyOp(['=', '<>', '<', '>', '<=', '>=']))) { p++; l = { t: 'cmp', o, l, r: add() }; }
+      return l;
+    }
+    function add() {
+      let l = mul(), o;
+      while ((o = anyOp(['+', '-']))) { p++; l = { t: 'bin', o, l, r: mul() }; }
+      return l;
+    }
+    function mul() {
+      let l = pow(), o;
+      while ((o = anyOp(['*', '/']))) { p++; l = { t: 'bin', o, l, r: pow() }; }
+      return l;
+    }
+    function pow() {
+      const l = unary();
+      if (isOp('^')) { p++; return { t: 'bin', o: '^', l, r: pow() }; }
+      return l;
+    }
+    function unary() {
+      if (isOp('-')) { p++; return { t: 'neg', x: unary() }; }
+      if (isOp('+')) { p++; return unary(); }
+      return postfix();
+    }
+    function postfix() {
+      let x = atom();
+      while (isOp('%')) { p++; x = { t: 'pct', x }; }
+      return x;
+    }
+    function atom() {
+      const tk = peek();
+      if (!tk) throw new Error('#ERROR!');
+      if (tk.t === 'num') { p++; return { t: 'num', v: tk.v }; }
+      if (tk.t === 'str') { p++; return { t: 'str', v: tk.v }; }
+      if (tk.t === 'bool') { p++; return { t: 'bool', v: tk.v }; }
+      if (tk.t === 'ref') { p++; return { t: 'ref', v: tk.v }; }
+      if (tk.t === 'range') { p++; return { t: 'range', v: tk.v }; }
+      if (tk.t === 'func') {
+        p++;
+        if (!isOp('(')) throw new Error('#ERROR!');
+        p++;
+        const args = [];
+        if (!isOp(')')) {
+          args.push(cmp());
+          while (isOp(';')) { p++; args.push(cmp()); }
+        }
+        if (!isOp(')')) throw new Error('#ERROR!');
+        p++;
+        return { t: 'call', f: tk.v, args };
+      }
+      if (isOp('(')) {
+        p++;
+        const x = cmp();
+        if (!isOp(')')) throw new Error('#ERROR!');
+        p++;
+        return x;
+      }
+      throw new Error('#ERROR!');
+    }
+
+    const ast = cmp();
+    if (p !== toks.length) throw new Error('#ERROR!');
+    return ast;
+  }
+
+  // ── Referencie vo vzorci (pre graf závislostí) ──
+  function refsOf(ast, out) {
+    out = out || new Set();
+    if (!ast) return out;
+    if (ast.t === 'ref') out.add(ast.v);
+    else if (ast.t === 'range') {
+      const a = parseRef(ast.v[0]), b = parseRef(ast.v[1]);
+      for (let c = Math.min(a.c, b.c); c <= Math.max(a.c, b.c); c++)
+        for (let r = Math.min(a.r, b.r); r <= Math.max(a.r, b.r); r++)
+          out.add(refName(c, r));
+    }
+    else if (ast.t === 'bin' || ast.t === 'cmp') { refsOf(ast.l, out); refsOf(ast.r, out); }
+    else if (ast.t === 'neg' || ast.t === 'pct') refsOf(ast.x, out);
+    else if (ast.t === 'call') ast.args.forEach(a => refsOf(a, out));
+    return out;
+  }
+
+  // ── Vyhodnotenie ──
+  const isErr = v => v && typeof v === 'object' && v.err;
+  const E = code => ({ err: code });
+
+  function toNum(v) { // koercia ako Excel: prázdne=0, text→číslo alebo #VALUE!
+    if (isErr(v)) return v;
+    if (v === null || v === undefined || v === '') return 0;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'boolean') return v ? 1 : 0;
+    const n = parseNumber(String(v));
+    return n === null ? E('#VALUE!') : n;
+  }
+
+  function evalAst(ast, getVal) {
+    switch (ast.t) {
+      case 'num': return ast.v;
+      case 'str': return ast.v;
+      case 'bool': return ast.v;
+      case 'ref': return getVal(ast.v);
+      case 'range': return E('#VALUE!'); // rozsah mimo funkcie nedáva hodnotu
+      case 'neg': { const x = toNum(evalAst(ast.x, getVal)); return isErr(x) ? x : -x; }
+      case 'pct': { const x = toNum(evalAst(ast.x, getVal)); return isErr(x) ? x : x / 100; }
+      case 'bin': {
+        const a = toNum(evalAst(ast.l, getVal)); if (isErr(a)) return a;
+        const b = toNum(evalAst(ast.r, getVal)); if (isErr(b)) return b;
+        switch (ast.o) {
+          case '+': return a + b;
+          case '-': return a - b;
+          case '*': return a * b;
+          case '/': return b === 0 ? E('#DIV/0!') : a / b;
+          case '^': return Math.pow(a, b);
+        }
+      }
+      case 'cmp': {
+        let a = evalAst(ast.l, getVal); if (isErr(a)) return a;
+        let b = evalAst(ast.r, getVal); if (isErr(b)) return b;
+        // Excel: texty porovnáva bez ohľadu na veľkosť písmen
+        if (typeof a === 'string') a = a.toLowerCase();
+        if (typeof b === 'string') b = b.toLowerCase();
+        const bothNumLike = typeof a !== 'string' && typeof b !== 'string';
+        if (bothNumLike) { a = toNum(a); b = toNum(b); if (isErr(a)) return a; if (isErr(b)) return b; }
+        else if (typeof a !== typeof b) { // číslo vs text: v Exceli je číslo < text
+          return ast.o === '<>' ? true : ast.o === '=' ? false
+            : (typeof a === 'number') === ['<', '<='].includes(ast.o);
+        }
+        switch (ast.o) {
+          case '=': return a === b;
+          case '<>': return a !== b;
+          case '<': return a < b;
+          case '>': return a > b;
+          case '<=': return a <= b;
+          case '>=': return a >= b;
+        }
+      }
+      case 'call': return callFn(ast, getVal);
+    }
+    return E('#ERROR!');
+  }
+
+  // rozbalí argumenty na ploché pole hodnôt (rozsahy → bunky)
+  function flatVals(args, getVal) {
+    const out = [];
+    for (const a of args) {
+      if (a.t === 'range') {
+        const s = parseRef(a.v[0]), e = parseRef(a.v[1]);
+        for (let c = Math.min(s.c, e.c); c <= Math.max(s.c, e.c); c++)
+          for (let r = Math.min(s.r, e.r); r <= Math.max(s.r, e.r); r++)
+            out.push(getVal(refName(c, r)));
+      } else out.push(evalAst(a, getVal));
+    }
+    return out;
+  }
+  // len číselné hodnoty (Excel v SUM/AVERAGE/… ignoruje text a prázdne)
+  function numsOnly(vals) {
+    const out = [];
+    for (const v of vals) {
+      if (isErr(v)) return v;
+      if (typeof v === 'number') out.push(v);
+      else if (typeof v === 'boolean') out.push(v ? 1 : 0);
+    }
+    return out;
+  }
+
+  function callFn(ast, getVal) {
+    const f = ast.f;
+    if (f === 'IF') {
+      if (ast.args.length < 2 || ast.args.length > 3) return E('#ERROR!');
+      const c = evalAst(ast.args[0], getVal); if (isErr(c)) return c;
+      const truthy = typeof c === 'number' ? c !== 0 : typeof c === 'string' ? E('#VALUE!') : !!c;
+      if (isErr(truthy)) return truthy;
+      if (truthy) return evalAst(ast.args[1], getVal);
+      return ast.args.length === 3 ? evalAst(ast.args[2], getVal) : false;
+    }
+    if (f === 'ROUND') {
+      if (ast.args.length !== 2) return E('#ERROR!');
+      const x = toNum(evalAst(ast.args[0], getVal)); if (isErr(x)) return x;
+      const n = toNum(evalAst(ast.args[1], getVal)); if (isErr(n)) return n;
+      const k = Math.pow(10, Math.trunc(n));
+      // Excel zaokrúhľuje polovicu od nuly; toPrecision(15) ruší binárnu chybu (1,005*100 = 100,4999…)
+      const shifted = Number((Math.abs(x) * k).toPrecision(15));
+      return Math.sign(x) * Math.round(shifted) / k;
+    }
+    const vals = flatVals(ast.args, getVal);
+    const nums = numsOnly(vals);
+    if (isErr(nums)) return nums;
+    switch (f) {
+      case 'SUM': return nums.reduce((a, b) => a + b, 0);
+      case 'COUNT': return nums.length;
+      case 'AVERAGE': return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : E('#DIV/0!');
+      case 'MIN': return nums.length ? Math.min(...nums) : 0;
+      case 'MAX': return nums.length ? Math.max(...nums) : 0;
+    }
+    return E('#NAME?');
+  }
+
+  // ── Prepočet celého hárku ──
+  // cells: { 'A1': { raw:'=SUM(B1:B3)' | '12,5' | 'text' } }
+  // vráti { values: {A1: hodnota}, errors: {A1:'#…'} }
+  function recalc(cells) {
+    const parsed = {}, values = {};
+    for (const k of Object.keys(cells)) {
+      const raw = cells[k].raw;
+      if (typeof raw === 'string' && raw.startsWith('=') && raw.length > 1) {
+        try { parsed[k] = parse(raw.slice(1)); }
+        catch (e) { values[k] = E(e.message || '#ERROR!'); }
+      } else {
+        const n = parseNumber(raw);
+        values[k] = n !== null ? n : (raw ?? '');
+      }
+    }
+    const state = {}; // 0=nevidená 1=v spracovaní 2=hotová
+    function getVal(ref) {
+      if (ref in values && state[ref] !== 1) return values[ref];
+      if (state[ref] === 1) return E('#CYCLE!');
+      if (!(ref in parsed)) return ''; // prázdna bunka
+      state[ref] = 1;
+      let v;
+      try { v = evalAst(parsed[ref], getVal); }
+      catch (e) { v = E(e.message || '#ERROR!'); }
+      state[ref] = 2;
+      values[ref] = v;
+      return v;
+    }
+    for (const k of Object.keys(parsed)) getVal(k);
+    return values;
+  }
+
+  // prevod vzorca zo SK konvencie (; argumenty, , desatiny) na EN pre .xlsx (, argumenty, . desatiny)
+  function toEN(formula) {
+    const toks = tokenize(formula);
+    return toks.map(tk => {
+      if (tk.t === 'num') return String(tk.v);
+      if (tk.t === 'str') return '"' + tk.v.replace(/"/g, '""') + '"';
+      if (tk.t === 'ref') return tk.v;
+      if (tk.t === 'range') return tk.v[0] + ':' + tk.v[1];
+      if (tk.t === 'func') return tk.v + '';
+      if (tk.t === 'bool') return tk.v ? 'TRUE' : 'FALSE';
+      if (tk.t === 'op') return tk.v === ';' ? ',' : tk.v;
+      return '';
+    }).join('');
+  }
+
+  return { COLS, ROWS, colName, refName, parseRef, parseNumber, parse, refsOf, recalc, isErr, evalAst, tokenize, toEN };
+})();
+
+
+/* ═══ i18n ═══ */
+const I18N = {
+  sk: {
+    bBold:'B', bDecMinus:',0−', bDecPlus:',00+', bCopy:'Kopírovať', bXlsx:'.xlsx', bHtml:'.html',
+    bClear:'Vymazať', bClearAsk:'Naozaj? Klepni znova', bHelp:'? Nápoveda',
+    tCopied:'Skopírované — v Exceli stačí prilepiť', tCopyFail:'Kopírovanie zlyhalo',
+    tXlsxFail:'Export .xlsx zlyhal', tCleared:'Tabuľka vymazaná', tSaved:'Uložené',
+    hFnT:'Vzorce',
+    hFn:'Vzorec začína znakom <code>=</code>. Funkcie: <code>SUM</code>, <code>AVERAGE</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code>, <code>ROUND</code>, <code>IF</code>. Operátory <code>+ − * / ^ %</code>, porovnania <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>. Rozsah buniek: <code>A1:B5</code>.',
+    hSep:'Argumenty oddeľuje bodkočiarka, desatinná čiarka aj bodka fungujú — rovnako ako v slovenskom Exceli: <code>=IF(A1&gt;2,5;"veľa";"málo")</code>',
+    hShareT:'Zdieľanie',
+    hShare:'<b>Kopírovať</b> vloží do schránky tabuľku aj so živými vzorcami — v Exceli na počítači stačí prilepiť. <b>.xlsx</b> stiahne súbor pre Excel (aj v telefóne). <b>.html</b> stiahne úplnú editovateľnú kópiu tohto nástroja s tvojimi dátami — funguje offline, dá sa poslať ďalej.',
+    hLimT:'Čestné limity',
+    hLim:'Toto nie je Excel: žiadne grafy, podmienené formátovanie, viac hárkov ani krok späť. Prilepenie so vzorcami funguje v Exceli na počítači; mobilný Excel spoľahlivo otvorí až súbor .xlsx. Dáta sa ukladajú len v tomto prehliadači (localStorage).',
+    title:'Tabuľka — plainkit.'
+  },
+  en: {
+    bBold:'B', bDecMinus:'.0−', bDecPlus:'.00+', bCopy:'Copy', bXlsx:'.xlsx', bHtml:'.html',
+    bClear:'Clear', bClearAsk:'Sure? Tap again', bHelp:'? Help',
+    tCopied:'Copied — just paste into Excel', tCopyFail:'Copy failed',
+    tXlsxFail:'.xlsx export failed', tCleared:'Sheet cleared', tSaved:'Saved',
+    hFnT:'Formulas',
+    hFn:'A formula starts with <code>=</code>. Functions: <code>SUM</code>, <code>AVERAGE</code>, <code>MIN</code>, <code>MAX</code>, <code>COUNT</code>, <code>ROUND</code>, <code>IF</code>. Operators <code>+ − * / ^ %</code>, comparisons <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>. Cell range: <code>A1:B5</code>.',
+    hSep:'Arguments are separated by a semicolon; both decimal comma and dot work — same as Slovak Excel: <code>=IF(A1&gt;2.5;"high";"low")</code>',
+    hShareT:'Sharing',
+    hShare:'<b>Copy</b> puts the table on your clipboard with live formulas — just paste into desktop Excel. <b>.xlsx</b> downloads an Excel file (works on phones too). <b>.html</b> downloads a full editable copy of this tool with your data — works offline, easy to send onward.',
+    hLimT:'Honest limits',
+    hLim:'This is not Excel: no charts, conditional formatting, multiple sheets or undo. Pasting with formulas works in desktop Excel; mobile Excel reliably opens the .xlsx file. Data is stored only in this browser (localStorage).',
+    title:'Spreadsheet — plainkit.'
+  }
+};
+let LANG = localStorage.getItem('pk_lang') || 'sk';
+
+/* ═══ stav ═══ */
+let cells = {};          // { A1: { raw:'…', fmt:{b:true,d:2} } }
+let values = {};         // vypočítané hodnoty
+let sel = { c: 0, r: 0 };
+let clearArmed = false;
+const $ = id => document.getElementById(id);
+const STORE = 'pk_tabulka_v1';
+
+/* ═══ mriežka ═══ */
+function buildGrid() {
+  const t = ['<table><thead><tr><th></th>'];
+  for (let c = 0; c < PK.COLS; c++) t.push('<th>' + PK.colName(c) + '</th>');
+  t.push('</tr></thead><tbody>');
+  for (let r = 0; r < PK.ROWS; r++) {
+    t.push('<tr><th>' + (r + 1) + '</th>');
+    for (let c = 0; c < PK.COLS; c++) t.push('<td id="c' + PK.refName(c, r) + '"></td>');
+    t.push('</tr>');
+  }
+  t.push('</tbody></table>');
+  $('gridWrap').innerHTML = t.join('');
+}
+
+function fmtNum(n, d) {
+  let s;
+  if (d !== null && d !== undefined) s = n.toFixed(d);
+  else {
+    s = String(Math.round(n * 1e10) / 1e10);
+  }
+  if (LANG === 'sk') s = s.replace('.', ',');
+  return s;
+}
+function displayVal(ref) {
+  const v = values[ref];
+  if (v === undefined || v === '') return '';
+  if (PK.isErr(v)) return v.err;
+  if (typeof v === 'number') return fmtNum(v, cells[ref] && cells[ref].fmt ? cells[ref].fmt.d : null);
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  return String(v);
+}
+
+let rendered = new Set();
+function renderCells() {
+  const now = new Set(Object.keys(cells).filter(k => cells[k].raw !== '' || cells[k].fmt));
+  for (const k of rendered) if (!now.has(k)) {
+    const td = $('c' + k); if (td) { td.textContent = ''; td.className = td.classList.contains('sel') ? 'sel' : ''; }
+  }
+  for (const k of now) {
+    const td = $('c' + k); if (!td) continue;
+    const v = values[k];
+    td.textContent = displayVal(k);
+    let cls = [];
+    if (typeof v === 'number') cls.push('num');
+    if (PK.isErr(v)) cls.push('err');
+    if (cells[k].fmt && cells[k].fmt.b) cls.push('b');
+    if (td.classList.contains('sel')) cls.push('sel');
+    td.className = cls.join(' ');
+  }
+  rendered = now;
+}
+
+function recalcAll() {
+  const src = {};
+  for (const k of Object.keys(cells)) if (cells[k].raw !== '') src[k] = { raw: cells[k].raw };
+  values = PK.recalc(src);
+  renderCells();
+}
+
+/* ═══ výber a editácia ═══ */
+function selRef() { return PK.refName(sel.c, sel.r); }
+function select(c, r, focus) {
+  commit();
+  const old = $('c' + selRef()); if (old) old.classList.remove('sel');
+  sel = { c, r };
+  const ref = selRef();
+  const td = $('c' + ref);
+  if (td) { td.classList.add('sel'); if (td.scrollIntoView) td.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  $('cellName').textContent = ref;
+  $('fx').value = cells[ref] ? cells[ref].raw : '';
+  updateBoldBtn();
+  if (focus) $('fx').focus();
+}
+function commit() {
+  const ref = selRef();
+  const raw = $('fx').value;
+  const cur = cells[ref] ? cells[ref].raw : '';
+  if (raw === cur) return;
+  if (raw === '') {
+    if (cells[ref]) { if (cells[ref].fmt) cells[ref].raw = ''; else delete cells[ref]; }
+  } else {
+    if (!cells[ref]) cells[ref] = { raw: '' };
+    cells[ref].raw = raw;
+  }
+  recalcAll();
+  save();
+}
+function move(dc, dr) {
+  const c = Math.min(PK.COLS - 1, Math.max(0, sel.c + dc));
+  const r = Math.min(PK.ROWS - 1, Math.max(0, sel.r + dr));
+  const keep = document.activeElement === $('fx');
+  select(c, r, keep);
+}
+
+/* ═══ formát ═══ */
+function fmtOf(ref) { if (!cells[ref]) cells[ref] = { raw: '' }; if (!cells[ref].fmt) cells[ref].fmt = {}; return cells[ref].fmt; }
+function cleanFmt(ref) {
+  const c = cells[ref]; if (!c || !c.fmt) return;
+  if (!c.fmt.b && (c.fmt.d === null || c.fmt.d === undefined)) delete c.fmt;
+  if (c.raw === '' && !c.fmt) delete cells[ref];
+}
+function toggleBold() {
+  commit();
+  const ref = selRef(); const f = fmtOf(ref);
+  f.b = !f.b; if (!f.b) delete f.b;
+  cleanFmt(ref); renderCells(); save(); updateBoldBtn();
+}
+function updateBoldBtn() {
+  const c = cells[selRef()];
+  $('btnBold').classList.toggle('on', !!(c && c.fmt && c.fmt.b));
+}
+function decChange(step) {
+  commit();
+  const ref = selRef(); const f = fmtOf(ref);
+  let d = (f.d === null || f.d === undefined) ? 2 : f.d + step;
+  d = Math.min(8, Math.max(0, d));
+  f.d = d;
+  cleanFmt(ref); renderCells(); save();
+}
+
+/* ═══ ukladanie ═══ */
+function save() { try { localStorage.setItem(STORE, JSON.stringify({ cells })); } catch (e) {} }
+function load() {
+  const emb = document.getElementById('pk-data');
+  if (emb) { try { cells = JSON.parse(emb.textContent).cells || {}; save(); return; } catch (e) {} }
+  try { const s = localStorage.getItem(STORE); if (s) cells = JSON.parse(s).cells || {}; } catch (e) {}
+}
+
+/* ═══ použitá oblasť ═══ */
+function usedRange() {
+  let maxC = -1, maxR = -1;
+  for (const k of Object.keys(cells)) {
+    if (cells[k].raw === '') continue;
+    const p = PK.parseRef(k);
+    if (p.c > maxC) maxC = p.c;
+    if (p.r > maxR) maxR = p.r;
+  }
+  return { maxC, maxR };
+}
+
+/* ═══ kopírovanie ═══ */
+function copyAll() {
+  commit();
+  const { maxC, maxR } = usedRange();
+  if (maxC < 0) { toast(T('tCopyFail')); return; }
+  const tsv = [], htmlRows = [];
+  for (let r = 0; r <= maxR; r++) {
+    const line = [], hline = [];
+    for (let c = 0; c <= maxC; c++) {
+      const ref = PK.refName(c, r);
+      const cell = cells[ref];
+      const raw = cell ? cell.raw : '';
+      // TSV: vzorce ostávajú živé (Excel ich pri prilepení interpretuje)
+      line.push(raw.startsWith('=') ? raw : displayVal(ref));
+      const style = [];
+      if (cell && cell.fmt && cell.fmt.b) style.push('font-weight:bold');
+      if (typeof values[ref] === 'number') style.push('text-align:right');
+      hline.push('<td' + (style.length ? ' style="' + style.join(';') + '"' : '') + '>' + esc(displayVal(ref)) + '</td>');
+    }
+    tsv.push(line.join('\t'));
+    htmlRows.push('<tr>' + hline.join('') + '</tr>');
+  }
+  const plain = tsv.join('\n');
+  const html = '<table>' + htmlRows.join('') + '</table>';
+  if (navigator.clipboard && window.ClipboardItem) {
+    navigator.clipboard.write([new ClipboardItem({
+      'text/plain': new Blob([plain], { type: 'text/plain' }),
+      'text/html': new Blob([html], { type: 'text/html' })
+    })]).then(() => toast(T('tCopied')), () => fallbackCopy(plain));
+  } else fallbackCopy(plain);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast(T('tCopied')); }
+  catch (e) { toast(T('tCopyFail')); }
+  document.body.removeChild(ta);
+}
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* ═══ export .xlsx ═══ */
+async function exportXlsx() {
+  commit();
+  try {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('plainkit');
+    const { maxC, maxR } = usedRange();
+    for (let r = 0; r <= maxR; r++) for (let c = 0; c <= maxC; c++) {
+      const ref = PK.refName(c, r);
+      const cell = cells[ref];
+      if (!cell || cell.raw === '') continue;
+      const x = ws.getCell(r + 1, c + 1);
+      if (cell.raw.startsWith('=')) {
+        let en; try { en = PK.toEN(cell.raw.slice(1)); } catch (e) { en = null; }
+        if (en) {
+          const v = values[ref];
+          x.value = { formula: en, result: PK.isErr(v) ? undefined : v };
+        } else x.value = cell.raw;
+      } else {
+        const n = PK.parseNumber(cell.raw);
+        x.value = n !== null ? n : cell.raw;
+      }
+      if (cell.fmt) {
+        if (cell.fmt.b) x.font = { bold: true };
+        if (cell.fmt.d !== null && cell.fmt.d !== undefined)
+          x.numFmt = cell.fmt.d > 0 ? '0.' + '0'.repeat(cell.fmt.d) : '0';
+      }
+    }
+    const buf = await wb.xlsx.writeBuffer();
+    download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'plainkit-tabulka.xlsx');
+  } catch (e) { toast(T('tXlsxFail')); }
+}
+
+/* ═══ export .html — samostatná editovateľná kópia ═══ */
+async function exportHtml() {
+  commit();
+  let dataEl = document.getElementById('pk-data');
+  if (!dataEl) {
+    dataEl = document.createElement('script');
+    dataEl.type = 'application/json';
+    dataEl.id = 'pk-data';
+    document.body.appendChild(dataEl);
+  }
+  dataEl.textContent = JSON.stringify({ cells });
+  let src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  // ExcelJS vložiť inline, aby .xlsx fungoval aj v kópii offline
+  if (src.includes('src="/exceljs.min.js"')) {
+    try {
+      const lib = await (await fetch('/exceljs.min.js')).text();
+      src = src.replace(/<script src="\/exceljs\.min\.js" defer><\/script>/, '<script>' + lib + '<\/script>');
+    } catch (e) { /* offline — kópia bude bez .xlsx exportu */ }
+  }
+  download(new Blob([src], { type: 'text/html' }), 'plainkit-tabulka.html');
+  dataEl.textContent = '';
+}
+function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ═══ vymazanie (dvojité potvrdenie) ═══ */
+function clearAll() {
+  if (!clearArmed) {
+    clearArmed = true;
+    $('btnClear').textContent = T('bClearAsk');
+    setTimeout(() => { clearArmed = false; $('btnClear').textContent = T('bClear'); }, 2500);
+    return;
+  }
+  clearArmed = false;
+  cells = {}; values = {};
+  $('btnClear').textContent = T('bClear');
+  $('fx').value = '';
+  recalcAll(); save();
+  toast(T('tCleared'));
+}
+
+/* ═══ drobnosti ═══ */
+function toggleHelp() { $('helpWrap').classList.toggle('show'); }
+let toastTimer;
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+function T(k) { return I18N[LANG][k]; }
+function setLang(l) {
+  LANG = l; localStorage.setItem('pk_lang', l);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (I18N[l][k] !== undefined) el.innerHTML = I18N[l][k];
+  });
+  $('langSk').classList.toggle('on', l === 'sk');
+  $('langEn').classList.toggle('on', l === 'en');
+  document.title = I18N[l].title;
+  document.documentElement.lang = l;
+  renderCells();
+}
+
+/* ═══ udalosti ═══ */
+$('gridWrap') && init();
+function init() {
+  buildGrid();
+  load();
+  recalcAll();
+  setLang(LANG);
+  select(0, 0, false);
+
+  $('gridWrap').addEventListener('click', e => {
+    const td = e.target.closest('td');
+    if (!td || !td.id) return;
+    const ref = td.id.slice(1);
+    const p = PK.parseRef(ref);
+    if (!p) return;
+    const already = p.c === sel.c && p.r === sel.r;
+    select(p.c, p.r, already); // druhý klepnutím sa otvorí klávesnica
+  });
+
+  $('fx').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); move(0, 1); }
+    else if (e.key === 'Escape') { $('fx').value = cells[selRef()] ? cells[selRef()].raw : ''; $('fx').blur(); }
+    else if (e.key === 'Tab') { e.preventDefault(); commit(); move(e.shiftKey ? -1 : 1, 0); }
+  });
+  $('fx').addEventListener('blur', commit);
+}
+</script>
+</body>
+</html>
