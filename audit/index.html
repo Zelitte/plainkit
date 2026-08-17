@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zásady ochrany súkromia — plainkit. audit</title>
+<meta name="description" content="Zásady ochrany súkromia pre Android aplikáciu plainkit. audit. Celá analýza prebieha v telefóne, žiadne osobné údaje sa neodosielajú.">
+<style>
+  :root{
+    --bg:#0a0f14;
+    --bg2:#07090f;
+    --fg:#dbe7ea;
+    --muted:#8ba6ad;
+    --dim:#5b757c;
+    --accent:#00d4e8;
+    --line:#16303a;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.65;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:44rem;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+  header{border-bottom:1px solid var(--line);padding-bottom:1.25rem;margin-bottom:2rem}
+  .brand{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+  .brand a{
+    font-family:var(--mono);
+    font-size:1.5rem;
+    color:var(--accent);
+    text-decoration:none;
+    letter-spacing:-.02em;
+  }
+  .brand a:hover,.brand a:focus{text-decoration:underline}
+  .brand span{font-family:var(--mono);color:var(--muted);font-size:1.1rem}
+  .badge{
+    margin-top:.75rem;
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--dim);
+    letter-spacing:.02em;
+  }
+
+  .langbar{display:flex;gap:.5rem;margin-top:1.25rem}
+  .langbar button{
+    font-family:var(--mono);
+    font-size:.85rem;
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:.3rem .9rem;
+    cursor:pointer;
+  }
+  .langbar button[aria-pressed="true"]{
+    color:var(--bg2);
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .langbar button:hover{border-color:var(--accent)}
+
+  h1{font-size:1.7rem;line-height:1.25;margin:0 0 .35rem;letter-spacing:-.01em}
+  .updated{font-family:var(--mono);font-size:.8rem;color:var(--dim);margin:0 0 2rem}
+  h2{
+    font-size:1.05rem;
+    margin:2.4rem 0 .6rem;
+    color:var(--accent);
+    font-family:var(--mono);
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+  p{margin:0 0 1rem}
+  ul{margin:0 0 1rem;padding-left:1.2rem}
+  li{margin:.35rem 0}
+  strong{color:#fff}
+  code{
+    font-family:var(--mono);
+    font-size:.9em;
+    background:#0f1a21;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:.05em .35em;
+  }
+  a{color:var(--accent)}
+
+  .lead{
+    border-left:2px solid var(--accent);
+    padding:.1rem 0 .1rem 1rem;
+    color:#eaf6f8;
+  }
+  .note{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:1rem 1.1rem;
+    background:#0c141a;
+    margin:1.25rem 0;
+  }
+  .note p:last-child{margin-bottom:0}
+
+  footer{
+    margin-top:3rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--line);
+    font-size:.9rem;
+    color:var(--dim);
+  }
+  footer a{color:var(--muted)}
+
+  [data-lang]{display:none}
+  html[lang="sk"] [data-lang="sk"]{display:block}
+  html[lang="en"] [data-lang="en"]{display:block}
+  html[lang="sk"] li[data-lang="sk"]{display:list-item}
+  html[lang="en"] li[data-lang="en"]{display:list-item}
+  html[lang="sk"] span[data-lang="sk"]{display:inline}
+  html[lang="en"] span[data-lang="en"]{display:inline}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <a href="/">plainkit.</a><span>audit</span>
+  </div>
+  <div class="badge">no ads · no signup · nothing is uploaded</div>
+  <div class="langbar">
+    <button type="button" id="btn-sk" aria-pressed="true">Slovensky</button>
+    <button type="button" id="btn-en" aria-pressed="false">English</button>
+  </div>
+</header>
+
+<!-- ─────────────────────────  SK  ───────────────────────── -->
+<main data-lang="sk">
+
+  <h1>Zásady ochrany súkromia</h1>
+  <p class="updated">Android aplikácia „plainkit. audit" · posledná aktualizácia 16. 8. 2026</p>
+
+  <p class="lead"><strong>Aplikácia nezbiera, neukladá ani neodosiela žiadne osobné údaje.</strong>
+  Celá analýza prebieha vo vašom telefóne. Výsledky nikdy neopustia zariadenie.</p>
+
+  <h2>Čo aplikácia robí</h2>
+  <p>Audit prečíta zoznam aplikácií nainštalovaných vo vašom telefóne, pozrie sa
+  do ich inštalačných súborov (APK) a hľadá v nich známe sledovacie knižnice —
+  reklamné, marketingové, analytické, nástroje na detekciu podvodov a na hlásenie
+  pádov. Výsledok spojí s povoleniami, ktoré daná aplikácia žiada a ktoré má
+  skutočne udelené, a zobrazí vám ho v zrozumiteľnej vete.</p>
+  <p>Všetky tieto operácie prebiehajú <strong>lokálne, vo vašom zariadení</strong>.
+  Nič sa pri nich neodosiela na žiadny server.</p>
+
+  <h2>Prečo aplikácia potrebuje vidieť ostatné aplikácie</h2>
+  <p>Aby mohla robiť to, na čo je určená, potrebuje systémové oprávnenie
+  <code>QUERY_ALL_PACKAGES</code>, ktoré jej umožňuje získať zoznam nainštalovaných
+  aplikácií. Bez neho by videla len samu seba.</p>
+  <p>Tento zoznam sa používa výhradne na zobrazenie a analýzu priamo v aplikácii.
+  <strong>Nikam sa neodosiela, nikde sa nezálohuje a s nikým sa nezdieľa.</strong></p>
+
+  <h2>Kde sú uložené výsledky</h2>
+  <p>Výsledky skenov a história zmien sa ukladajú do lokálnej databázy v súkromnom
+  úložisku aplikácie vo vašom zariadení. Prístup k nim nemá žiadna iná aplikácia
+  ani my.</p>
+  <ul>
+    <li>V Nastaveniach aplikácie môžete kedykoľvek vymazať log zmien alebo všetky
+    výsledky skenov.</li>
+    <li>Odinštalovaním aplikácie sa všetky jej údaje nenávratne odstránia.</li>
+  </ul>
+
+  <h2>Sieťové spojenia</h2>
+  <p>Aplikácia funguje aj úplne bez internetu. Existuje však jedno spojenie,
+  ktoré môže nadviazať, a preto ho tu uvádzame otvorene:</p>
+  <div class="note">
+    <p><strong>Aktualizácia zoznamu signatúr.</strong> Rozpoznávanie sledovacích
+    knižníc stojí na zozname signatúr, ktorý je zabudovaný priamo v aplikácii.
+    Aby nezastarával, aplikácia si môže z <code>plainkit.app</code> stiahnuť jeho
+    novšiu verziu.</p>
+    <p>Toto spojenie je <strong>jednosmerné</strong>: aplikácia iba <em>sťahuje</em>
+    verejný súbor so zoznamom. <strong>Neodosiela pritom nič</strong> — ani zoznam
+    vašich aplikácií, ani výsledky, ani žiadny identifikátor zariadenia či
+    používateľa.</p>
+    <p>Ako pri každom bežnom sťahovaní zo siete platí, že hostiteľ webu
+    <strong>Cloudflare</strong> (u ktorého je plainkit.app prevádzkovaný) pri takom
+    spojení vidí <strong>IP adresu</strong> vášho pripojenia a technické údaje
+    požiadavky, a to na úrovni infraštruktúry. Nedokážeme tomu zabrániť a nechceme
+    to zamlčať. Z IP adresy sa nedá zistiť, aké aplikácie máte v telefóne — tá
+    informácia sa neodosiela vôbec.</p>
+  </div>
+
+  <h2>Čo aplikácia nerobí</h2>
+  <ul>
+    <li>Neobsahuje žiadne reklamy.</li>
+    <li>Nevyžaduje registráciu ani účet.</li>
+    <li>Neobsahuje analytiku, meranie používania ani hlásenie pádov —
+    <strong>samotný Audit neobsahuje žiadnu sledovaciu knižnicu</strong>, čo si
+    môžete overiť ktorýmkoľvek nástrojom tohto typu vrátane jeho samého.</li>
+    <li>Nepoužíva reklamné identifikátory.</li>
+    <li>Nepredáva ani nezdieľa žiadne údaje s tretími stranami, pretože žiadne
+    nezískava.</li>
+  </ul>
+
+  <h2>Presnosť a hranice</h2>
+  <p>Kvôli poctivosti uvádzame aj to, čo aplikácia <em>nevie</em>:</p>
+  <ul>
+    <li>Hovorí, <strong>čo je v kóde aplikácie prítomné</strong>, nie čo sa práve
+    deje. Prítomnosť analytickej knižnice neznamená, že sa v danej chvíli
+    odosielajú údaje.</li>
+    <li>Zoznam signatúr <strong>nie je úplný</strong>, takže výsledky skôr
+    podhodnocujú, než preháňajú.</li>
+    <li>Výsledok je informácia, ktorá vám má pomôcť rozhodnúť sa. Nie je to
+    obvinenie ani odborný posudok.</li>
+  </ul>
+
+  <h2>Deti a citlivé údaje</h2>
+  <p>Aplikácia nie je zameraná na deti a vedome od nikoho nezískava žiadne osobné
+  ani citlivé údaje.</p>
+
+  <h2>Zmeny týchto zásad</h2>
+  <p>Ak sa fungovanie aplikácie zmení tak, že to ovplyvní tento dokument,
+  aktualizujeme ho a zmeníme dátum uvedený hore. Podstatné zmeny sa objavia aj
+  v popise novej verzie aplikácie.</p>
+
+  <h2>Kontakt</h2>
+  <p>Otázky, pripomienky alebo nahlásenie chyby: <a href="mailto:4o2a11@gmail.com">admin</a></p>
+  <p>Audit je súčasťou projektu <a href="/">plainkit.app</a>.</p>
+
+</main>
+
+<!-- ─────────────────────────  EN  ───────────────────────── -->
+<main data-lang="en">
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Android app "plainkit. audit" · last updated 16 August 2026</p>
+
+  <p class="lead"><strong>The app does not collect, store or transmit any personal
+  data.</strong> The entire analysis runs on your phone. Results never leave your
+  device.</p>
+
+  <h2>What the app does</h2>
+  <p>Audit reads the list of applications installed on your phone, looks inside
+  their installation files (APKs) and searches for known tracking libraries —
+  advertising, marketing, analytics, fraud detection and crash reporting. It then
+  combines this with the permissions each app requests and has actually been
+  granted, and presents the result as a plain-language sentence.</p>
+  <p>All of this happens <strong>locally, on your device</strong>. Nothing is sent
+  to any server in the process.</p>
+
+  <h2>Why the app needs to see your other apps</h2>
+  <p>To do what it is built for, the app needs the <code>QUERY_ALL_PACKAGES</code>
+  system permission, which allows it to obtain the list of installed applications.
+  Without it, it would only be able to see itself.</p>
+  <p>This list is used solely for display and analysis inside the app.
+  <strong>It is never uploaded, backed up or shared with anyone.</strong></p>
+
+  <h2>Where results are stored</h2>
+  <p>Scan results and the change history are stored in a local database inside the
+  app's private storage on your device. No other application — and not us — has
+  access to them.</p>
+  <ul>
+    <li>In the app's Settings you can clear the change log or all scan results at
+    any time.</li>
+    <li>Uninstalling the app permanently removes all of its data.</li>
+  </ul>
+
+  <h2>Network connections</h2>
+  <p>The app works fully offline. There is, however, one connection it may make,
+  which we state here openly:</p>
+  <div class="note">
+    <p><strong>Updating the signature list.</strong> Detection of tracking
+    libraries relies on a signature list bundled inside the app. To keep it from
+    going stale, the app may download a newer version of that list from
+    <code>plainkit.app</code>.</p>
+    <p>This connection is <strong>one-way</strong>: the app only <em>downloads</em>
+    a public list file. <strong>It sends nothing</strong> — not the list of your
+    apps, not the results, and no device or user identifier.</p>
+    <p>As with any ordinary download, the web host <strong>Cloudflare</strong>
+    (which serves plainkit.app) can see the <strong>IP address</strong> of your
+    connection and technical request data at the infrastructure level. We cannot
+    prevent this and we will not hide it. An IP address does not reveal which apps
+    you have installed — that information is never transmitted at all.</p>
+  </div>
+
+  <h2>What the app does not do</h2>
+  <ul>
+    <li>It contains no advertising.</li>
+    <li>It requires no registration or account.</li>
+    <li>It contains no analytics, usage measurement or crash reporting —
+    <strong>Audit itself contains no tracking library whatsoever</strong>, which
+    you can verify with any tool of this kind, including Audit itself.</li>
+    <li>It does not use advertising identifiers.</li>
+    <li>It does not sell or share any data with third parties, because it obtains
+    none.</li>
+  </ul>
+
+  <h2>Accuracy and limits</h2>
+  <p>In the interest of honesty, here is what the app <em>cannot</em> tell you:</p>
+  <ul>
+    <li>It reports <strong>what is present in an app's code</strong>, not what is
+    happening right now. The presence of an analytics library does not mean data is
+    being sent at this moment.</li>
+    <li>The signature list is <strong>not complete</strong>, so results tend to
+    under-report rather than exaggerate.</li>
+    <li>The result is information to help you decide. It is not an accusation nor
+    an expert assessment.</li>
+  </ul>
+
+  <h2>Children and sensitive data</h2>
+  <p>The app is not directed at children and does not knowingly obtain any personal
+  or sensitive data from anyone.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If the app changes in a way that affects this document, we will update it and
+  change the date shown above. Significant changes will also be noted in the
+  release notes of the new app version.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, feedback or bug reports: <a href="mailto:4o2a11@gmail.com">admin</a></p>
+  <p>Audit is part of the <a href="/">plainkit.app</a> project.</p>
+
+</main>
+
+<footer>
+  <span data-lang="sk">Späť na <a href="/">plainkit.app</a></span>
+  <span data-lang="en">Back to <a href="/">plainkit.app</a></span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var sk = document.getElementById('btn-sk');
+  var en = document.getElementById('btn-en');
+
+  function set(lang) {
+    root.setAttribute('lang', lang);
+    sk.setAttribute('aria-pressed', lang === 'sk' ? 'true' : 'false');
+    en.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+    document.title = (lang === 'sk')
+      ? 'Zásady ochrany súkromia — plainkit. audit'
+      : 'Privacy Policy — plainkit. audit';
+  }
+
+  sk.addEventListener('click', function () { set('sk'); });
+  en.addEventListener('click', function () { set('en'); });
+
+  // ak má prehliadač nastavenú inú reč než slovenčinu/češtinu, začni v angličtine
+  var nav = (navigator.language || 'sk').toLowerCase();
+  if (nav.indexOf('sk') !== 0 && nav.indexOf('cs') !== 0) set('en');
+})();
+</script>
+
+</body>
+</html>
