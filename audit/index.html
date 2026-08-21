@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zásady ochrany súkromia — plainkit. audit</title>
-<meta name="description" content="Zásady ochrany súkromia pre Android aplikáciu plainkit. audit. Celá analýza prebieha v telefóne, žiadne osobné údaje sa neodosielajú.">
+<title>plainkit. audit — čo vaše aplikácie skutočne môžu</title>
+<meta name="description" content="Android aplikácia, ktorá zrozumiteľne ukáže, čo vaše aplikácie môžu a aké sledovacie knižnice obsahujú. Celá analýza prebieha v telefóne, nič sa neodosiela. Bez reklám, bez účtu.">
 <style>
   :root{
     --bg:#0a0f14;
@@ -76,6 +76,13 @@
     font-weight:600;
     letter-spacing:-.01em;
   }
+  h2.major{
+    font-size:1.45rem;
+    font-family:var(--sans);
+    color:var(--fg);
+    margin:0 0 .35rem;
+    letter-spacing:-.01em;
+  }
   p{margin:0 0 1rem}
   ul{margin:0 0 1rem;padding-left:1.2rem}
   li{margin:.35rem 0}
@@ -103,6 +110,82 @@
     margin:1.25rem 0;
   }
   .note p:last-child{margin-bottom:0}
+
+  /* ── stránka aplikácie ── */
+  .hero h1{font-size:2rem;margin-bottom:.6rem}
+  .hero .lead{font-size:1.1rem;margin-bottom:1.75rem}
+
+  .shots{
+    display:flex;
+    gap:.75rem;
+    overflow-x:auto;
+    padding-bottom:.75rem;
+    margin:0 0 1.75rem;
+    scrollbar-width:thin;
+  }
+  .shots img{
+    flex:0 0 auto;
+    width:min(13rem,42vw);
+    height:auto;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--bg2);
+  }
+
+  .dl{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:1.05rem;
+    font-weight:600;
+    color:var(--bg2);
+    background:var(--accent);
+    border-radius:4px;
+    padding:.85rem 1.6rem;
+    text-decoration:none;
+    letter-spacing:-.01em;
+  }
+  .dl:hover,.dl:focus{filter:brightness(1.12)}
+  .meta{
+    font-family:var(--mono);
+    font-size:.8rem;
+    color:var(--dim);
+    margin:.7rem 0 0;
+  }
+  .verify{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:1rem 1.1rem;
+    background:#0c141a;
+    margin:1.75rem 0;
+    font-size:.95rem;
+  }
+  .verify p{margin:0 0 .6rem}
+  .verify p:last-child{margin-bottom:0}
+  .hash{
+    display:block;
+    font-family:var(--mono);
+    font-size:.78rem;
+    line-height:1.5;
+    color:var(--muted);
+    background:#0f1a21;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:.6rem .7rem;
+    overflow-wrap:anywhere;
+    word-break:break-all;
+  }
+  .links{
+    font-family:var(--mono);
+    font-size:.9rem;
+    margin:1.5rem 0 0;
+  }
+  .links a{margin-right:1.25rem;display:inline-block}
+
+  .divider{
+    border:0;
+    border-top:1px solid var(--line);
+    margin:3.5rem 0 2.25rem;
+  }
 
   footer{
     margin-top:3rem;
@@ -136,11 +219,140 @@
   </div>
 </header>
 
+<!-- ═════════════  STRÁNKA APLIKÁCIE (spoločná, texty prepínané)  ═════════════ -->
+<section class="hero">
+
+  <h1>
+    <span data-lang="sk">Čo vaše aplikácie skutočne môžu</span>
+    <span data-lang="en">What your apps can actually do</span>
+  </h1>
+
+  <p class="lead">
+    <span data-lang="sk">Málokto zistí, že baterka má povolený mikrofón alebo že hra
+    spred roka stále vidí kontakty. Audit vypíše každú nainštalovanú aplikáciu
+    a normálnou vetou povie, kam dočiahne a čo v sebe nesie.</span>
+    <span data-lang="en">Most people never find out that a flashlight app has been
+    granted the microphone, or that a game they installed last year still sees their
+    contacts. Audit lists every installed app and tells you, in a normal sentence,
+    what it can reach and what it carries inside.</span>
+  </p>
+
+  <div class="shots">
+    <img src="img/povolenia.png" alt="Povolenia zrozumiteľnou rečou" loading="lazy">
+    <img src="img/zoznam_sken.jpg" alt="Zoznam aplikácií" loading="lazy">
+    <img src="img/uvodna_obrazovka.jpg" alt="Úvodná obrazovka" loading="lazy">
+  </div>
+
+  <p>
+    <a class="dl" href="https://github.com/Zelitte/plainkit-audit/releases/latest/download/app-release.apk">
+      <span data-lang="sk">Stiahnuť pre Android</span>
+      <span data-lang="en">Download for Android</span>
+    </a>
+  </p>
+  <p class="meta">v1.0 · 7,85 MB · Android 8.0+ · GPLv3</p>
+
+  <div class="verify">
+    <p>
+      <span data-lang="sk"><strong>Inštalácia.</strong> Stiahnutý súbor otvorte
+      v telefóne. Android sa spýta, či povoliť inštaláciu z tohto zdroja — aplikácia
+      nie je z Google Play. Samotný súbor je uložený na GitHube; sťahovanie sa spustí
+      až po kliknutí, stránka sa naň sama nepripája.</span>
+      <span data-lang="en"><strong>Installing.</strong> Open the downloaded file on
+      your phone. Android will ask whether to allow installation from this source —
+      the app is not distributed through Google Play. The file itself is hosted on
+      GitHub; the download starts only when you click, this page never connects to it
+      on its own.</span>
+    </p>
+    <p>
+      <span data-lang="sk"><strong>Overenie súboru.</strong> Ak chcete mať istotu, že
+      máte presne ten súbor, ktorý sme vydali, porovnajte jeho odtlačok SHA-256:</span>
+      <span data-lang="en"><strong>Verifying the file.</strong> If you want to be sure
+      you have exactly the file we published, compare its SHA-256 fingerprint:</span>
+    </p>
+    <code class="hash">9317A99716881D78B40998959E47A6055F11D6A5A50CFA731C072B7A56B750E6</code>
+    <p style="margin-top:.6rem">
+      <span data-lang="sk">Vo Windows: <code>Get-FileHash .\app-release.apk -Algorithm SHA256</code>.
+      Ak sa odtlačok nezhoduje, súbor nie je náš — neinštalujte ho.</span>
+      <span data-lang="en">On Windows: <code>Get-FileHash .\app-release.apk -Algorithm SHA256</code>.
+      If the fingerprint does not match, the file is not ours — do not install it.</span>
+    </p>
+  </div>
+
+  <h2>
+    <span data-lang="sk">Čo aplikácia vie</span>
+    <span data-lang="en">What it does</span>
+  </h2>
+  <ul>
+    <li data-lang="sk">Vypíše povolenia zrozumiteľne — „presná poloha“ namiesto
+    <code>ACCESS_FINE_LOCATION</code>.</li>
+    <li data-lang="sk">Rozlišuje <strong>udelené / neudelené / automaticky pri
+    inštalácii</strong> — väčšina aplikácií dostane kopu povolení bez toho, aby sa
+    vás niekto pýtal.</li>
+    <li data-lang="sk">Hľadá v inštalačných súboroch ~115 známych sledovacích
+    knižníc a rozlišuje ich účel: reklama, atribúcia, analytika, detekcia podvodov,
+    hlásenie pádov.</li>
+    <li data-lang="sk">Nález vysvetlí jednou vetou a zoradí aplikácie podľa
+    závažnosti.</li>
+    <li data-lang="sk">Pamätá si výsledky a po aktualizácii aplikácie ukáže, čo sa
+    zmenilo.</li>
+    <li data-lang="sk">Slovensky aj anglicky.</li>
+
+    <li data-lang="en">Shows permissions in plain language — “precise location”
+    instead of <code>ACCESS_FINE_LOCATION</code>.</li>
+    <li data-lang="en">Distinguishes <strong>granted / not granted / automatic at
+    install</strong> — most apps get a pile of permissions without ever asking you.</li>
+    <li data-lang="en">Scans installation files for ~115 known tracking libraries and
+    separates their purpose: ads, attribution, analytics, fraud detection, crash
+    reporting.</li>
+    <li data-lang="en">Explains each finding in one sentence and sorts apps by
+    severity.</li>
+    <li data-lang="en">Remembers results and reports what changed after an app
+    update.</li>
+    <li data-lang="en">Slovak and English.</li>
+  </ul>
+
+  <h2>
+    <span data-lang="sk">Čo aplikácia nerobí</span>
+    <span data-lang="en">What it does not do</span>
+  </h2>
+  <ul>
+    <li data-lang="sk">Nehovorí, čo sa práve deje — hovorí, <strong>čo je v kóde
+    prítomné</strong>. Analytická knižnica v aplikácii neznamená, že v tejto chvíli
+    niečo odosiela.</li>
+    <li data-lang="sk">Zoznam signatúr nie je úplný, takže skôr <strong>podhodnocuje</strong>,
+    než preháňa.</li>
+    <li data-lang="sk">Nie je to obvinenie ani odborný posudok — je to informácia,
+    ktorá vám má pomôcť rozhodnúť sa.</li>
+
+    <li data-lang="en">It does not tell you what is happening right now — it reports
+    <strong>what is present in the code</strong>. A bundled analytics library does not
+    mean data is being sent at this moment.</li>
+    <li data-lang="en">The signature list is not complete, so it
+    <strong>under-reports</strong> rather than exaggerates.</li>
+    <li data-lang="en">It is not an accusation nor an expert assessment — it is
+    information to help you decide.</li>
+  </ul>
+
+  <p class="links">
+    <a href="https://github.com/Zelitte/plainkit-audit">
+      <span data-lang="sk">Zdrojový kód (GPLv3)</span>
+      <span data-lang="en">Source code (GPLv3)</span>
+    </a>
+    <a href="#sukromie">
+      <span data-lang="sk">Zásady ochrany súkromia ↓</span>
+      <span data-lang="en">Privacy policy ↓</span>
+    </a>
+  </p>
+
+</section>
+
+<hr class="divider" id="sukromie">
+
 <!-- ─────────────────────────  SK  ───────────────────────── -->
 <main data-lang="sk">
 
-  <h1>Zásady ochrany súkromia</h1>
-  <p class="updated">Android aplikácia „plainkit. audit" · posledná aktualizácia 16. 8. 2026</p>
+  <h2 class="major">Zásady ochrany súkromia</h2>
+  <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 16. 8. 2026</p>
 
   <p class="lead"><strong>Aplikácia nezbiera, neukladá ani neodosiela žiadne osobné údaje.</strong>
   Celá analýza prebieha vo vašom telefóne. Výsledky nikdy neopustia zariadenie.</p>
@@ -189,6 +401,10 @@
     požiadavky, a to na úrovni infraštruktúry. Nedokážeme tomu zabrániť a nechceme
     to zamlčať. Z IP adresy sa nedá zistiť, aké aplikácie máte v telefóne — tá
     informácia sa neodosiela vôbec.</p>
+    <p>To isté platí pre <strong>stiahnutie inštalačného súboru</strong> tlačidlom
+    vyššie: súbor je uložený na <strong>GitHube</strong>, ktorý pri sťahovaní vidí
+    IP adresu vášho pripojenia. Spojenie vznikne až vtedy, keď na tlačidlo kliknete —
+    táto stránka sa naň sama nepripája.</p>
   </div>
 
   <h2>Čo aplikácia nerobí</h2>
@@ -233,8 +449,8 @@
 <!-- ─────────────────────────  EN  ───────────────────────── -->
 <main data-lang="en">
 
-  <h1>Privacy Policy</h1>
-  <p class="updated">Android app "plainkit. audit" · last updated 16 August 2026</p>
+  <h2 class="major">Privacy Policy</h2>
+  <p class="updated">Android app “plainkit. audit” · last updated 16 August 2026</p>
 
   <p class="lead"><strong>The app does not collect, store or transmit any personal
   data.</strong> The entire analysis runs on your phone. Results never leave your
@@ -282,6 +498,10 @@
     connection and technical request data at the infrastructure level. We cannot
     prevent this and we will not hide it. An IP address does not reveal which apps
     you have installed — that information is never transmitted at all.</p>
+    <p>The same applies to <strong>downloading the installation file</strong> with
+    the button above: the file is hosted on <strong>GitHub</strong>, which sees the
+    IP address of your connection when you download it. That connection is made only
+    when you click — this page never contacts it on its own.</p>
   </div>
 
   <h2>What the app does not do</h2>
@@ -341,14 +561,14 @@
     sk.setAttribute('aria-pressed', lang === 'sk' ? 'true' : 'false');
     en.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
     document.title = (lang === 'sk')
-      ? 'Zásady ochrany súkromia — plainkit. audit'
-      : 'Privacy Policy — plainkit. audit';
+      ? 'plainkit. audit — čo vaše aplikácie skutočne môžu'
+      : 'plainkit. audit — what your apps can actually do';
   }
 
   sk.addEventListener('click', function () { set('sk'); });
   en.addEventListener('click', function () { set('en'); });
 
-  
+  // ak má prehliadač nastavenú inú reč než slovenčinu/češtinu, začni v angličtine
   var nav = (navigator.language || 'sk').toLowerCase();
   if (nav.indexOf('sk') !== 0 && nav.indexOf('cs') !== 0) set('en');
 })();
