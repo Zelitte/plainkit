@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07090f">
-
 <!-- PWA: inštalácia na plochu -->
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -13,22 +12,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="plainkit">
-
 <!-- Titulka + popis sa menia podľa jazyka cez JS (viď applyLang) -->
 <title>plainkit · prekladač, QR, prevodník — zadarmo, bez reklám</title>
-<meta name="description" id="meta-desc" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas. Free online tools, no ads, no signup.">
-<meta name="keywords" content="plainkit, nástroje, prekladač dokumentov, qr generátor, prevodník jednotiek, svetový čas, free online tools, document translator, qr code generator, unit converter, world clock, no ads, no signup, zadarmo, bez reklamy">
-
+<meta name="description" id="meta-desc" content="plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas a Android aplikácia audit. Free online tools, no ads, no signup.">
+<meta name="keywords" content="plainkit, nástroje, prekladač dokumentov, qr generátor, prevodník jednotiek, svetový čas, audit, android, sledovacie knižnice, povolenia, free online tools, document translator, qr code generator, unit converter, world clock, no ads, no signup, zadarmo, bez reklamy">
 <!-- Open Graph -->
 <meta property="og:title" content="plainkit · free online tools, no ads">
-<meta property="og:description" content="Document translator, QR generator, unit converter, world clock & search. No ads, no signup, no tracking. Prekladač, QR, prevodník — zadarmo.">
+<meta property="og:description" content="Document translator, QR generator, unit converter, world clock & search, plus the audit Android app. No ads, no signup, no tracking. Prekladač, QR, prevodník — zadarmo.">
 <meta property="og:image" content="https://plainkit.app/og-image.png">
 <meta property="og:url" content="https://plainkit.app/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="plainkit · free online tools, no ads">
 <meta name="twitter:image" content="https://plainkit.app/og-image.png">
-
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307090f'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='62' font-style='italic' font-weight='600' fill='%2300d4e8'%3EP%3C/text%3E%3C/svg%3E">
 <style>
   /* Self-hostované fonty — žiadne volania na Google. latin + latin-ext kvôli diakritike. */
@@ -77,7 +73,6 @@ body {
     radial-gradient(ellipse 70% 50% at 50% 0%, var(--accent-dim), transparent 60%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
 }
-
 /* ═══ Prepínač jazyka (vpravo hore) ═══ */
 .lang-switch {
   position: fixed; top: 16px; right: 16px; z-index: 50;
@@ -92,7 +87,6 @@ body {
   transition: all 0.15s;
 }
 .lang-switch button.active { background: var(--accent-dim); color: var(--accent); }
-
 /* ═══ Layout: 3 stĺpce ═══ */
 .layout {
   display: grid;
@@ -108,7 +102,6 @@ body {
   .panel-left, .panel-right { order: 2; }
   .panel-center { order: 1; }
 }
-
 .panel { display: flex; flex-direction: column; gap: 20px; }
 h3.section-title {
   font-family: 'JetBrains Mono', monospace;
@@ -118,7 +111,6 @@ h3.section-title {
   color: var(--accent);
   margin-bottom: 12px;
 }
-
 .notes-card, .support-card, .clock-card, .search-card, .links-card {
   background: var(--glass);
   border: 1px solid var(--border);
@@ -141,7 +133,6 @@ h3.section-title {
   letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
 }
 .notes-btn:hover { border-color: var(--accent); color: var(--accent); }
-
 .support-card h4 { font-size: 0.95rem; margin-bottom: 6px; }
 .support-sub { font-size: 0.8rem; color: var(--text-2); line-height: 1.5; margin-bottom: 14px; }
 .donate-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
@@ -159,7 +150,6 @@ h3.section-title {
   margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-2);
 }
 .iban-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
-
 .home-head { text-align: center; margin-bottom: 8px; }
 .home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
@@ -168,7 +158,38 @@ h3.section-title {
 .home-logo .ver { position: relative; cursor: help; }
 .home-logo .ver-tip { display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; width: max-content; max-width: 260px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 6px; padding: 8px 12px; font-size: 0.72rem; line-height: 1.5; color: var(--text); white-space: normal; text-align: left; }
 .home-logo .ver:hover .ver-tip, .home-logo .ver:focus .ver-tip { display: block; }
-
+/* ═══ Karta Android aplikácie (audit) ═══ */
+.app-card {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(0,212,232,0.11), transparent 60%),
+    var(--glass);
+  border: 1px solid rgba(0,212,232,0.35);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.app-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #05090d; background: var(--accent);
+  border-radius: 100px; padding: 4px 11px;
+  margin-bottom: 13px;
+}
+.app-title { font-size: 1.55rem; font-weight: 600; letter-spacing: -0.025em; margin-bottom: 7px; }
+.app-title .dot { color: var(--accent); }
+.app-title .sub { color: var(--text-2); font-weight: 400; }
+.app-desc { font-size: 0.9rem; color: var(--text-2); line-height: 1.65; margin-bottom: 17px; max-width: 52ch; }
+.app-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.app-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #05090d;
+  border-radius: var(--radius); text-decoration: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.02em; padding: 11px 20px; transition: filter 0.15s;
+}
+.app-btn:hover { filter: brightness(1.14); }
+.app-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-3); line-height: 1.6; }
 /* ═══ Svetové hodiny ═══ */
 .clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .clocks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -195,7 +216,6 @@ h3.section-title {
   padding: 7px 10px; cursor: pointer; outline: none;
 }
 .add-city:focus { border-color: var(--accent); }
-
 /* ═══ Ovládací riadok hodín (pridať mesto + na plochu) ═══ */
 .clock-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .install-btn {
@@ -208,7 +228,6 @@ h3.section-title {
 .install-btn:hover { background: rgba(0,212,232,0.18); }
 .install-btn .ico { font-size: 0.95rem; line-height: 1; }
 @media (max-width: 600px) { .clocks { grid-template-columns: repeat(2, 1fr); } }
-
 /* ═══ iOS návod (modal) ═══ */
 .ios-modal {
   position: fixed; inset: 0; z-index: 100; display: none;
@@ -229,7 +248,6 @@ h3.section-title {
   color: var(--accent); font-family: 'JetBrains Mono', monospace;
   font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
 }
-
 .search-card { padding: 24px; }
 .search-box { display: flex; gap: 10px; }
 #search-input {
@@ -251,7 +269,6 @@ h3.section-title {
 }
 .engine-btn:hover { border-color: var(--accent); background: var(--bg-elev-2); }
 .engine-btn .dot-g { width: 10px; height: 10px; border-radius: 50%; }
-
 .tool-link {
   display: block; background: var(--bg-elev);
   border: 1px solid var(--border); border-radius: var(--radius);
@@ -261,7 +278,6 @@ h3.section-title {
 .tool-link:hover { border-color: var(--accent); background: var(--bg-elev-2); }
 .tool-link .label { font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
 .tool-link .url { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
-
 /* ═══ Rozbaľovacia ponuka (Hry) ═══ */
 .tool-group { margin-bottom: 8px; }
 .tool-group > summary {
@@ -280,7 +296,6 @@ h3.section-title {
 .tool-group .group-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 8px 8px 4px; }
 .tool-group .group-body .tool-link { background: transparent; }
 .tool-group .group-body .tool-link:hover { background: var(--bg-elev-2); }
-
 /* Decentné zvýraznenie odkazu na chat */
 .tool-link.featured {
   border-left: 2px solid var(--accent);
@@ -291,6 +306,14 @@ h3.section-title {
 .tool-link.featured:hover { background:
     linear-gradient(90deg, var(--accent-dim), transparent 45%),
     var(--bg-elev-2); }
+/* Malý odznak „nové" pri odkaze v zozname nástrojov */
+.tag-new {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent);
+  border-radius: 100px; padding: 1px 7px; margin-left: 8px;
+  vertical-align: middle;
+}
 .live-dot {
   display: inline-block; width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent); margin-right: 6px; vertical-align: middle;
@@ -305,20 +328,16 @@ h3.section-title {
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
 }
-
 .foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 20px; margin-top: 20px; line-height: 1.8; }
 </style>
 </head>
 <body>
-
 <!-- Prepínač jazyka -->
 <div class="lang-switch">
   <button id="lang-sk" class="active" onclick="setLang('sk')">SK</button>
   <button id="lang-en" onclick="setLang('en')">EN</button>
 </div>
-
 <div class="layout">
-
   <!-- ═══════════════ ĽAVÁ LIŠTA ═══════════════ -->
   <aside class="panel panel-left">
     <div class="notes-card">
@@ -329,7 +348,6 @@ h3.section-title {
       <textarea id="notes" data-i18n-ph="notesPh" placeholder="Píšte tu vaše poznámky..."></textarea>
       <button class="notes-btn" onclick="downloadNotes()" data-i18n="downloadNotes">↓ Stiahnuť poznámky</button>
     </div>
-
     <div class="support-card">
       <h3 class="section-title" data-i18n="support">Podporte projekt</h3>
       <h4 data-i18n="supportH">Na skenovanie použi bankovú aplikáciu</h4>
@@ -350,14 +368,26 @@ h3.section-title {
       </div>
     </div>
   </aside>
-
   <!-- ═══════════════ STRED ═══════════════ -->
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.4<span class="ver-tip" data-i18n="verTip">Nové vo v1.4: Tabuľka so vzorcami + prehľadnejšie skupiny Kancelária a Vzdelávanie</span></span></div>
+      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.5<span class="ver-tip" data-i18n="verTip">Nové vo v1.5: plainkit. audit — vlastná Android aplikácia, ktorá ukáže, čo vaše appky skutočne môžu</span></span></div>
     </div>
-
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║  KARTA ANDROID APLIKÁCIE                                  ║
+         ║  Odznak „NOVÉ" nechaj, kým je appka čerstvá; potom ho     ║
+         ║  zmaž (riadok s .app-badge) a karta ostane bez neho.      ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <div class="app-card">
+      <span class="app-badge" data-i18n="appBadge">Nové · Android aplikácia</span>
+      <div class="app-title">plainkit<span class="dot">.</span> <span class="sub">audit</span></div>
+      <p class="app-desc" data-i18n="appDesc">Zistite, čo vaše aplikácie skutočne môžu. Audit vypíše ich povolenia zrozumiteľnou rečou a nájde v nich sledovacie knižnice. Celá analýza prebieha vo vašom telefóne — nič sa neodosiela.</p>
+      <div class="app-actions">
+        <a href="/audit" class="app-btn" data-i18n="appBtn">Pozrieť a stiahnuť</a>
+        <span class="app-meta" data-i18n="appMeta">Zadarmo · bez reklám · bez účtu · otvorený kód GPLv3</span>
+      </div>
+    </div>
     <!-- Svetové hodiny -->
     <div class="clock-card">
       <div class="clock-head">
@@ -373,7 +403,6 @@ h3.section-title {
         </button>
       </div>
     </div>
-
     <!-- Vyhľadávanie -->
     <div class="search-card">
       <h3 class="section-title" data-i18n="search">Vyhľadávanie</h3>
@@ -389,12 +418,10 @@ h3.section-title {
       </div>
     </div>
   </main>
-
   <!-- ═══════════════ PRAVÁ LIŠTA: NÁSTROJE ═══════════════ -->
   <aside class="panel panel-right">
     <div class="links-card">
       <h3 class="section-title" data-i18n="tools">Nástroje</h3>
-
       <!-- ╔══════════════════════════════════════════════════════════╗
            ║  AKO PRIDAŤ NOVÝ NÁSTROJ:                                 ║
            ║  • Samostatný nástroj = skopíruj blok <a class="tool-link>║
@@ -403,21 +430,24 @@ h3.section-title {
            ║  Poradie: samostatné nástroje + skupiny podľa abecedy,    ║
            ║  Súkromie zostáva úplne dole (nie je to nástroj).         ║
            ╚══════════════════════════════════════════════════════════╝ -->
-
+      <!-- ── A ── -->
+      <!-- NÁSTROJ: Audit — Android aplikácia. Odznak „nové" zmaž, keď prestane byť nová. -->
+      <a href="/audit" class="tool-link">
+        <div class="label"><span><span data-i18n="tAudit">Audit · Android</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/audit</div>
+      </a>
       <!-- ── C ── -->
       <!-- NÁSTROJ: Chat bez stopy / Off the record (decentne zvýraznený) -->
       <a href="/chat" class="tool-link featured">
         <div class="label"><span><span class="live-dot"></span><span data-i18n="tChat">Chat</span></span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/chat</div>
       </a>
-
       <!-- ── H ── -->
       <!-- NÁSTROJ: Heslo / Password -->
       <a href="/heslo" class="tool-link">
         <div class="label"><span data-i18n="theslo">Heslo/Password</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/heslo</div>
       </a>
-
       <!-- ╔══════════════════════════════════════════════╗
            ║  ROZBAĽOVACIA PONUKA: HRY                     ║
            ║  Novú hru pridáš skopírovaním jedného         ║
@@ -476,17 +506,11 @@ h3.section-title {
           </a>
         </div>
       </details>
-
-
       <!-- NÁSTROJ: Počasie -->
       <a href="/pocasie" class="tool-link">
         <div class="label"><span data-i18n="tpocasie">Počasie</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/pocasie</div>
       </a>
-
-
-
-
       <!-- ── K ── -->
       <!-- SKUPINA: Kancelária (Tabuľka + Štatistika) -->
       <details class="tool-group">
@@ -523,7 +547,6 @@ h3.section-title {
           <!-- ↓ ĎALŠÍ KANCELÁRSKY NÁSTROJ sem ↓ -->
         </div>
       </details>
-
       <!-- ╔══════════════════════════════════════════════════════════╗
            ║  ROZBAĽOVACIA PONUKA: VZDELÁVANIE                          ║
            ║  Štruktúra: predmet (Chémia…) ako pod-skupina, v nej      ║
@@ -595,16 +618,13 @@ h3.section-title {
           <!-- ↓ ĎALŠÍ PREDMET (Matematika…) = skopíruj celý <details> blok vyššie ↓ -->
         </div>
       </details>
-
       <!-- ── Z ── -->
       <!-- NÁSTROJ: Zvuk -->
       <a href="/zvuk" class="tool-link">
         <div class="label"><span data-i18n="tzvuk">Zvuk</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/zvuk</div>
       </a>
-
       <!-- ↓↓↓ NOVÝ SAMOSTATNÝ NÁSTROJ: vlož na abecedné miesto vyššie ↓↓↓ -->
-
       <!-- ── (mimo abecedy — právne) ── -->
       <!-- NÁSTROJ: Súkromie a podmienky / Privacy & Terms -->
       <a href="/politika" class="tool-link">
@@ -612,13 +632,10 @@ h3.section-title {
         <div class="url">plainkit.app/politika</div>
       </a>
 
-      
-    
 
     </div>
   </aside>
 </div>
-
 <!-- iOS návod na pridanie na plochu -->
 <div class="ios-modal" id="ios-modal" onclick="closeIosHelp(event)">
   <div class="ios-card">
@@ -631,12 +648,10 @@ h3.section-title {
     <button class="ios-close" type="button" onclick="closeIosHelp()" data-i18n="iosClose">Rozumiem</button>
   </div>
 </div>
-
 <div class="foot">
   <span data-i18n="footTag">plainkit.app · bez reklám, bez registrácie, bez sledovania</span><br>
   <span data-i18n="footPrivacy">Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.</span>
 </div>
-
 <script src="/qr-code-styling.js"></script>
 <script>
 // ═══ Konfigurácia ═══
@@ -644,7 +659,6 @@ const IBAN_FULL    = 'SK06 1100 0000 0026 1224 7644';
 const IBAN_COMPACT = 'SK0611000000002612247644';
 const BENEFICIARY  = 'plainkit';
 const BIC          = 'TATRSKBX';
-
 // ═══ Ponuka miest pre dropdown (názov SK | EN | timezone) ═══
 const CITY_POOL = [
   { sk:'Bratislava', en:'Bratislava', tz:'Europe/Bratislava' },
@@ -675,7 +689,6 @@ const CITY_POOL = [
   { sk:'Johannesburg',en:'Johannesburg',tz:'Africa/Johannesburg' },
 ];
 const DEFAULT_CITIES = ['Europe/Bratislava','Europe/London','America/New_York','Asia/Tokyo'];
-
 // ═══ Preklady (i18n) ═══
 const I18N = {
   sk: {
@@ -683,48 +696,56 @@ const I18N = {
     support:'Podporte projekt', supportH:'Na skenovanie použi bankovú aplikáciu',
     supportSub:'Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.',
     amtFree:'Voľná',
+    appBadge:'Nové · Android aplikácia',
+    appDesc:'Zistite, čo vaše aplikácie skutočne môžu. Audit vypíše ich povolenia zrozumiteľnou rečou a nájde v nich sledovacie knižnice. Celá analýza prebieha vo vašom telefóne — nič sa neodosiela.',
+    appBtn:'Pozrieť a stiahnuť',
+    appMeta:'Zadarmo · bez reklám · bez účtu · otvorený kód GPLv3',
     worldTime:'Svetový čas', addCity:'+ Pridať mesto',
     install:'Na plochu',
     iosTitle:'Pridať na plochu', iosStep1:'Klepni na ikonu Zdieľať v Safari (štvorček so šípkou nahor).', iosStep2:'Vyber „Pridať na plochu".', iosStep3:'Potvrď „Pridať" vpravo hore.', iosClose:'Rozumiem',
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
+    tAudit:'Audit · Android', tagNew:'nové',
     tGames:'Hry', tGamesSub:'9 hier · od Hada po Šach', tpocty:'Počty',
     tEdu:'Vzdelávanie', tEduSub:'Chémia · Fyzika · Jednotky', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.4: Tabuľka so vzorcami + prehľadnejšie skupiny Kancelária a Vzdelávanie',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.5: plainkit. audit — vlastná Android aplikácia, ktorá ukáže, čo vaše appky skutočne môžu',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
-    desc:'plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas.'
+    desc:'plainkit — jednoduché nástroje bez reklám, bez registrácie, bez sledovania. Prekladač dokumentov, QR generátor, prevodník jednotiek, svetový čas a Android aplikácia audit.'
   },
   en: {
     notes:'Notes', chars:'chars', downloadNotes:'↓ Download notes', notesPh:'Write your notes here...',
     support:'Support the project', supportH:'Scan with your banking app',
     supportSub:'This site is free, no ads. It runs on paid services — a voluntary contribution helps keep it running.',
     amtFree:'Custom',
+    appBadge:'New · Android app',
+    appDesc:'See what your apps can actually do. Audit lists their permissions in plain language and finds the tracking libraries inside them. The whole analysis runs on your phone — nothing is uploaded.',
+    appBtn:'View and download',
+    appMeta:'Free · no ads · no account · open source, GPLv3',
     worldTime:'World time', addCity:'+ Add city',
     install:'Add to home',
     iosTitle:'Add to Home Screen', iosStep1:'Tap the Share icon in Safari (a square with an up arrow).', iosStep2:'Choose "Add to Home Screen".', iosStep3:'Confirm with "Add" at the top right.', iosClose:'Got it',
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
+    tAudit:'Audit · Android', tagNew:'new',
     tGames:'Games', tGamesSub:'9 games · from Snake to Chess', tpocty:'Mental math',
     tEdu:'Education', tEduSub:'Chemistry · Physics · Units', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.4: Spreadsheet with formulas + tidier Office and Education groups',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.5: plainkit. audit — our own Android app that shows what your apps can actually do',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
-    desc:'plainkit — simple tools with no ads, no signup, no tracking. Document translator, QR code generator, unit converter, world clock.'
+    desc:'plainkit — simple tools with no ads, no signup, no tracking. Document translator, QR code generator, unit converter, world clock and the audit Android app.'
   }
 };
-
 let lang = 'sk';
 let activeCities = [];  // zoznam timezone reťazcov
-
 // ═══ Jazyk ═══
 function setLang(l) {
   lang = l;
@@ -753,7 +774,6 @@ function applyLang() {
   buildCityDropdown();
   renderClocks();
 }
-
 // ═══ Svetové hodiny ═══
 function cityByTz(tz) { return CITY_POOL.find(c => c.tz === tz); }
 function buildCityDropdown() {
@@ -803,7 +823,6 @@ function removeCity(tz) {
   renderClocks();
 }
 function saveCities() { localStorage.setItem('pk_cities', JSON.stringify(activeCities)); }
-
 // ═══ Vyhľadávanie ═══
 function search(engine) {
   const q = document.getElementById('search-input').value.trim();
@@ -811,7 +830,6 @@ function search(engine) {
   const urls = { google:'https://www.google.com/search?q=', bing:'https://www.bing.com/search?q=', ddg:'https://duckduckgo.com/?q=' };
   window.open(urls[engine] + encodeURIComponent(q), '_blank', 'noopener');
 }
-
 // ═══ Poznámky ═══
 const notesEl = document.getElementById('notes');
 notesEl.addEventListener('input', () => {
@@ -823,7 +841,6 @@ function downloadNotes() {
   a.href = URL.createObjectURL(blob); a.download = 'poznamky.txt'; a.click();
   URL.revokeObjectURL(a.href);
 }
-
 // ═══ Podpora ═══
 let qrVariable = null;
 function switchQr(amt) {
@@ -845,7 +862,6 @@ function copyIban() {
     setTimeout(() => el.textContent = orig, 1500);
   });
 }
-
 // ═══ Inštalácia na plochu (PWA) ═══
 let deferredPrompt = null;
 function isStandalone() {
@@ -880,7 +896,6 @@ function closeIosHelp(e) {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
-
 // ═══ Init: načítaj uložené nastavenia ═══
 (function init() {
   // jazyk
@@ -891,7 +906,6 @@ if ('serviceWorker' in navigator) {
     const saved = JSON.parse(localStorage.getItem('pk_cities') || 'null');
     activeCities = (Array.isArray(saved) && saved.length) ? saved : [...DEFAULT_CITIES];
   } catch { activeCities = [...DEFAULT_CITIES]; }
-
   applyLang();
   buildVariableQr();
   document.getElementById('iban-display').textContent = IBAN_FULL;
