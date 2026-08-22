@@ -28,7 +28,6 @@
     -webkit-text-size-adjust:100%;
   }
   .wrap{max-width:44rem;margin:0 auto;padding:2rem 1.25rem 4rem}
-
   header{border-bottom:1px solid var(--line);padding-bottom:1.25rem;margin-bottom:2rem}
   .brand{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
   .brand a{
@@ -47,7 +46,6 @@
     color:var(--dim);
     letter-spacing:.02em;
   }
-
   .langbar{display:flex;gap:.5rem;margin-top:1.25rem}
   .langbar button{
     font-family:var(--mono);
@@ -65,7 +63,6 @@
     border-color:var(--accent);
   }
   .langbar button:hover{border-color:var(--accent)}
-
   h1{font-size:1.7rem;line-height:1.25;margin:0 0 .35rem;letter-spacing:-.01em}
   .updated{font-family:var(--mono);font-size:.8rem;color:var(--dim);margin:0 0 2rem}
   h2{
@@ -96,7 +93,6 @@
     padding:.05em .35em;
   }
   a{color:var(--accent)}
-
   .lead{
     border-left:2px solid var(--accent);
     padding:.1rem 0 .1rem 1rem;
@@ -110,11 +106,9 @@
     margin:1.25rem 0;
   }
   .note p:last-child{margin-bottom:0}
-
   /* ── stránka aplikácie ── */
   .hero h1{font-size:2rem;margin-bottom:.6rem}
   .hero .lead{font-size:1.1rem;margin-bottom:1.75rem}
-
   .shots{
     display:flex;
     gap:.75rem;
@@ -131,7 +125,6 @@
     border-radius:6px;
     background:var(--bg2);
   }
-
   .dl{
     display:inline-block;
     font-family:var(--mono);
@@ -180,13 +173,11 @@
     margin:1.5rem 0 0;
   }
   .links a{margin-right:1.25rem;display:inline-block}
-
   .divider{
     border:0;
     border-top:1px solid var(--line);
     margin:3.5rem 0 2.25rem;
   }
-
   footer{
     margin-top:3rem;
     padding-top:1.25rem;
@@ -195,7 +186,6 @@
     color:var(--dim);
   }
   footer a{color:var(--muted)}
-
   [data-lang]{display:none}
   html[lang="sk"] [data-lang="sk"]{display:block}
   html[lang="en"] [data-lang="en"]{display:block}
@@ -207,7 +197,6 @@
 </head>
 <body>
 <div class="wrap">
-
 <header>
   <div class="brand">
     <a href="/">plainkit.</a><span>audit</span>
@@ -218,15 +207,12 @@
     <button type="button" id="btn-en" aria-pressed="false">English</button>
   </div>
 </header>
-
 <!-- ═════════════  STRÁNKA APLIKÁCIE (spoločná, texty prepínané)  ═════════════ -->
 <section class="hero">
-
   <h1>
     <span data-lang="sk">Čo vaše aplikácie skutočne môžu</span>
     <span data-lang="en">What your apps can actually do</span>
   </h1>
-
   <p class="lead">
     <span data-lang="sk">Málokto zistí, že baterka má povolený mikrofón alebo že hra
     spred roka stále vidí kontakty. Audit vypíše každú nainštalovanú aplikáciu
@@ -236,13 +222,11 @@
     contacts. Audit lists every installed app and tells you, in a normal sentence,
     what it can reach and what it carries inside.</span>
   </p>
-
   <div class="shots">
     <img src="img/povolenia.png" alt="Povolenia zrozumiteľnou rečou" loading="lazy">
     <img src="img/zoznam_sken.jpg" alt="Zoznam aplikácií" loading="lazy">
     <img src="img/uvodna_obrazovka.jpg" alt="Úvodná obrazovka" loading="lazy">
   </div>
-
   <p>
     <a class="dl" href="https://github.com/Zelitte/plainkit-audit/releases/latest/download/app-release.apk">
       <span data-lang="sk">Stiahnuť pre Android</span>
@@ -250,7 +234,6 @@
     </a>
   </p>
   <p class="meta">v1.0 · 7,85 MB · Android 8.0+ · GPLv3</p>
-
   <div class="verify">
     <p>
       <span data-lang="sk"><strong>Inštalácia.</strong> Stiahnutý súbor otvorte
@@ -262,6 +245,17 @@
       the app is not distributed through Google Play. The file itself is hosted on
       GitHub; the download starts only when you click, this page never connects to it
       on its own.</span>
+    </p>
+    <p>
+      <span data-lang="sk"><strong>Upozornenie na novú verziu.</strong> Aplikácia
+      sama nikam nechodí, takže o novom vydaní sa nedozvie. Ak chcete byť
+      upozornený, použite <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> —
+      vložte doň odkaz na zdrojový kód a dá vám vedieť, keď vyjde nová verzia.</span>
+      <span data-lang="en"><strong>Getting notified about new versions.</strong> The
+      app never contacts a server on its own, so it cannot tell you when a new
+      release exists. If you want to be notified, use
+      <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> — add the
+      source-code link to it and it will let you know when a new version is out.</span>
     </p>
     <p>
       <span data-lang="sk"><strong>Overenie súboru.</strong> Ak chcete mať istotu, že
@@ -277,7 +271,6 @@
       If the fingerprint does not match, the file is not ours — do not install it.</span>
     </p>
   </div>
-
   <h2>
     <span data-lang="sk">Čo aplikácia vie</span>
     <span data-lang="en">What it does</span>
@@ -296,7 +289,6 @@
     <li data-lang="sk">Pamätá si výsledky a po aktualizácii aplikácie ukáže, čo sa
     zmenilo.</li>
     <li data-lang="sk">Slovensky aj anglicky.</li>
-
     <li data-lang="en">Shows permissions in plain language — “precise location”
     instead of <code>ACCESS_FINE_LOCATION</code>.</li>
     <li data-lang="en">Distinguishes <strong>granted / not granted / automatic at
@@ -310,7 +302,6 @@
     update.</li>
     <li data-lang="en">Slovak and English.</li>
   </ul>
-
   <h2>
     <span data-lang="sk">Čo aplikácia nerobí</span>
     <span data-lang="en">What it does not do</span>
@@ -323,7 +314,6 @@
     než preháňa.</li>
     <li data-lang="sk">Nie je to obvinenie ani odborný posudok — je to informácia,
     ktorá vám má pomôcť rozhodnúť sa.</li>
-
     <li data-lang="en">It does not tell you what is happening right now — it reports
     <strong>what is present in the code</strong>. A bundled analytics library does not
     mean data is being sent at this moment.</li>
@@ -332,7 +322,6 @@
     <li data-lang="en">It is not an accusation nor an expert assessment — it is
     information to help you decide.</li>
   </ul>
-
   <p class="links">
     <a href="https://github.com/Zelitte/plainkit-audit">
       <span data-lang="sk">Zdrojový kód (GPLv3)</span>
@@ -343,20 +332,14 @@
       <span data-lang="en">Privacy policy ↓</span>
     </a>
   </p>
-
 </section>
-
 <hr class="divider" id="sukromie">
-
 <!-- ─────────────────────────  SK  ───────────────────────── -->
 <main data-lang="sk">
-
   <h2 class="major">Zásady ochrany súkromia</h2>
   <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 16. 8. 2026</p>
-
   <p class="lead"><strong>Aplikácia nezbiera, neukladá ani neodosiela žiadne osobné údaje.</strong>
   Celá analýza prebieha vo vašom telefóne. Výsledky nikdy neopustia zariadenie.</p>
-
   <h2>Čo aplikácia robí</h2>
   <p>Audit prečíta zoznam aplikácií nainštalovaných vo vašom telefóne, pozrie sa
   do ich inštalačných súborov (APK) a hľadá v nich známe sledovacie knižnice —
@@ -365,14 +348,12 @@
   skutočne udelené, a zobrazí vám ho v zrozumiteľnej vete.</p>
   <p>Všetky tieto operácie prebiehajú <strong>lokálne, vo vašom zariadení</strong>.
   Nič sa pri nich neodosiela na žiadny server.</p>
-
   <h2>Prečo aplikácia potrebuje vidieť ostatné aplikácie</h2>
   <p>Aby mohla robiť to, na čo je určená, potrebuje systémové oprávnenie
   <code>QUERY_ALL_PACKAGES</code>, ktoré jej umožňuje získať zoznam nainštalovaných
   aplikácií. Bez neho by videla len samu seba.</p>
   <p>Tento zoznam sa používa výhradne na zobrazenie a analýzu priamo v aplikácii.
   <strong>Nikam sa neodosiela, nikde sa nezálohuje a s nikým sa nezdieľa.</strong></p>
-
   <h2>Kde sú uložené výsledky</h2>
   <p>Výsledky skenov a história zmien sa ukladajú do lokálnej databázy v súkromnom
   úložisku aplikácie vo vašom zariadení. Prístup k nim nemá žiadna iná aplikácia
@@ -382,7 +363,6 @@
     výsledky skenov.</li>
     <li>Odinštalovaním aplikácie sa všetky jej údaje nenávratne odstránia.</li>
   </ul>
-
   <h2>Sieťové spojenia</h2>
   <p>Aplikácia funguje aj úplne bez internetu. Existuje však jedno spojenie,
   ktoré môže nadviazať, a preto ho tu uvádzame otvorene:</p>
@@ -406,7 +386,6 @@
     IP adresu vášho pripojenia. Spojenie vznikne až vtedy, keď na tlačidlo kliknete —
     táto stránka sa naň sama nepripája.</p>
   </div>
-
   <h2>Čo aplikácia nerobí</h2>
   <ul>
     <li>Neobsahuje žiadne reklamy.</li>
@@ -418,7 +397,6 @@
     <li>Nepredáva ani nezdieľa žiadne údaje s tretími stranami, pretože žiadne
     nezískava.</li>
   </ul>
-
   <h2>Presnosť a hranice</h2>
   <p>Kvôli poctivosti uvádzame aj to, čo aplikácia <em>nevie</em>:</p>
   <ul>
@@ -430,32 +408,24 @@
     <li>Výsledok je informácia, ktorá vám má pomôcť rozhodnúť sa. Nie je to
     obvinenie ani odborný posudok.</li>
   </ul>
-
   <h2>Deti a citlivé údaje</h2>
   <p>Aplikácia nie je zameraná na deti a vedome od nikoho nezískava žiadne osobné
   ani citlivé údaje.</p>
-
   <h2>Zmeny týchto zásad</h2>
   <p>Ak sa fungovanie aplikácie zmení tak, že to ovplyvní tento dokument,
   aktualizujeme ho a zmeníme dátum uvedený hore. Podstatné zmeny sa objavia aj
   v popise novej verzie aplikácie.</p>
-
   <h2>Kontakt</h2>
   <p>Otázky, pripomienky alebo nahlásenie chyby: <a href="mailto:sprt@plainkit.app">admin</a></p>
   <p>Audit je súčasťou projektu <a href="/">plainkit.app</a>.</p>
-
 </main>
-
 <!-- ─────────────────────────  EN  ───────────────────────── -->
 <main data-lang="en">
-
   <h2 class="major">Privacy Policy</h2>
   <p class="updated">Android app “plainkit. audit” · last updated 16 August 2026</p>
-
   <p class="lead"><strong>The app does not collect, store or transmit any personal
   data.</strong> The entire analysis runs on your phone. Results never leave your
   device.</p>
-
   <h2>What the app does</h2>
   <p>Audit reads the list of applications installed on your phone, looks inside
   their installation files (APKs) and searches for known tracking libraries —
@@ -464,14 +434,12 @@
   granted, and presents the result as a plain-language sentence.</p>
   <p>All of this happens <strong>locally, on your device</strong>. Nothing is sent
   to any server in the process.</p>
-
   <h2>Why the app needs to see your other apps</h2>
   <p>To do what it is built for, the app needs the <code>QUERY_ALL_PACKAGES</code>
   system permission, which allows it to obtain the list of installed applications.
   Without it, it would only be able to see itself.</p>
   <p>This list is used solely for display and analysis inside the app.
   <strong>It is never uploaded, backed up or shared with anyone.</strong></p>
-
   <h2>Where results are stored</h2>
   <p>Scan results and the change history are stored in a local database inside the
   app's private storage on your device. No other application — and not us — has
@@ -481,7 +449,6 @@
     any time.</li>
     <li>Uninstalling the app permanently removes all of its data.</li>
   </ul>
-
   <h2>Network connections</h2>
   <p>The app works fully offline. There is, however, one connection it may make,
   which we state here openly:</p>
@@ -503,7 +470,6 @@
     IP address of your connection when you download it. That connection is made only
     when you click — this page never contacts it on its own.</p>
   </div>
-
   <h2>What the app does not do</h2>
   <ul>
     <li>It contains no advertising.</li>
@@ -515,7 +481,6 @@
     <li>It does not sell or share any data with third parties, because it obtains
     none.</li>
   </ul>
-
   <h2>Accuracy and limits</h2>
   <p>In the interest of honesty, here is what the app <em>cannot</em> tell you:</p>
   <ul>
@@ -527,35 +492,27 @@
     <li>The result is information to help you decide. It is not an accusation nor
     an expert assessment.</li>
   </ul>
-
   <h2>Children and sensitive data</h2>
   <p>The app is not directed at children and does not knowingly obtain any personal
   or sensitive data from anyone.</p>
-
   <h2>Changes to this policy</h2>
   <p>If the app changes in a way that affects this document, we will update it and
   change the date shown above. Significant changes will also be noted in the
   release notes of the new app version.</p>
-
   <h2>Contact</h2>
   <p>Questions, feedback or bug reports: <a href="mailto:sprt@plainkit.app">admin</a></p>
   <p>Audit is part of the <a href="/">plainkit.app</a> project.</p>
-
 </main>
-
 <footer>
   <span data-lang="sk">Späť na <a href="/">plainkit.app</a></span>
   <span data-lang="en">Back to <a href="/">plainkit.app</a></span>
 </footer>
-
 </div>
-
 <script>
 (function () {
   var root = document.documentElement;
   var sk = document.getElementById('btn-sk');
   var en = document.getElementById('btn-en');
-
   function set(lang) {
     root.setAttribute('lang', lang);
     sk.setAttribute('aria-pressed', lang === 'sk' ? 'true' : 'false');
@@ -564,15 +521,12 @@
       ? 'plainkit. audit — čo vaše aplikácie skutočne môžu'
       : 'plainkit. audit — what your apps can actually do';
   }
-
   sk.addEventListener('click', function () { set('sk'); });
   en.addEventListener('click', function () { set('en'); });
-
   // ak má prehliadač nastavenú inú reč než slovenčinu/češtinu, začni v angličtine
   var nav = (navigator.language || 'sk').toLowerCase();
   if (nav.indexOf('sk') !== 0 && nav.indexOf('cs') !== 0) set('en');
 })();
 </script>
-
 </body>
 </html>
