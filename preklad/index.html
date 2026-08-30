@@ -977,13 +977,12 @@ body::before {
 <!-- ═══ Cookie banner ═══ -->
 <div id="cookie-banner">
   <div class="cookie-text" id="cookie-text">
-    🍪 <strong>Stránka používa lokálne úložisko a cookies</strong> výlučne na sledovanie denného limitu prekladov (3 dokumenty / 50 strán denne). Žiadne reklamy, žiadny tracking, žiadne tretie strany.
+    🍪 <strong>Stránka používa lokálne úložisko</strong> výlučne na sledovanie denného limitu prekladov (3 dokumenty / 50 strán denne). Žiadne reklamy, žiadny tracking, žiadne tretie strany.
   </div>
   <button class="cookie-btn" id="cookie-btn" onclick="acceptCookies()">Rozumiem</button>
 </div>
 
 <script src="/jszip.min.js"></script>
-<script src="/qrious.min.js"></script>
 
 <script>
 // ═══ Multilingual content ═══
@@ -1104,7 +1103,7 @@ const CONTENT = {
     resultTitle: 'Traduction terminée',
     dlResult: 'Télécharger',
     resultBody: 'Fichier prêt. La mise en forme originale est préservée.',
-    cookieText: '🍪 <strong>Ce site utilise le stockage local et les cookies</strong> uniquement pour suivre la limite quotidienne. Pas de publicité, pas de suivi, aucun tiers.',
+    cookieText: '🍪 <strong>Ce site utilise le stockage local </strong> uniquement pour suivre la limite quotidienne. Pas de publicité, pas de suivi, aucun tiers.',
     cookieBtn: 'Compris',
     toolsTitle: 'Outils',
     err: {
@@ -1125,11 +1124,7 @@ const CONTENT = {
   }
 };
 
-// ═══ Constants ═══
-const IBAN_FULL = 'SK06 1100 0000 0026 1224 7644';
-const IBAN_COMPACT = 'SK0611000000002612247644';
-const BENEFICIARY = 'Prekladac';
-const REMITTANCE = 'prekladac';
+
 
 // ═══ State ═══
 let lang = 'sk';
@@ -1178,7 +1173,6 @@ function selectLang(l) {
       app.classList.add('visible');
       applyLang();
       maybeShowCookieBanner();
-      renderQR();
     }, 20);
   }, 600);
 }
@@ -1205,12 +1199,6 @@ function applyLang() {
   document.getElementById('notes-title').textContent = c.notesTitle;
   document.getElementById('notes-area').placeholder = c.notesPlaceholder;
   document.getElementById('dl-notes-label').textContent = c.dlNotes;
-  document.getElementById('donation-title').textContent = c.donationTitle;
-  document.getElementById('donation-instruction').textContent = c.donationInstruction;
-  document.getElementById('donation-text').textContent = c.donationText;
-  document.getElementById('qr-hint').textContent = c.qrHint;
-  document.getElementById('qr-tab-variable').textContent = c.qrTabVariable;
-  document.getElementById('iban-copy-btn').title = c.ibanCopyTitle;
   document.getElementById('dz-title').textContent = c.dzTitle;
   document.getElementById('dz-sub').innerHTML = c.dzSub;
   document.getElementById('translate-label').textContent = c.translateBtn;
@@ -1250,79 +1238,6 @@ function downloadNotes() {
 }
 
 // ═══ Donations: EPC QR + IBAN ═══
-function renderQR() {
-  if (qrRendered) return;
-  if (!window.QRious) {
-    setTimeout(renderQR, 200);
-    return;
-  }
-  // EPC QR (SEPA Credit Transfer) - https://en.wikipedia.org/wiki/EPC_QR_code
-  // BIC + default amount EUR1.00 included for maximum app compatibility
-  // (some Slovak banking apps reject empty amount field)
-  const epcData = [
-    'BCD',                // Service tag
-    '002',                // Version
-    '1',                  // Character set (1 = UTF-8)
-    'SCT',                // Identification
-    'TATRSKBX',           // BIC (Tatra Banka, derived from IBAN SK06 1100)
-    BENEFICIARY,          // Beneficiary name
-    IBAN_COMPACT,         // IBAN
-    'EUR1.00',            // Amount (default €1, user changes in app)
-    '',                   // Purpose
-    '',                   // Structured reference (using unstructured remittance instead)
-    REMITTANCE            // Unstructured remittance info
-  ].join('\n');
-
-  try {
-    new QRious({
-      element: document.getElementById('qr-canvas-variable'),
-      value: epcData,
-      size: 260,
-      background: 'white',
-      foreground: '#0a0c12',
-      level: 'M'
-    });
-    qrRendered = true;
-  } catch (e) {
-    console.error('QR render failed', e);
-  }
-}
-
-// Switch between QR variants (variable / 10€ / 100€)
-function switchQr(type) {
-  document.querySelectorAll('.qr-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.qr === type)
-  );
-  document.getElementById('qr-canvas-variable').style.display = type === 'variable' ? 'block' : 'none';
-  document.getElementById('qr-img-10').style.display = type === '10' ? 'block' : 'none';
-  document.getElementById('qr-img-100').style.display = type === '100' ? 'block' : 'none';
-
-  const hint = document.getElementById('qr-hint');
-  const c = CONTENT[lang];
-  if (type === 'variable') hint.textContent = c.qrHint;
-  else if (type === '10') hint.textContent = c.qrFixed10;
-  else if (type === '100') hint.textContent = c.qrFixed100;
-}
-
-async function copyIban() {
-  try {
-    await navigator.clipboard.writeText(IBAN_FULL);
-    const btn = document.getElementById('iban-copy-btn');
-    btn.textContent = '✓';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = '📋';
-      btn.classList.remove('copied');
-    }, 1800);
-  } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = IBAN_FULL;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch {}
-    document.body.removeChild(ta);
-  }
-}
 
 // ═══ Turnstile ═══
 function mountTurnstile() {
@@ -1625,8 +1540,14 @@ async function doTranslate() {
       if (/^[\d.,\s\-+:%€$()\/]+$/.test(s)) return true;
       return false;
     };
-    const skipMask = data.texts.map(isSkippable);
-    const textsToSend = data.texts.filter((_, i) => !skipMask[i]);
+        const skipMask = data.texts.map(isSkippable);
+    // Behy v PPTX/DOCX bývajú rozdelené uprostred vety ("Toto je " + "dôležitá" + " veta.").
+    // Model vracia preklad orezaný, takže pôvodné okrajové medzery treba podržať tu.
+    const pad = data.texts.map(t => {
+      const s = String(t);
+      return { lead: s.match(/^\s*/)[0], trail: s.slice(s.trimEnd().length) };
+    });
+    const textsToSend = data.texts.filter((_, i) => !skipMask[i]).map(t => String(t).trim());
     const skippedCount = data.texts.length - textsToSend.length;
     if (skippedCount > 0) {
       console.log(`[filter] Skipped ${skippedCount} non-translatable items (numbers/punctuation/single chars)`);
@@ -1692,7 +1613,12 @@ async function doTranslate() {
 
     // Reconstruct full translated array: insert originals at skipped positions
     let j = 0;
-    const translated = data.texts.map((orig, i) => skipMask[i] ? orig : allTranslated[j++]);
+    const translated = data.texts.map((orig, i) => {
+      if (skipMask[i]) return orig;
+      const t = allTranslated[j++];
+      if (t == null) return orig;
+      return pad[i].lead + String(t).trim() + pad[i].trail;
+    });
 
     setProgress(78, c.rebuilding);
 
