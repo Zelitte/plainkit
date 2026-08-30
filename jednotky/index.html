@@ -1814,58 +1814,7 @@ document.getElementById('cookiesAccept').addEventListener('click', () => {
 });
 
 // ====== SUPPORT SECTION ======
-const supportToggle = document.getElementById('supportToggle');
-const supportContent = document.getElementById('supportContent');
-supportToggle.addEventListener('click', () => {
-  const open = supportContent.classList.toggle('open');
-  supportToggle.classList.toggle('open', open);
-  supportToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-});
 
-const qrSources = {
-  '10':  '/qr-10e.png',
-  '100': '/qr-100e.png'
-};
-const supportQr = document.getElementById('supportQr');
-const supportPlaceholder = document.getElementById('supportPlaceholder');
-
-document.querySelectorAll('.support-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.support-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const amt = tab.dataset.amount;
-    if (amt === 'free') {
-      supportQr.style.display = 'none';
-      supportPlaceholder.style.display = '';
-    } else {
-      supportPlaceholder.style.display = 'none';
-      supportQr.src = qrSources[amt];
-      supportQr.alt = `QR ${amt} €`;
-      supportQr.style.display = '';
-    }
-  });
-});
-
-// IBAN copy
-document.getElementById('ibanCopy').addEventListener('click', async () => {
-  const btn = document.getElementById('ibanCopy');
-  try {
-    await navigator.clipboard.writeText('SK0611000000002612247644');
-    btn.textContent = '✓';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
-  } catch (e) {
-    // Fallback for older browsers
-    const ta = document.createElement('textarea');
-    ta.value = 'SK0611000000002612247644';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); btn.textContent = '✓'; btn.classList.add('copied'); }
-    catch(e2) {}
-    document.body.removeChild(ta);
-    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
-  }
-});
 
 // ====== INIT ======
 loadStorage();
