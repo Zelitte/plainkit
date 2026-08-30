@@ -11,12 +11,6 @@ const SENSITIVE_TYPES = new Set(['wifi', 'vcard']);
 const DEBOUNCE_MS = 150;
 const LOGO_MAX_BYTES = 500 * 1024;
 
-// EPC QR (donate) constants — shared with preklad
-const IBAN_FULL = 'SK06 1100 0000 0026 1224 7644';
-const IBAN_COMPACT = 'SK0611000000002612247644';
-const BENEFICIARY = 'Prekladac';
-const REMITTANCE = 'gencod';
-
 const TYPE_ICONS = {
   url: '🔗', text: '✎', wifi: '📶', vcard: '👤',
   email: '✉', sms: '💬', geo: '📍',
@@ -31,7 +25,6 @@ let logoDataUrl = null;
 let logoFileName = '';
 let debounceTimer = null;
 let history = [];
-let donateQrRendered = false;
 
 // ═══ Init ═══
 document.addEventListener('DOMContentLoaded', () => {
@@ -108,7 +101,7 @@ function initApp() {
   applyLang();
   renderHistory();
   maybeShowCookieBanner();
-  renderDonateQr();
+
   // Trigger initial generate if there's a value (e.g., after page refresh)
   regenerate();
 }
@@ -140,13 +133,6 @@ function applyLang() {
   document.getElementById('history-title').textContent = c.historyTitle;
   document.getElementById('history-clear-label').textContent = c.historyClear;
 
-  // Donations
-  document.getElementById('donation-title').textContent = c.donationTitle;
-  document.getElementById('donation-instruction').textContent = c.donationInstruction;
-  document.getElementById('donation-text').textContent = c.donationText;
-  document.getElementById('qr-hint').textContent = c.qrHint;
-  document.getElementById('qr-tab-variable').textContent = c.qrTabVariable;
-  document.getElementById('iban-copy-btn').title = c.ibanCopyTitle;
 
   // Tools panel (header only - links are bilingual by design)
   document.getElementById('tools-title').textContent = c.toolsTitle;
@@ -708,75 +694,5 @@ function acceptCookies() {
   document.getElementById('cookie-banner').classList.remove('visible');
 }
 
-// ═══════════════════════════════════════════════════════
-// Donate panel (EPC QR + IBAN copy)
-// ═══════════════════════════════════════════════════════
-function renderDonateQr() {
-  if (donateQrRendered) return;
-  if (typeof QRCodeStyling === 'undefined') {
-    setTimeout(renderDonateQr, 200);
-    return;
-  }
-  // EPC QR (SEPA Credit Transfer)
-  const epcData = [
-    'BCD', '002', '1', 'SCT',
-    'TATRSKBX',          // BIC (Tatra Banka)
-    BENEFICIARY,
-    IBAN_COMPACT,
-    'EUR1.00',
-    '', '',
-    REMITTANCE,
-  ].join('\n');
 
-  try {
-    const inst = new QRCodeStyling({
-      width: 260, height: 260, type: 'canvas',
-      data: epcData,
-      qrOptions: { errorCorrectionLevel: 'M' },
-      dotsOptions: { color: '#0a0c12', type: 'square' },
-      backgroundOptions: { color: '#ffffff' },
-    });
-    const target = document.getElementById('donate-qr-variable');
-    target.innerHTML = '';
-    inst.append(target);
-    donateQrRendered = true;
-  } catch (e) {
-    console.error('Donate QR render failed', e);
-  }
-}
 
-function switchDonateQr(type) {
-  document.querySelectorAll('.qr-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.qr === type)
-  );
-  document.getElementById('donate-qr-variable').style.display = type === 'variable' ? '' : 'none';
-  document.getElementById('donate-qr-10').style.display = type === '10' ? 'block' : 'none';
-  document.getElementById('donate-qr-100').style.display = type === '100' ? 'block' : 'none';
-
-  const hint = document.getElementById('qr-hint');
-  const c = window.I18N[lang];
-  if (type === 'variable') hint.textContent = c.qrHint;
-  else if (type === '10') hint.textContent = c.qrFixed10;
-  else if (type === '100') hint.textContent = c.qrFixed100;
-}
-
-async function copyIban() {
-  try {
-    await navigator.clipboard.writeText(IBAN_FULL);
-    const btn = document.getElementById('iban-copy-btn');
-    btn.textContent = '✓';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = '📋';
-      btn.classList.remove('copied');
-    }, 1800);
-  } catch (e) {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = IBAN_FULL;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch {}
-    document.body.removeChild(ta);
-  }
-}
