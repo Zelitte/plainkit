@@ -348,25 +348,6 @@ h3.section-title {
       <textarea id="notes" data-i18n-ph="notesPh" placeholder="Píšte tu vaše poznámky..."></textarea>
       <button class="notes-btn" onclick="downloadNotes()" data-i18n="downloadNotes">↓ Stiahnuť poznámky</button>
     </div>
-    <div class="support-card">
-      <h3 class="section-title" data-i18n="support">Podporte projekt</h3>
-      <h4 data-i18n="supportH">Na skenovanie použi bankovú aplikáciu</h4>
-      <p class="support-sub" data-i18n="supportSub">Stránka je zadarmo, bez reklamy. Beží na platených službách — dobrovoľný príspevok pomôže udržať ju v chode.</p>
-      <div class="donate-tabs">
-        <button class="donate-tab active" data-amt="variable" onclick="switchQr('variable')" data-i18n="amtFree">Voľná</button>
-        <button class="donate-tab" data-amt="10" onclick="switchQr('10')">10 €</button>
-        <button class="donate-tab" data-amt="100" onclick="switchQr('100')">100 €</button>
-      </div>
-      <div class="qr-box">
-        <div id="qr-variable"></div>
-        <img id="qr-10" src="/qr-10e.png" alt="QR 10 €" style="display:none">
-        <img id="qr-100" src="/qr-100e.png" alt="QR 100 €" style="display:none">
-      </div>
-      <div class="iban-row">
-        <span id="iban-display">SK06 1100 0000 ···· ···· 7644</span>
-        <button class="iban-copy" onclick="copyIban()" title="Kopírovať IBAN">📋</button>
-      </div>
-    </div>
   </aside>
   <!-- ═══════════════ STRED ═══════════════ -->
   <main class="panel panel-center">
