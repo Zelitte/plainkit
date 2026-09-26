@@ -263,7 +263,7 @@
       <span data-lang="en"><strong>Verifying the file.</strong> If you want to be sure
       you have exactly the file we published, compare its SHA-256 fingerprint:</span>
     </p>
-    <code class="hash">9317A99716881D78B40998959E47A6055F11D6A5A50CFA731C072B7A56B750E6</code>
+    <code class="hash">E4872405FDC06146C047E010284B088879F16ED54DBE127AE2C4C29973AD9C0A</code>
     <p style="margin-top:.6rem">
       <span data-lang="sk">Vo Windows: <code>Get-FileHash .\app-release.apk -Algorithm SHA256</code>.
       Ak sa odtlačok nezhoduje, súbor nie je náš — neinštalujte ho.</span>
@@ -288,7 +288,7 @@
     závažnosti.</li>
     <li data-lang="sk">Pamätá si výsledky a po aktualizácii aplikácie ukáže, čo sa
     zmenilo.</li>
-    <li data-lang="sk">Slovensky aj anglicky.</li>
+    <li data-lang="sk">Šesť jazykov: slovenčina, angličtina, nemčina, francúzština, španielčina, taliančina.</li>
     <li data-lang="en">Shows permissions in plain language — “precise location”
     instead of <code>ACCESS_FINE_LOCATION</code>.</li>
     <li data-lang="en">Distinguishes <strong>granted / not granted / automatic at
@@ -300,7 +300,7 @@
     severity.</li>
     <li data-lang="en">Remembers results and reports what changed after an app
     update.</li>
-    <li data-lang="en">Slovak and English.</li>
+        <li data-lang="en">Six languages: Slovak, English, German, French, Spanish and Italian.</li>
   </ul>
   <h2>
     <span data-lang="sk">Čo aplikácia nerobí</span>
@@ -337,7 +337,7 @@
 <!-- ─────────────────────────  SK  ───────────────────────── -->
 <main data-lang="sk">
   <h2 class="major">Zásady ochrany súkromia</h2>
-  <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 16. 8. 2026</p>
+  <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 26.09. 2026</p>
   <p class="lead"><strong>Aplikácia nezbiera, neukladá ani neodosiela žiadne osobné údaje.</strong>
   Celá analýza prebieha vo vašom telefóne. Výsledky nikdy neopustia zariadenie.</p>
   <h2>Čo aplikácia robí</h2>
@@ -363,28 +363,17 @@
     výsledky skenov.</li>
     <li>Odinštalovaním aplikácie sa všetky jej údaje nenávratne odstránia.</li>
   </ul>
-  <h2>Sieťové spojenia</h2>
-  <p>Aplikácia funguje aj úplne bez internetu. Existuje však jedno spojenie,
-  ktoré môže nadviazať, a preto ho tu uvádzame otvorene:</p>
+    <h2>Sieťové spojenia</h2>
+  <p>Aplikácia <strong>vôbec nežiada povolenie na prístup k internetu</strong>.
+  Android jej preto žiadne sieťové spojenie neumožní — nie je to sľub, ale
+  vlastnosť systému, ktorú si môžete overiť v zozname jej povolení.</p>
   <div class="note">
-    <p><strong>Aktualizácia zoznamu signatúr.</strong> Rozpoznávanie sledovacích
-    knižníc stojí na zozname signatúr, ktorý je zabudovaný priamo v aplikácii.
-    Aby nezastarával, aplikácia si môže z <code>plainkit.app</code> stiahnuť jeho
-    novšiu verziu.</p>
-    <p>Toto spojenie je <strong>jednosmerné</strong>: aplikácia iba <em>sťahuje</em>
-    verejný súbor so zoznamom. <strong>Neodosiela pritom nič</strong> — ani zoznam
-    vašich aplikácií, ani výsledky, ani žiadny identifikátor zariadenia či
-    používateľa.</p>
-    <p>Ako pri každom bežnom sťahovaní zo siete platí, že hostiteľ webu
-    <strong>Cloudflare</strong> (u ktorého je plainkit.app prevádzkovaný) pri takom
-    spojení vidí <strong>IP adresu</strong> vášho pripojenia a technické údaje
-    požiadavky, a to na úrovni infraštruktúry. Nedokážeme tomu zabrániť a nechceme
-    to zamlčať. Z IP adresy sa nedá zistiť, aké aplikácie máte v telefóne — tá
-    informácia sa neodosiela vôbec.</p>
-    <p>To isté platí pre <strong>stiahnutie inštalačného súboru</strong> tlačidlom
-    vyššie: súbor je uložený na <strong>GitHube</strong>, ktorý pri sťahovaní vidí
-    IP adresu vášho pripojenia. Spojenie vznikne až vtedy, keď na tlačidlo kliknete —
-    táto stránka sa naň sama nepripája.</p>
+    <p><strong>Zoznam signatúr</strong> sledovacích knižníc je zabudovaný priamo
+    v aplikácii. Dopĺňa sa novou verziou aplikácie, nie sťahovaním zo siete.</p>
+    <p>Jediné spojenie súvisiace s Auditom vzniká <strong>mimo aplikácie</strong>:
+    keď si inštalačný súbor stiahnete tlačidlom vyššie. Súbor je uložený na
+    <strong>GitHube</strong>, ktorý pri sťahovaní vidí IP adresu vášho pripojenia.
+    Spojenie vznikne až po kliknutí — táto stránka sa naň sama nepripája.</p>
   </div>
   <h2>Čo aplikácia nerobí</h2>
   <ul>
@@ -450,25 +439,16 @@
     <li>Uninstalling the app permanently removes all of its data.</li>
   </ul>
   <h2>Network connections</h2>
-  <p>The app works fully offline. There is, however, one connection it may make,
-  which we state here openly:</p>
+  <p>The app <strong>does not request internet access at all</strong>. Android
+  therefore cannot grant it any network connection — this is not a promise but a
+  property of the system, and you can verify it in the app's permission list.</p>
   <div class="note">
-    <p><strong>Updating the signature list.</strong> Detection of tracking
-    libraries relies on a signature list bundled inside the app. To keep it from
-    going stale, the app may download a newer version of that list from
-    <code>plainkit.app</code>.</p>
-    <p>This connection is <strong>one-way</strong>: the app only <em>downloads</em>
-    a public list file. <strong>It sends nothing</strong> — not the list of your
-    apps, not the results, and no device or user identifier.</p>
-    <p>As with any ordinary download, the web host <strong>Cloudflare</strong>
-    (which serves plainkit.app) can see the <strong>IP address</strong> of your
-    connection and technical request data at the infrastructure level. We cannot
-    prevent this and we will not hide it. An IP address does not reveal which apps
-    you have installed — that information is never transmitted at all.</p>
-    <p>The same applies to <strong>downloading the installation file</strong> with
-    the button above: the file is hosted on <strong>GitHub</strong>, which sees the
-    IP address of your connection when you download it. That connection is made only
-    when you click — this page never contacts it on its own.</p>
+    <p>The <strong>signature list</strong> of tracking libraries is bundled inside
+    the app. It grows with new versions of the app, not by downloading from a server.</p>
+    <p>The only connection related to Audit happens <strong>outside the app</strong>:
+    when you download the installation file with the button above. The file is hosted
+    on <strong>GitHub</strong>, which sees the IP address of your connection. That
+    connection is made only when you click — this page never contacts it on its own.</p>
   </div>
   <h2>What the app does not do</h2>
   <ul>
