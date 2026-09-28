@@ -122,6 +122,15 @@ h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.03em; margin-bottom
 .check { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); line-height: 1.7; }
 .check .dim { color: var(--text-2); }
 .check.bad { color: var(--yellow); }
+/* Poznámky */
+.notes-card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-top: 20px; }
+.notes-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.notes-title { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+.notes-count { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-3); }
+#notes { width: 100%; min-height: 140px; resize: vertical; background: transparent; border: none; outline: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6; }
+#notes::placeholder { color: var(--text-3); }
+.notes-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.notes-hint { font-size: 0.72rem; color: var(--text-3); margin-top: 10px; line-height: 1.5; }
 /* Informácie */
 .info { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 720px) { .info { grid-template-columns: 1fr; } }
@@ -165,6 +174,20 @@ h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.03em; margin-bottom
   </div>
 
   <div id="list"></div>
+
+  <!-- ═══ Poznámky (neukladajú sa — rovnako ako na domovskej stránke) ═══ -->
+  <section class="notes-card">
+    <div class="notes-head">
+      <h2 class="notes-title" data-i18n="notes">Poznámky</h2>
+      <span class="notes-count"><span id="notes-count">0</span> <span data-i18n="chars">znakov</span></span>
+    </div>
+    <textarea id="notes" data-i18n-ph="notesPh" placeholder="Napr. ktoré fotky si vyčistil a komu si ich poslal…"></textarea>
+    <div class="notes-btns">
+      <button class="btn" id="notesAdd" type="button" data-i18n="notesAdd">+ Vložiť súhrn vyčistených</button>
+      <button class="btn" id="notesDl" type="button" data-i18n="notesDl">↓ Stiahnuť poznámky</button>
+    </div>
+    <div class="notes-hint" data-i18n="notesHint">Poznámky sa nikam neukladajú — po zatvorení stránky zmiznú. Ak ich chceš mať, stiahni si ich.</div>
+  </section>
 
   <section class="info">
     <div class="info-box">
@@ -783,7 +806,11 @@ const I18N = {
     iChk3: 'Nezávislá kontrola: napr. exiftool alebo vlastnosti súboru v systéme.',
     footTag: 'bez reklám, bez registrácie, bez sledovania',
     footPrivacy: 'Ukladáme len nastavenie jazyka vo vašom prehliadači. Fotky neopustia vaše zariadenie.',
-    namePrefix: 'foto-'
+    namePrefix: 'foto-',
+    notes: 'Poznámky', chars: 'znakov', notesPh: 'Napr. ktoré fotky si vyčistil a komu si ich poslal…',
+    notesAdd: '+ Vložiť súhrn vyčistených', notesDl: '↓ Stiahnuť poznámky',
+    notesHint: 'Poznámky sa nikam neukladajú — po zatvorení stránky zmiznú. Ak ich chceš mať, stiahni si ich.',
+    sumHead: 'Vyčistené fotky', sumRemoved: 'odstránené', sumNothing: 'bez metadát', sumNone: '(zatiaľ žiadne vyčistené fotky)', notesFile: 'poznamky-exif.txt'
   },
   en: {
     title: 'plainkit · remove photo metadata (EXIF, GPS)',
@@ -845,7 +872,11 @@ const I18N = {
     iChk3: 'Independent check: e.g. exiftool or the file properties in your system.',
     footTag: 'no ads, no signup, no tracking',
     footPrivacy: 'We only store your language setting in your browser. Your photos never leave your device.',
-    namePrefix: 'photo-'
+    namePrefix: 'photo-',
+    notes: 'Notes', chars: 'chars', notesPh: 'E.g. which photos you cleaned and who you sent them to…',
+    notesAdd: '+ Insert summary of cleaned photos', notesDl: '↓ Download notes',
+    notesHint: 'Notes are not saved anywhere — they disappear when you close the page. Download them if you want to keep them.',
+    sumHead: 'Cleaned photos', sumRemoved: 'removed', sumNothing: 'no metadata', sumNone: '(no cleaned photos yet)', notesFile: 'notes-exif.txt'
   }
 };
 
@@ -884,6 +915,7 @@ if (typeof document !== 'undefined') {
     $('lang-sk').classList.toggle('active', lang === 'sk');
     $('lang-en').classList.toggle('active', lang === 'en');
     document.querySelectorAll('[data-i18n]').forEach(e => { const k = e.getAttribute('data-i18n'); if (I18N[lang][k]) e.textContent = I18N[lang][k]; });
+    document.querySelectorAll('[data-i18n-ph]').forEach(e => { const k = e.getAttribute('data-i18n-ph'); if (I18N[lang][k]) e.placeholder = I18N[lang][k]; });
     document.title = t('title');
     $('meta-desc').setAttribute('content', t('desc'));
     render();
@@ -1005,6 +1037,32 @@ if (typeof document !== 'undefined') {
     for (const it of items) { if (it.url) URL.revokeObjectURL(it.url); if (it.A) it.A.ctx.urls.forEach(u => URL.revokeObjectURL(u)); }
     items.length = 0; render();
   });
+
+  // ═══ Poznámky ═══
+  const notesEl = $('notes');
+  const updateCount = () => { $('notes-count').textContent = notesEl.value.length; };
+  notesEl.addEventListener('input', updateCount);
+  $('notesAdd').addEventListener('click', () => {
+    // Jeden riadok na vyčistenú fotku: pôvodný názov → nový názov · počet a najdôležitejšie odstránené údaje
+    const done = items.filter(it => it.out && !it.left);
+    const now = new Date(), stamp = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK') + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+    let txt;
+    if (!done.length) txt = t('sumNone');
+    else {
+      const lines = done.map(it => {
+        const rm = it.A.F.filter(f => f.sev !== 'kept');
+        const lowerFirst = s => /^\p{Lu}\p{Ll}/u.test(s) ? s[0].toLowerCase() + s.slice(1) : s;   // „Poloha (GPS)" → „poloha (GPS)"
+        const high = [...new Set(rm.filter(f => f.sev === 'high').map(f => lowerFirst(t(f.k))))].slice(0, 4);
+        const name = outName(it) === it.name ? it.name : it.name + ' → ' + outName(it);
+        return '• ' + name + ' · ' + (rm.length ? t('sumRemoved') + ': ' + t('vdAny', rm.length) + (high.length ? ' (' + high.join(', ') + ')' : '') : t('sumNothing'));
+      });
+      txt = t('sumHead') + ' — ' + stamp + '\n' + lines.join('\n');
+    }
+    notesEl.value = notesEl.value.trim() ? notesEl.value.replace(/\s*$/, '') + '\n\n' + txt : txt;
+    updateCount();
+    notesEl.focus();
+  });
+  $('notesDl').addEventListener('click', () => download(new Blob([notesEl.value], { type: 'text/plain;charset=utf-8' }), t('notesFile')));
 
   try { const s = localStorage.getItem('pk_lang'); if (s === 'en' || s === 'sk') lang = s; } catch (e) {}
   applyLang();
