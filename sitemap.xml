@@ -190,6 +190,13 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Photos without metadata -->
+  <url>
+    <loc>https:plainkit.app/exif/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
   <!-- ↓↓↓ KEĎ PRIDÁŠ NOVÝ NÁSTROJ, SKOPÍRUJ BLOK <url>...</url> A ZMEŇ <loc> ↓↓↓ -->
 
 </urlset>
