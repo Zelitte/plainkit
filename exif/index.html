@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07090f">
+<title>plainkit · fotky bez metadát (EXIF, GPS)</title>
+<meta name="description" id="meta-desc" content="Zistí, čo fotka prezrádza — polohu, zariadenie, sériové čísla — a odstráni to. Beží v prehliadači, fotky sa nikam neodosielajú.">
+<meta property="og:title" content="plainkit · fotky bez metadát">
+<meta property="og:description" content="See what your photo reveals — location, device, serial numbers — and remove it. Runs in your browser, nothing is uploaded.">
+<meta property="og:image" content="https://plainkit.app/og-image.png">
+<meta property="og:url" content="https://plainkit.app/exif">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307090f'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-size='62' font-style='italic' font-weight='600' fill='%2300d4e8'%3EP%3C/text%3E%3C/svg%3E">
+<style>
+  /* Self-hostované fonty — žiadne volania na Google. */
+  @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/inter-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/inter-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/inter-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/inter-latin-ext-600-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/jetbrains-mono-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/jetbrains-mono-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+:root {
+  --bg: #0a0f14; --bg2: #11171f; --bg-deep: #07090f;
+  --glass: rgba(255,255,255,0.025);
+  --border: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.12);
+  --accent: #00d4e8; --accent-dim: rgba(0,212,232,0.13);
+  --yellow: #ffc629; --yellow-dim: rgba(255,198,41,0.10);
+  --text: #f5f7fa; --text-2: #8b95a3; --text-3: #4a5260;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% 0%, var(--accent-dim), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+a { color: var(--accent); }
+/* ═══ Hlavička ═══ */
+.top { max-width: 880px; margin: 0 auto; padding: 22px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; color: var(--text); text-decoration: none; }
+.brand .dot { color: var(--accent); }
+.brand .path { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 400; color: var(--text-2); letter-spacing: 0; margin-left: 8px; }
+.brand:hover .path { color: var(--accent); }
+.eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); }
+.lang-switch { display: flex; gap: 4px; background: var(--glass); border: 1px solid var(--border); border-radius: 100px; padding: 4px; }
+.lang-switch button { background: transparent; border: none; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-2); padding: 5px 12px; border-radius: 100px; }
+.lang-switch button.active { background: var(--accent-dim); color: var(--accent); }
+/* ═══ Obsah ═══ */
+.wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 40px; }
+h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 10px; }
+.lead { color: var(--text-2); line-height: 1.65; max-width: 62ch; margin-bottom: 24px; }
+/* Zóna na pretiahnutie */
+.drop {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  min-height: 150px; padding: 24px; cursor: pointer; text-align: center;
+  border: 1.5px dashed rgba(0,212,232,0.35); border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0,212,232,0.06), transparent 60%), var(--glass);
+  transition: border-color 0.15s, background 0.15s;
+}
+.drop:hover, .drop.over { border-color: var(--accent); background: rgba(0,212,232,0.09); }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.drop-t { font-size: 1.05rem; font-weight: 500; }
+.drop-s { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-2); }
+/* Lišta s hromadnými akciami */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 20px 0 12px; }
+.bar[hidden] { display: none; }
+.chk { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: var(--text-2); line-height: 1.5; cursor: pointer; max-width: 52ch; }
+.chk input { margin-top: 3px; accent-color: var(--accent); }
+.bar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  background: transparent; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  color: var(--text-2); font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
+  padding: 9px 14px; cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #05090d; font-weight: 500; }
+.btn.primary:hover { filter: brightness(1.12); color: #05090d; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Karta súboru */
+.card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.card-head { display: flex; align-items: center; gap: 14px; }
+.prev { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--bg-deep); border: 1px solid var(--border); flex-shrink: 0; }
+.prev-x { display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; color: var(--text-3); }
+.meta { flex: 1; min-width: 0; }
+.fname { font-weight: 500; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fsub { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-2); margin-top: 3px; }
+.verdict { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; border-radius: 100px; padding: 3px 10px; white-space: nowrap; border: 1px solid; }
+.v-high { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
+.v-any { color: var(--text-2); border-color: var(--border-strong); }
+.v-none { color: var(--accent); border-color: rgba(0,212,232,0.4); }
+.note { margin-top: 12px; font-size: 0.85rem; color: var(--text-2); line-height: 1.55; }
+.note.err { color: var(--yellow); }
+/* Zoznam nálezov */
+.finds { list-style: none; margin-top: 14px; border-top: 1px solid var(--border); }
+.f { display: grid; grid-template-columns: 190px 1fr auto; gap: 12px; align-items: baseline; padding: 8px 0 8px 10px; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; font-size: 0.84rem; }
+.f-l { color: var(--text-2); }
+.f-v { color: var(--text); word-break: break-word; line-height: 1.5; }
+.f-s { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--text-3); text-transform: uppercase; white-space: nowrap; }
+.f-high { border-left-color: var(--yellow); background: linear-gradient(90deg, var(--yellow-dim), transparent 50%); }
+.f-high .f-l { color: var(--yellow); }
+.f-low .f-v, .f-low .f-l { color: var(--text-3); }
+.f-kept { border-left-color: var(--accent); }
+.f-kept .f-l { color: var(--accent); }
+.f-kept .f-v { color: var(--text-2); }
+.f-kept .f-s { color: var(--accent); }
+.f .maplink { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; margin-left: 6px; text-decoration: none; }
+.f .maplink:hover { text-decoration: underline; }
+.f .thumb { display: block; margin-top: 8px; max-width: 160px; max-height: 120px; border-radius: 4px; border: 1px solid var(--yellow); }
+@media (max-width: 620px) {
+  .f { grid-template-columns: 1fr auto; }
+  .f-l { grid-column: 1; }
+  .f-s { grid-column: 2; grid-row: 1; }
+  .f-v { grid-column: 1 / -1; }
+}
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.check { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); line-height: 1.7; }
+.check .dim { color: var(--text-2); }
+.check.bad { color: var(--yellow); }
+/* Informácie */
+.info { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .info { grid-template-columns: 1fr; } }
+.info-box { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+.info-box h2 { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; font-weight: 500; }
+.info-box.warn h2 { color: var(--yellow); }
+.info-box ul { list-style: none; }
+.info-box li { font-size: 0.85rem; color: var(--text-2); line-height: 1.6; padding-left: 16px; position: relative; margin-bottom: 8px; }
+.info-box li::before { content: '›'; position: absolute; left: 0; color: var(--text-3); }
+.foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 24px 20px 32px; line-height: 1.8; }
+.foot a { color: var(--text-2); text-decoration: none; }
+.foot a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" title="plainkit.app">plainkit<span class="dot">.</span><span class="path">/exif</span></a>
+  <div class="eyebrow">no ads · no signup · no tracking</div>
+  <div class="lang-switch">
+    <button id="lang-sk" class="active" type="button">SK</button>
+    <button id="lang-en" type="button">EN</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="h1">Fotky bez metadát</h1>
+  <p class="lead" data-i18n="lead">Ukáže, čo fotka prezrádza — polohu, zariadenie, sériové čísla, čas — a odstráni to. Obraz ostane nedotknutý. Všetko prebieha v tvojom prehliadači, fotky sa nikam neodosielajú.</p>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,.heic,.heif,.avif">
+    <span class="drop-t" data-i18n="dropT">Pretiahni sem fotky</span>
+    <span class="drop-s" data-i18n="dropS">alebo klikni a vyber · JPEG, PNG, WebP · aj viac naraz</span>
+  </label>
+
+  <div class="bar" id="bar" hidden>
+    <label class="chk"><input type="checkbox" id="rename" checked> <span data-i18n="rename">Premenovať súbory (foto-1.jpg…) — pôvodný názov často obsahuje dátum a čas snímky</span></label>
+    <div class="bar-btns">
+      <button class="btn primary" id="zipBtn" type="button" data-i18n="dlAll">↓ Stiahnuť všetko (ZIP)</button>
+      <button class="btn" id="clearBtn" type="button" data-i18n="clearAll">Vymazať zoznam</button>
+    </div>
+  </div>
+
+  <div id="list"></div>
+
+  <section class="info">
+    <div class="info-box">
+      <h2 data-i18n="iKeepT">Čo ostane</h2>
+      <ul>
+        <li data-i18n="iKeep1">Obraz — pixely sa nemenia, fotka sa znova nekomprimuje.</li>
+        <li data-i18n="iKeep2">Orientácia — bez nej by sa fotka z mobilu zobrazila bokom.</li>
+        <li data-i18n="iKeep3">Farebný profil — bez neho by sa zmenili farby.</li>
+        <li data-i18n="iKeep4">Označenie „vytvorené AI", ak ho súbor mal — jeden neutrálny štítok bez promptu, mena a účtu.</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h2 data-i18n="iDropT">Čo sa odstráni</h2>
+      <ul>
+        <li data-i18n="iDrop1">Poloha GPS, dátum a čas, zariadenie, sériové čísla, softvér, autor.</li>
+        <li data-i18n="iDrop2">Blok výrobcu (MakerNote) — neokomentované dáta, v ktorých často býva sériové číslo.</li>
+        <li data-i18n="iDrop3">Vložená miniatúra — pri orezanej fotke môže ukazovať pôvodný, neorezaný záber.</li>
+        <li data-i18n="iDrop4">História úprav z Photoshopu a Lightroomu, IPTC popisy a názvy miest.</li>
+        <li data-i18n="iDrop5">Prompty a workflow zo Stable Diffusion a ComfyUI, vrátane ciest na disku.</li>
+        <li data-i18n="iDrop6">Dáta pripojené za koncom obrázka — napr. video z Motion Photo alebo HDR mapa.</li>
+        <li data-i18n="iDrop7">Podpísaný záznam o pôvode (C2PA). Ak šlo o AI obrázok, nahradí ho jednoduchý štítok „vytvorené AI" — ten nie je podpísaný, takže sa nedá overiť ako originál.</li>
+      </ul>
+    </div>
+    <div class="info-box warn">
+      <h2 data-i18n="iNotT">Čo tento nástroj nerieši</h2>
+      <ul>
+        <li data-i18n="iNot1">Obsah fotky. Tvár, ŠPZ, výhľad z okna či odraz v zrkadle môžu prezradiť viac než metadáta.</li>
+        <li data-i18n="iNot2">Vodoznak vložený priamo do pixelov (napr. pri AI obrázkoch). Nie je to metadáta a zostáva.</li>
+        <li data-i18n="iNot3">HEIC a AVIF — prehliadač ich nevie prečítať.</li>
+        <li data-i18n="iNot4">Niektoré telefóny odstránia polohu už pri výbere fotky. Vtedy ju tu neuvidíš — do stránky sa vôbec nedostala.</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h2 data-i18n="iChkT">Ako si to overiť</h2>
+      <ul>
+        <li data-i18n="iChk1">Fotky sa nikam neodosielajú. Otvor DevTools → Network: pri spracovaní nepribudne žiadna požiadavka.</li>
+        <li data-i18n="iChk2">Vyčistený súbor stránka prečíta znova a vypíše, koľko metadát v ňom našla. Ponechať smie len to, čo je v zozname „Čo ostane".</li>
+        <li data-i18n="iChk3">Nezávislá kontrola: napr. exiftool alebo vlastnosti súboru v systéme.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <a href="/">plainkit.app</a> · <span data-i18n="footTag">bez reklám, bez registrácie, bez sledovania</span><br>
+  <span data-i18n="footPrivacy">Ukladáme len nastavenie jazyka vo vašom prehliadači. Fotky neopustia vaše zariadenie.</span>
+</footer>
+
+<script src="/jszip.min.js"></script>
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════════
+   JADRO — čisté funkcie nad Uint8Array (bez DOM).
+   Princíp: ZOZNAM TOHO, ČO OSTANE. Všetky ostatné bloky sa zahodia.
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Pomocné funkcie ──
+const te = new TextEncoder();
+const u8s = s => te.encode(s);                               // UTF-8
+const latin = s => { const a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 255; return a; };
+const ascii = (b, o, n) => { let s = ''; for (let i = o; i < o + n && i < b.length; i++) s += String.fromCharCode(b[i]); return s; };
+const startsWith = (b, s) => { if (s.length > b.length) return false; for (let i = 0; i < s.length; i++) if (b[i] !== (s.charCodeAt(i) & 255)) return false; return true; };
+const dec = (b, enc) => { try { return new TextDecoder(enc || 'utf-8').decode(b); } catch (e) { return ''; } };
+const clip = (s, n) => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
+const pad2 = n => String(n).padStart(2, '0');
+const u32be = (b, o) => ((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]) >>> 0;
+const u32le = (b, o) => (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+function indexOfStr(b, s) {
+  const n = s.length, c0 = s.charCodeAt(0);
+  outer: for (let i = 0; i <= b.length - n; i++) {
+    if (b[i] !== c0) continue;
+    for (let j = 1; j < n; j++) if (b[i + j] !== s.charCodeAt(j)) continue outer;
+    return i;
+  }
+  return -1;
+}
+function concat(parts) {
+  let n = 0; for (const p of parts) n += p.length;
+  const o = new Uint8Array(n); let k = 0;
+  for (const p of parts) { o.set(p, k); k += p.length; }
+  return o;
+}
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function inflate(b) {          // zlib (PNG zTXt / komprimovaný iTXt), natívne v prehliadači
+  if (typeof DecompressionStream === 'undefined') return null;
+  try {
+    const s = new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return new Uint8Array(await new Response(s).arrayBuffer());
+  } catch (e) { return null; }
+}
+// Nález: sev = high | mid | low | kept;  k = kľúč popisu;  v = text alebo {t:kľúč, a:[argumenty]}
+const fd = (sev, k, v, src, x) => ({ sev, k, v, src, x });
+
+// ── Formát podľa obsahu, nie podľa prípony ──
+function detectFormat(b) {
+  if (b.length > 3 && b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return 'jpeg';
+  if (b.length > 8 && b[0] === 0x89 && ascii(b, 1, 3) === 'PNG') return 'png';
+  if (b.length > 12 && ascii(b, 0, 4) === 'RIFF' && ascii(b, 8, 4) === 'WEBP') return 'webp';
+  if (b.length > 12 && ascii(b, 4, 4) === 'ftyp') {
+    const brand = ascii(b, 8, 4);
+    if (/^avi/.test(brand)) return 'avif';
+    if (/^(hei|hev|mif1|msf1)/.test(brand)) return 'heic';
+  }
+  return null;
+}
+
+// ── AI označenie (IPTC DigitalSourceType) ──
+const AI_RE = /digitalsourcetype\/(compositeWithTrainedAlgorithmicMedia|trainedAlgorithmicMedia|algorithmicMedia)\b/;
+const aiFromText = s => { const m = s.match(AI_RE); return m ? m[1] : null; };
+const XMP_AI = v =>
+  '<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>' +
+  '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
+  '<rdf:Description rdf:about="" xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/" ' +
+  'Iptc4xmpExt:DigitalSourceType="http://cv.iptc.org/newscodes/digitalsourcetype/' + v + '"/>' +
+  '</rdf:RDF></x:xmpmeta><?xpacket end="r"?>';
+
+// ── Minimálny EXIF: len jedna značka Orientation (26 bajtov, big-endian) ──
+const buildOrientTiff = o => new Uint8Array([0x4D,0x4D,0,0x2A, 0,0,0,8, 0,1, 0x01,0x12, 0,3, 0,0,0,1, 0,o,0,0, 0,0,0,0]);
+
+/* ════════ TIFF / EXIF ════════ */
+const TSZ = {1:1, 2:1, 3:2, 4:4, 5:8, 6:1, 7:1, 8:2, 9:4, 10:8, 11:4, 12:8};
+function tiffReader(t) {
+  if (t.length < 8) return null;
+  const le = t[0] === 0x49 && t[1] === 0x49;
+  if (!le && !(t[0] === 0x4D && t[1] === 0x4D)) return null;
+  const u16 = o => o + 2 <= t.length ? (le ? t[o] | t[o + 1] << 8 : t[o] << 8 | t[o + 1]) : 0;
+  const u32 = o => o + 4 <= t.length ? (le ? u32le(t, o) : u32be(t, o)) : 0;
+  const seen = new Set();
+  function ifd(off) {
+    const m = new Map();
+    if (!off || off + 2 > t.length || seen.has(off)) return { m, next: 0 };
+    seen.add(off);
+    const n = u16(off);
+    if (n > 2000) return { m, next: 0 };
+    for (let i = 0; i < n; i++) {
+      const e = off + 2 + i * 12;
+      if (e + 12 > t.length) break;
+      const type = u16(e + 2), cnt = u32(e + 4), sz = (TSZ[type] || 1) * cnt;
+      const vo = sz <= 4 ? e + 8 : u32(e + 8);
+      m.set(u16(e), { type, cnt, vo, sz, ok: vo + sz <= t.length });
+    }
+    return { m, next: u32(off + 2 + n * 12) };
+  }
+  const R = { le, u16, u32, ifd };
+  R.bytes = e => (e && e.ok) ? t.subarray(e.vo, e.vo + e.sz) : new Uint8Array(0);
+  R.str = e => { let s = R.bytes(e); const z = s.indexOf(0); if (z >= 0) s = s.subarray(0, z); return dec(s).trim(); };
+  R.num = (e, i) => {
+    if (!e || !e.ok) return 0;
+    const o = e.vo + (i || 0) * (TSZ[e.type] || 1);
+    return e.type === 3 ? u16(o) : e.type === 4 ? u32(o) : e.type === 9 ? (u32(o) | 0) : t[o];
+  };
+  R.rat = (e, i) => {
+    if (!e || !e.ok) return NaN;
+    const o = e.vo + 8 * (i || 0);
+    let a = u32(o), d = u32(o + 4);
+    if (e.type === 10) { a |= 0; d |= 0; }
+    return d ? a / d : NaN;
+  };
+  return R;
+}
+const IFD0_NAMED = new Set([0x010F,0x0110,0x0131,0x0132,0x013B,0x8298,0x010E,0x0112,0x013C,0x8769,0x8825,0xA005]);
+const EXIF_NAMED = new Set([0x9003,0x9004,0x9010,0x9011,0x9012,0xA430,0xA431,0xA433,0xA434,0xA435,0xA420,0x927C,0x9286,0xA005]);
+const exifDate = s => s.replace(/^(\d{4}):(\d\d):(\d\d)/, '$1-$2-$3');
+function userComment(R, e) {
+  const b = R.bytes(e); if (b.length <= 8) return '';
+  const code = ascii(b, 0, 8), body = b.subarray(8);
+  let s = code.startsWith('UNICODE') ? dec(body, R.le ? 'utf-16le' : 'utf-16be') : dec(body);
+  return s.replace(/\u0000/g, '').trim();
+}
+function exifFindings(tiff, F, ctx, mk) {
+  const src = 'EXIF';
+  const R = tiffReader(tiff);
+  if (!R) { F.push(fd('low', 'fExif', { t: 'vBytes', a: [tiff.length] }, src)); return; }
+  let named = 0, tech = 0;
+  const push = (sev, k, v, x) => { F.push(fd(sev, k, v, src, x)); named++; };
+  const d0 = R.ifd(R.u32(4)), I0 = d0.m;
+  const E = R.ifd(R.num(I0.get(0x8769))).m;
+  const G = R.ifd(R.num(I0.get(0x8825))).m;
+  const d1 = R.ifd(d0.next), I1 = d1.m;
+  for (const k of I0.keys()) if (!IFD0_NAMED.has(k)) tech++;
+  for (const k of E.keys()) if (!EXIF_NAMED.has(k)) tech++;
+
+  // Poloha
+  if (G.size) {
+    const la = G.get(2), lo = G.get(4);
+    if (la && lo) {
+      const deg = e => R.rat(e, 0) + (R.rat(e, 1) || 0) / 60 + (R.rat(e, 2) || 0) / 3600;
+      let lat = deg(la), lon = deg(lo);
+      if (/S/i.test(R.str(G.get(1)))) lat = -lat;
+      if (/W/i.test(R.str(G.get(3)))) lon = -lon;
+      if (!isFinite(lat) || !isFinite(lon)) push('high', 'fGps', { t: 'vGpsBad' });
+      else if (lat === 0 && lon === 0) push('mid', 'fGpsRec', { t: 'vGpsZero' });
+      else {
+        let alt = G.get(6) ? R.rat(G.get(6)) : NaN;
+        if (isFinite(alt) && R.num(G.get(5)) === 1) alt = -alt;
+        push('high', 'fGps', lat.toFixed(5) + ', ' + lon.toFixed(5), { gps: { lat, lon, alt } });
+      }
+    } else push('low', 'fGpsRec', { t: 'vGpsMeta' });
+    const gd = R.str(G.get(29));
+    if (gd || G.get(7)) {
+      const tm = G.get(7) ? [0, 1, 2].map(i => pad2(Math.floor(R.rat(G.get(7), i) || 0))).join(':') : '';
+      push('mid', 'fGpsTime', (exifDate(gd) + ' ' + tm).trim() + ' UTC');
+    }
+  }
+  // Zariadenie a osoba
+  const make = R.str(I0.get(0x010F)), model = R.str(I0.get(0x0110));
+  if (make || model) push('mid', 'fDevice', model.toLowerCase().startsWith(make.toLowerCase()) && model ? model : [make, model].filter(Boolean).join(' '));
+  const lens = [R.str(E.get(0xA433)), R.str(E.get(0xA434))].filter(Boolean).join(' ');
+  if (lens) push('mid', 'fLens', lens);
+  const ser = R.str(E.get(0xA431)); if (ser) push('high', 'fSerial', ser);
+  const lser = R.str(E.get(0xA435)); if (lser) push('high', 'fLensSerial', lser);
+  const own = R.str(E.get(0xA430)); if (own) push('high', 'fOwner', own);
+  const art = R.str(I0.get(0x013B)); if (art) push('mid', 'fAuthor', art);
+  const cpr = R.str(I0.get(0x8298)); if (cpr) push('mid', 'fCopyright', cpr);
+  const uid = R.str(E.get(0xA420)); if (uid) push('high', 'fUid', uid);
+  const host = R.str(I0.get(0x013C)); if (host) push('mid', 'fHost', host);
+  // Čas
+  const dto = R.str(E.get(0x9003)) || R.str(E.get(0x9004));
+  const tz = R.str(E.get(0x9011)) || R.str(E.get(0x9010));
+  if (dto) push('mid', 'fDate', exifDate(dto) + (tz ? ' (UTC' + tz + ')' : ''));
+  const dtm = R.str(I0.get(0x0132));
+  if (dtm && dtm !== dto) push('mid', 'fDateMod', exifDate(dtm));
+  // Softvér a texty
+  const sw = R.str(I0.get(0x0131)); if (sw) push('mid', 'fSoftware', sw);
+  const ds = R.str(I0.get(0x010E)); if (ds) push('mid', 'fDesc', clip(ds, 160));
+  const uc = userComment(R, E.get(0x9286)); if (uc) push('mid', 'fUserComment', clip(uc, 160));
+  // Blok výrobcu
+  const mn = E.get(0x927C); if (mn && mn.sz) push('high', 'fMaker', { t: 'vMaker', a: [mn.sz] });
+  // Vložená miniatúra (IFD1)
+  const toff = R.num(I1.get(0x0201)), tlen = R.num(I1.get(0x0202));
+  if (tlen > 0 && toff + tlen <= tiff.length) {
+    const tb = tiff.slice(toff, toff + tlen), x = {};
+    if (mk && typeof URL !== 'undefined' && URL.createObjectURL) { x.thumb = URL.createObjectURL(new Blob([tb], { type: 'image/jpeg' })); ctx.urls.push(x.thumb); }
+    push('high', 'fThumb', { t: 'vThumb', a: [tlen] }, x);
+  } else if (I1.size) push('mid', 'fThumb', { t: 'vThumbOther' });
+  // Orientácia — jediné, čo ostane
+  const o = R.num(I0.get(0x0112));
+  if (o >= 2 && o <= 8) { ctx.orient = o; push('kept', 'fOrient', { t: 'o' + o }); }
+  if (tech) { F.push(fd('low', 'fTech', { t: 'vTech', a: [tech] }, src)); named++; }
+  if (!named) F.push(fd('low', 'fExif', { t: 'vBytes', a: [tiff.length] }, src));
+}
+
+/* ════════ XMP ════════ */
+const unxml = s => s.replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+function xmpProp(x, name) {
+  const n = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let m = x.match(new RegExp('\\s' + n + '="([^"]*)"'));
+  if (m) return unxml(m[1]).trim();
+  m = x.match(new RegExp('<' + n + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + n + '>'));
+  if (!m) return '';
+  const li = m[1].match(/<rdf:li[^>]*>([^<]*)<\/rdf:li>/);
+  return unxml(li ? li[1] : m[1].replace(/<[^>]+>/g, ' ')).trim();
+}
+function xmpCoord(s) {               // "48,22.326N" alebo "48,22,19.56N"
+  const m = s.match(/^(\d+),(\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?([NSEW])$/);
+  if (!m) return NaN;
+  const v = +m[1] + (+m[2]) / 60 + (m[3] ? +m[3] / 3600 : 0);
+  return /[SW]/.test(m[4]) ? -v : v;
+}
+function xmpLabelOnly(x) {           // náš vlastný štítok „vytvorené AI" a nič iné
+  const props = new Set();
+  for (const m of x.matchAll(/\s([A-Za-z][\w-]*:[A-Za-z][\w-]*)="/g)) props.add(m[1]);
+  for (const m of x.matchAll(/<([A-Za-z][\w-]*:[A-Za-z][\w-]*)[\s>\/]/g)) props.add(m[1]);
+  const ok = new Set(['x:xmpmeta', 'x:xmptk', 'rdf:RDF', 'rdf:Description', 'rdf:about', 'Iptc4xmpExt:DigitalSourceType']);
+  for (const p of props) if (!ok.has(p) && !p.startsWith('xmlns:')) return false;
+  return props.has('Iptc4xmpExt:DigitalSourceType');
+}
+function xmpFindings(x, F, ctx) {
+  const src = 'XMP'; let n = 0;
+  const push = (sev, k, v, xx) => { F.push(fd(sev, k, v, src, xx)); n++; };
+  const P = name => xmpProp(x, name);
+  const ai = aiFromText(x); if (ai) ctx.ai = ai;
+  const la = xmpCoord(P('exif:GPSLatitude')), lo = xmpCoord(P('exif:GPSLongitude'));
+  if (isFinite(la) && isFinite(lo)) push('high', 'fGps', la.toFixed(5) + ', ' + lo.toFixed(5), { gps: { lat: la, lon: lo } });
+  const place = ['Iptc4xmpCore:Location', 'photoshop:City', 'photoshop:State', 'photoshop:Country'].map(P).filter(Boolean);
+  if (place.length) push('high', 'fPlace', place.join(', '));
+  const ser = P('aux:SerialNumber') || P('exifEX:BodySerialNumber'); if (ser) push('high', 'fSerial', ser);
+  const lser = P('aux:LensSerialNumber') || P('exifEX:LensSerialNumber'); if (lser) push('high', 'fLensSerial', lser);
+  const own = P('aux:OwnerName') || P('exifEX:CameraOwnerName'); if (own) push('high', 'fOwner', own);
+  const cr = P('dc:creator'); if (cr) push('mid', 'fAuthor', cr);
+  const rt = P('dc:rights'); if (rt) push('mid', 'fCopyright', clip(rt, 120));
+  const dev = [P('tiff:Make'), P('tiff:Model')].filter(Boolean).join(' '); if (dev) push('mid', 'fDevice', dev);
+  const lens = P('aux:Lens') || P('exifEX:LensModel'); if (lens) push('mid', 'fLens', lens);
+  const tool = P('xmp:CreatorTool'); if (tool) push('mid', 'fSoftware', tool);
+  const dt = P('exif:DateTimeOriginal') || P('photoshop:DateCreated') || P('xmp:CreateDate'); if (dt) push('mid', 'fDate', dt);
+  const ids = ['xmpMM:DocumentID', 'xmpMM:OriginalDocumentID', 'xmpMM:InstanceID'].filter(p => P(p)).length;
+  if (ids) push('mid', 'fDocId', { t: 'vDocId' });
+  const steps = (x.match(/stEvt:action/g) || []).length;
+  if (steps) push('mid', 'fHistory', { t: 'vSteps', a: [steps] });
+  else if (P('photoshop:History')) push('mid', 'fHistory', clip(P('photoshop:History'), 120));
+  const ds = P('dc:description') || P('dc:title'); if (ds) push('mid', 'fDesc', clip(ds, 160));
+  if (/MotionPhoto/.test(x)) push('mid', 'fMotion', { t: 'vMotion' });
+  if (!(n === 0 && xmpLabelOnly(x))) F.push(fd('low', 'fXmp', { t: 'vBytes', a: [u8s(x).length] }, src));
+}
+
+/* ════════ IPTC (Photoshop APP13) ════════ */
+const IPTC_DS = { 5: ['mid', 'fTitle'], 25: ['mid', 'fKeywords'], 80: ['mid', 'fAuthor'], 90: ['high', 'fPlace'], 92: ['high', 'fPlace'], 95: ['high', 'fPlace'], 101: ['high', 'fPlace'], 116: ['mid', 'fCopyright'], 120: ['mid', 'fDesc'], 55: ['mid', 'fDate'] };
+function iptcFindings(b, F) {
+  const got = {};
+  for (let i = 0; i + 5 <= b.length; i++) {
+    if (b[i] !== 0x1C || b[i + 1] !== 2) continue;
+    const ds = b[i + 2], len = (b[i + 3] << 8) | b[i + 4];
+    if (len & 0x8000 || i + 5 + len > b.length) continue;
+    if (IPTC_DS[ds]) { const v = dec(b.subarray(i + 5, i + 5 + len)).trim(); if (v) (got[ds] = got[ds] || []).push(v); }
+    i += 4 + len;
+  }
+  const place = [92, 90, 95, 101].filter(d => got[d]).map(d => got[d][0]);
+  if (place.length) F.push(fd('high', 'fPlace', place.join(', '), 'IPTC'));
+  for (const d of [5, 25, 80, 116, 120, 55]) if (got[d]) F.push(fd(IPTC_DS[d][0], IPTC_DS[d][1], clip(got[d].join(', '), 160), 'IPTC'));
+  if (indexOfStr(b, '8BIM\x04\x0c') >= 0 || indexOfStr(b, '8BIM\x04\x09') >= 0) F.push(fd('high', 'fThumb', { t: 'vThumbPs' }, 'IPTC'));
+  F.push(fd('low', 'fIptc', { t: 'vBytes', a: [b.length] }, 'IPTC'));
+}
+
+// ── C2PA / JUMBF ──
+function jumbfFinding(d, F, ctx, src) {
+  const s = dec(d, 'latin1');
+  const ai = aiFromText(s); if (ai) ctx.ai = ai;
+  F.push(fd('mid', /c2pa/.test(s) ? 'fC2pa' : 'fJumbf', { t: /c2pa/.test(s) ? 'vC2pa' : 'vBytes', a: [d.length] }, src));
+}
+// ── Cesty na disku (ComfyUI, A1111) ──
+function pathFinding(s, F, src) {
+  const m = s.match(/[A-Za-z]:\\{1,2}[^"\n,<>|]{2,120}/) || s.match(/\/(?:home|Users)\/[^"\s,<>|]{2,120}/);
+  if (m) F.push(fd('high', 'fPath', m[0].replace(/\\\\/g, '\\'), src));
+}
+
+/* ════════ JPEG ════════ */
+function scanJpeg(b) {
+  const segs = []; let p = 2, eoi = -1;
+  while (p + 1 < b.length) {
+    if (b[p] !== 0xFF) break;                                     // poškodený súbor — ďalej nečítame
+    const m = b[p + 1];
+    if (m === 0xFF) { p++; continue; }                            // výplňový bajt
+    if (m === 0xD9) { eoi = p + 2; break; }                       // koniec obrázka
+    if (m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { segs.push({ m, off: p, end: p + 2 }); p += 2; continue; }
+    if (p + 4 > b.length) break;
+    let end = p + 2 + ((b[p + 2] << 8) | b[p + 3]);
+    if (end > b.length) end = b.length;
+    if (m === 0xDA) {                                             // SOS: za hlavičkou idú obrazové dáta až po ďalšiu značku
+      let q = end;
+      while (q + 1 < b.length) {
+        if (b[q] === 0xFF) {
+          const n = b[q + 1];
+          if (n === 0x00 || (n >= 0xD0 && n <= 0xD7)) { q += 2; continue; }
+          if (n === 0xFF) { q++; continue; }
+          break;
+        }
+        q++;
+      }
+      if (q + 1 >= b.length) q = b.length;
+      segs.push({ m, off: p, end: q }); p = q; continue;
+    }
+    segs.push({ m, off: p, end, payOff: p + 4, payEnd: end });
+    p = end;
+  }
+  return { segs, eoi: eoi < 0 ? b.length : eoi };
+}
+function jpegKind(b, s) {
+  const m = s.m;
+  if (m < 0xE0 || (m >= 0xF0 && m <= 0xFD)) return 'image';      // DQT, SOF, DHT, SOS, DRI…
+  const pay = b.subarray(s.payOff, s.payEnd);
+  if (m === 0xE0) return startsWith(pay, 'JFIF\0') ? 'jfif' : startsWith(pay, 'JFXX\0') ? 'jfxx' : 'app';
+  if (m === 0xE1) return startsWith(pay, 'Exif\0') ? 'exif' : startsWith(pay, 'http://ns.adobe.com/xap/1.0/\0') ? 'xmp' : startsWith(pay, 'http://ns.adobe.com/xmp/extension/\0') ? 'xmpext' : 'app';
+  if (m === 0xE2) return startsWith(pay, 'ICC_PROFILE\0') ? 'icc' : startsWith(pay, 'MPF\0') ? 'mpf' : 'app';
+  if (m === 0xEB) return 'jumbf';
+  if (m === 0xED) return 'iptc';
+  if (m === 0xEE && startsWith(pay, 'Adobe')) return 'adobe';     // potrebné pre správne farby CMYK
+  if (m === 0xFE) return 'com';
+  return 'app';
+}
+const JPEG_KEEP = new Set(['image', 'jfif', 'icc', 'adobe']);
+async function analyzeJpeg(b, F, ctx, mk) {
+  const sc = scanJpeg(b), jumbf = []; let xmpext = 0;
+  for (const s of sc.segs) {
+    s.kind = jpegKind(b, s);
+    const pay = s.payOff != null ? b.subarray(s.payOff, s.payEnd) : null;
+    switch (s.kind) {
+      case 'image': case 'adobe': break;
+      case 'jfif': if (pay.length >= 14 && (pay[12] || pay[13])) F.push(fd('high', 'fThumb', { t: 'vThumbJfif' }, 'JFIF')); break;
+      case 'jfxx': F.push(fd('high', 'fThumb', { t: 'vBytes', a: [pay.length] }, 'JFIF')); break;
+      case 'icc': if (!ctx.icc) { ctx.icc = 1; F.push(fd('kept', 'fIcc', { t: 'vIcc' }, 'ICC')); } break;
+      case 'exif': exifFindings(pay.subarray(6), F, ctx, mk); break;
+      case 'xmp': xmpFindings(dec(pay.subarray(29)), F, ctx); break;
+      case 'xmpext': xmpext += pay.length; break;
+      case 'mpf': F.push(fd('mid', 'fMpf', { t: 'vMpf' }, 'MPF')); break;
+      case 'jumbf': jumbf.push(pay); break;
+      case 'iptc': iptcFindings(pay, F); break;
+      case 'com': F.push(fd('mid', 'fComment', clip(dec(pay), 140), 'JPEG')); break;
+      default: F.push(fd('low', 'fApp', { t: 'vApp', a: ['APP' + (s.m - 0xE0), pay.length] }, 'JPEG'));
+    }
+  }
+  if (xmpext) F.push(fd('mid', 'fXmpExt', { t: 'vBytes', a: [xmpext] }, 'XMP'));
+  if (jumbf.length) jumbfFinding(concat(jumbf), F, ctx, 'JPEG');
+  const tail = b.length - sc.eoi;
+  if (tail > 0) {
+    const exifInside = indexOfStr(b.subarray(sc.eoi), 'Exif\0') >= 0;
+    F.push(fd(exifInside ? 'high' : 'mid', 'fTrailing', { t: exifInside ? 'vTrailingExif' : 'vTrailing', a: [tail] }, 'JPEG'));
+  }
+  return sc;
+}
+const jseg = (m, pay) => concat([new Uint8Array([0xFF, m, (pay.length + 2) >> 8, (pay.length + 2) & 255]), pay]);
+function cleanJpeg(b, sc, ctx) {
+  const parts = [new Uint8Array([0xFF, 0xD8])];
+  const jf = sc.segs.find(s => s.kind === 'jfif');
+  if (jf) {                                                       // JFIF bez prípadnej miniatúry
+    const pay = b.slice(jf.payOff, Math.min(jf.payEnd, jf.payOff + 14));
+    if (pay.length === 14) { pay[12] = 0; pay[13] = 0; parts.push(jseg(0xE0, pay)); }
+  }
+  if (ctx.orient > 1) parts.push(jseg(0xE1, concat([latin('Exif\0\0'), buildOrientTiff(ctx.orient)])));
+  if (ctx.ai) parts.push(jseg(0xE1, concat([latin('http://ns.adobe.com/xap/1.0/\0'), u8s(XMP_AI(ctx.ai))])));
+  for (const s of sc.segs) if (s.kind !== 'jfif' && JPEG_KEEP.has(s.kind)) parts.push(b.subarray(s.off, s.end));
+  parts.push(new Uint8Array([0xFF, 0xD9]));
+  return concat(parts);
+}
+
+/* ════════ PNG ════════ */
+const PNG_KEEP = new Set(['IHDR', 'PLTE', 'IDAT', 'IEND', 'tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP', 'sBIT', 'pHYs', 'bKGD', 'acTL', 'fcTL', 'fdAT', 'cICP', 'mDCV', 'cLLI']);
+function scanPng(b) {
+  const chunks = []; let p = 8;
+  while (p + 12 <= b.length) {
+    const len = u32be(b, p), type = ascii(b, p + 4, 4);
+    const end = Math.min(p + 12 + len, b.length);
+    chunks.push({ type, off: p, end, dataOff: p + 8, dataEnd: Math.min(p + 8 + len, b.length) });
+    p = end;
+    if (type === 'IEND') break;
+  }
+  return { chunks, tail: b.length - p };
+}
+async function pngText(ty, d) {
+  const z = d.indexOf(0); if (z < 1) return null;
+  const k = ascii(d, 0, z);
+  if (ty === 'tEXt') return { k, v: dec(d.subarray(z + 1), 'latin1') };
+  if (ty === 'zTXt') { const r = await inflate(d.subarray(z + 2)); return { k, v: r ? dec(r, 'latin1') : null }; }
+  const cf = d[z + 1], l1 = d.indexOf(0, z + 3); if (l1 < 0) return { k, v: null };
+  const l2 = d.indexOf(0, l1 + 1); if (l2 < 0) return { k, v: null };
+  let body = d.subarray(l2 + 1);
+  if (cf === 1) { const r = await inflate(body); if (!r) return { k, v: null }; body = r; }
+  return { k, v: dec(body) };
+}
+function pngTextFinding(k, v, F, ctx, mk, len) {
+  const src = 'PNG', kl = k.toLowerCase();
+  if (v == null) { F.push(fd('mid', 'fPngText', { t: 'vKeyBytes', a: [k, len] }, src)); return; }
+  if (k === 'XML:com.adobe.xmp') { xmpFindings(v, F, ctx); return; }
+  if (kl === 'parameters') {                                      // Stable Diffusion (A1111, Forge)
+    ctx.ai = ctx.ai || 'trainedAlgorithmicMedia';
+    F.push(fd('high', 'fAiPrompt', clip(v, 200), src)); pathFinding(v, F, src); return;
+  }
+  if (kl === 'prompt' || kl === 'workflow') {                     // ComfyUI
+    ctx.ai = ctx.ai || 'trainedAlgorithmicMedia';
+    F.push(fd('high', kl === 'workflow' ? 'fAiWorkflow' : 'fAiPrompt', { t: 'vComfy', a: [u8s(v).length] }, src)); pathFinding(v, F, src); return;
+  }
+  if (kl.startsWith('raw profile type')) {                        // ImageMagick: EXIF/APP1 ako hex
+    const hex = v.replace(/^\s*\S+\s+\d+\s+/, '').replace(/[^0-9a-fA-F]/g, '');
+    const bb = new Uint8Array(hex.length >> 1);
+    for (let i = 0; i < bb.length; i++) bb[i] = parseInt(hex.substr(i * 2, 2), 16);
+    if (startsWith(bb, 'Exif\0')) { exifFindings(bb.subarray(6), F, ctx, mk); return; }
+    F.push(fd('mid', 'fPngText', { t: 'vKeyBytes', a: [k, bb.length] }, src)); return;
+  }
+  F.push(fd('mid', 'fPngText', k + ': ' + clip(v, 140), src));
+}
+async function analyzePng(b, F, ctx, mk) {
+  const sc = scanPng(b);
+  for (const c of sc.chunks) {
+    const d = b.subarray(c.dataOff, c.dataEnd), ty = c.type;
+    if (PNG_KEEP.has(ty)) { if (ty === 'iCCP') F.push(fd('kept', 'fIcc', { t: 'vIcc' }, 'PNG')); continue; }
+    if (ty === 'tEXt' || ty === 'zTXt' || ty === 'iTXt') {
+      const tx = await pngText(ty, d);
+      if (tx) pngTextFinding(tx.k, tx.v, F, ctx, mk, d.length);
+      else F.push(fd('mid', 'fChunk', { t: 'vChunk', a: [ty, d.length] }, 'PNG'));
+      continue;
+    }
+    if (ty === 'eXIf') { exifFindings(d, F, ctx, mk); continue; }
+    if (ty === 'tIME' && d.length >= 7) { F.push(fd('mid', 'fDateMod', ((d[0] << 8) | d[1]) + '-' + pad2(d[2]) + '-' + pad2(d[3]) + ' ' + pad2(d[4]) + ':' + pad2(d[5]), 'PNG')); continue; }
+    if (ty === 'caBX') { jumbfFinding(d, F, ctx, 'PNG'); continue; }
+    F.push(fd('low', 'fChunk', { t: 'vChunk', a: [ty, d.length] }, 'PNG'));
+  }
+  if (sc.tail > 0) F.push(fd('mid', 'fTrailing', { t: 'vTrailing', a: [sc.tail] }, 'PNG'));
+  return sc;
+}
+function pngChunk(type, data) {
+  const td = concat([latin(type), data]), h = new Uint8Array(4), c = new Uint8Array(4);
+  new DataView(h.buffer).setUint32(0, data.length); new DataView(c.buffer).setUint32(0, crc32(td));
+  return concat([h, td, c]);
+}
+function cleanPng(b, sc, ctx) {
+  const parts = [b.subarray(0, 8)]; let ins = false;
+  for (const c of sc.chunks) {
+    if (!PNG_KEEP.has(c.type)) continue;
+    if (!ins && c.type === 'IDAT') {                              // nové bloky musia byť pred obrazovými dátami
+      ins = true;
+      if (ctx.orient > 1) parts.push(pngChunk('eXIf', buildOrientTiff(ctx.orient)));
+      if (ctx.ai) parts.push(pngChunk('iTXt', concat([latin('XML:com.adobe.xmp'), new Uint8Array(5), u8s(XMP_AI(ctx.ai))])));
+    }
+    parts.push(b.subarray(c.off, c.end));
+  }
+  return concat(parts);
+}
+
+/* ════════ WebP ════════ */
+const WEBP_KEEP = new Set(['VP8 ', 'VP8L', 'VP8X', 'ALPH', 'ANIM', 'ANMF', 'ICCP']);
+function scanWebp(b) {
+  const chunks = [], end = Math.min(b.length, 8 + u32le(b, 4)); let p = 12;
+  while (p + 8 <= end) {
+    const type = ascii(b, p, 4), sz = u32le(b, p + 4), de = Math.min(p + 8 + sz, b.length), e = Math.min(de + (sz & 1), b.length);
+    chunks.push({ type, off: p, end: e, dataOff: p + 8, dataEnd: de });
+    p = e;
+  }
+  return { chunks, tail: b.length - end };
+}
+function analyzeWebp(b, F, ctx, mk) {
+  const sc = scanWebp(b);
+  for (const c of sc.chunks) {
+    let d = b.subarray(c.dataOff, c.dataEnd);
+    if (WEBP_KEEP.has(c.type)) { if (c.type === 'ICCP') F.push(fd('kept', 'fIcc', { t: 'vIcc' }, 'WebP')); continue; }
+    if (c.type === 'EXIF') { if (startsWith(d, 'Exif\0')) d = d.subarray(6); exifFindings(d, F, ctx, mk); continue; }
+    if (c.type === 'XMP ') { xmpFindings(dec(d), F, ctx); continue; }
+    if (c.type === 'C2PA') { jumbfFinding(d, F, ctx, 'WebP'); continue; }
+    F.push(fd('low', 'fChunk', { t: 'vChunk', a: [c.type.trim(), d.length] }, 'WebP'));
+  }
+  if (sc.tail > 0) F.push(fd('mid', 'fTrailing', { t: 'vTrailing', a: [sc.tail] }, 'WebP'));
+  return sc;
+}
+function webpChunk(type, data) {
+  const h = new Uint8Array(8); h.set(latin(type)); new DataView(h.buffer).setUint32(4, data.length, true);
+  return concat([h, data, new Uint8Array(data.length & 1)]);
+}
+function cleanWebp(b, sc, ctx) {
+  const parts = []; let vx = null;
+  for (const c of sc.chunks) {
+    if (!WEBP_KEEP.has(c.type)) continue;
+    const ch = b.slice(c.off, c.end);
+    if (c.type === 'VP8X') { ch[8] &= ~0x0C; vx = ch; }          // zhodiť príznaky EXIF (0x08) a XMP (0x04)
+    parts.push(ch);
+  }
+  if (vx) {                                                       // metadáta môže mať len rozšírený WebP (VP8X)
+    if (ctx.orient > 1) { parts.push(webpChunk('EXIF', buildOrientTiff(ctx.orient))); vx[8] |= 0x08; }
+    if (ctx.ai) { parts.push(webpChunk('XMP ', u8s(XMP_AI(ctx.ai)))); vx[8] |= 0x04; }
+  }
+  const body = concat(parts), hdr = new Uint8Array(12);
+  hdr.set(latin('RIFF')); new DataView(hdr.buffer).setUint32(4, body.length + 4, true); hdr.set(latin('WEBP'), 8);
+  return concat([hdr, body]);
+}
+
+/* ════════ Spoločné vstupné body ════════ */
+async function analyze(b, fmt, mk) {
+  const F = [], ctx = { orient: 1, ai: null, urls: [] };
+  const sc = fmt === 'jpeg' ? await analyzeJpeg(b, F, ctx, mk) : fmt === 'png' ? await analyzePng(b, F, ctx, mk) : analyzeWebp(b, F, ctx, mk);
+  if (ctx.ai) F.push(fd('kept', 'fAiLabel', { t: 'vAiLabel' }, null));
+  return { F, ctx, sc };
+}
+function clean(b, fmt, A) {
+  return fmt === 'jpeg' ? cleanJpeg(b, A.sc, A.ctx) : fmt === 'png' ? cleanPng(b, A.sc, A.ctx) : cleanWebp(b, A.sc, A.ctx);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ROZHRANIE
+   ════════════════════════════════════════════════════════════════ */
+const I18N = {
+  sk: {
+    title: 'plainkit · fotky bez metadát (EXIF, GPS)',
+    desc: 'Zistí, čo fotka prezrádza — polohu, zariadenie, sériové čísla — a odstráni to. Beží v prehliadači, fotky sa nikam neodosielajú.',
+    h1: 'Fotky bez metadát',
+    lead: 'Ukáže, čo fotka prezrádza — polohu, zariadenie, sériové čísla, čas — a odstráni to. Obraz ostane nedotknutý. Všetko prebieha v tvojom prehliadači, fotky sa nikam neodosielajú.',
+    dropT: 'Pretiahni sem fotky', dropS: 'alebo klikni a vyber · JPEG, PNG, WebP · aj viac naraz',
+    rename: 'Premenovať súbory (foto-1.jpg…) — pôvodný názov často obsahuje dátum a čas snímky',
+    dlAll: '↓ Stiahnuť všetko (ZIP)', clearAll: 'Vymazať zoznam', dl: '↓ Stiahnuť', zipBusy: 'balím…',
+    working: 'spracúvam…', noneFound: 'Nenašli sme žiadne metadáta, ktoré poznáme.',
+    errHeic: 'HEIC a AVIF zatiaľ nevieme — prehliadač tieto formáty nedokáže prečítať. Na iPhone: Nastavenia → Fotoaparát → Formáty → Najkompatibilnejšie.',
+    errUnknown: 'Nepodporovaný formát. Stránka vie JPEG, PNG a WebP.', errRead: 'Súbor sa nepodarilo spracovať — vyzerá poškodený.',
+    vdHigh: '{0~citlivá|citlivé|citlivých}', vdAny: '{0~položka|položky|položiek}', vdNone: 'bez metadát',
+    cleanOk: '✓ vyčistené', checkOk: 'kontrola výstupu: 0 metadát', checkBad: '⚠ kontrola výstupu: {0~položka zostala|položky zostali|položiek zostalo} — súbor nesťahuj',
+    kept: 'ponechané: {0}', keptTag: 'ostane', k_fOrient: 'orientácia', k_fIcc: 'farebný profil', k_fAiLabel: 'štítok „vytvorené AI"',
+    mapLink: 'mapa ↗', mapTitle: 'Otvorí OpenStreetMap — súradnice sa tým odošlú na ich server', gpsAlt: ' · výška {0} m',
+    fGps: 'Poloha (GPS)', fGpsRec: 'GPS záznam', vGpsZero: 'súradnice 0, 0 — poloha bola pri fotení vypnutá', vGpsMeta: 'bez súradníc', vGpsBad: 'súradnice v neplatnom tvare',
+    fGpsTime: 'Čas z GPS', fPlace: 'Názov miesta', fDevice: 'Zariadenie', fLens: 'Objektív',
+    fSerial: 'Sériové číslo zariadenia', fLensSerial: 'Sériové číslo objektívu', fOwner: 'Meno vlastníka',
+    fAuthor: 'Autor', fCopyright: 'Autorské práva', fUid: 'Jedinečné ID snímky', fHost: 'Počítač',
+    fDate: 'Dátum a čas snímky', fDateMod: 'Dátum úpravy', fSoftware: 'Softvér', fDesc: 'Popis', fTitle: 'Názov', fKeywords: 'Kľúčové slová',
+    fUserComment: 'Komentár', fComment: 'Komentár v súbore',
+    fMaker: 'Blok výrobcu (MakerNote)', vMaker: '{0b} · neokomentované dáta výrobcu, často so sériovým číslom',
+    fThumb: 'Vložená miniatúra', vThumb: '{0b} · môže ukazovať pôvodný, neorezaný záber', vThumbJfif: 'miniatúra v hlavičke JFIF', vThumbPs: 'miniatúra z Photoshopu', vThumbOther: 'druhý obrázok v EXIF',
+    fTech: 'Technické údaje', vTech: '{0~položka|položky|položiek} (expozícia, clona, ISO, rozlíšenie…)',
+    fExif: 'EXIF blok', fXmp: 'XMP blok', fXmpExt: 'Rozšírené XMP', fIptc: 'IPTC / Photoshop blok', vBytes: '{0b}',
+    fDocId: 'Identifikátory dokumentu', vDocId: 'spájajú súbor s originálom a jeho ďalšími kópiami',
+    fHistory: 'História úprav', vSteps: '{0~krok|kroky|krokov} (Photoshop, Lightroom…)',
+    fMotion: 'Motion Photo', vMotion: 'k fotke je pripojené krátke video',
+    fC2pa: 'Záznam o pôvode (C2PA)', vC2pa: '{0b} · podpísaný záznam; môže obsahovať meno alebo účet autora', fJumbf: 'Blok JUMBF',
+    fAiPrompt: 'Prompt a nastavenia AI', fAiWorkflow: 'Workflow (ComfyUI)', vComfy: '{0b} · JSON s celým postupom', fPath: 'Cesta na disku',
+    fPngText: 'Textový údaj', vKeyBytes: '{0} · {1b}', fChunk: 'Neznámy blok', vChunk: '{0} · {1b}',
+    fApp: 'Iný blok aplikácie', vApp: '{0} · {1b}', fMpf: 'Index pripojených obrázkov', vMpf: 'MPF — odkazy na ďalšie obrázky v súbore',
+    fTrailing: 'Dáta za koncom obrázka', vTrailing: '{0b} · napr. video z Motion Photo, HDR mapa alebo ďalší obrázok', vTrailingExif: '{0b} · ďalší obrázok s vlastnými metadátami',
+    fOrient: 'Orientácia', o2: 'zrkadlená', o3: 'otočená o 180°', o4: 'zrkadlená', o5: 'zrkadlená a otočená', o6: 'otočená o 90°', o7: 'zrkadlená a otočená', o8: 'otočená o 270°',
+    fIcc: 'Farebný profil (ICC)', vIcc: 'potrebný pre správne farby',
+    fAiLabel: 'Označenie „vytvorené AI"', vAiLabel: 'ostane ako jeden štítok — bez promptu, mena a účtu',
+    iKeepT: 'Čo ostane',
+    iKeep1: 'Obraz — pixely sa nemenia, fotka sa znova nekomprimuje.',
+    iKeep2: 'Orientácia — bez nej by sa fotka z mobilu zobrazila bokom.',
+    iKeep3: 'Farebný profil — bez neho by sa zmenili farby.',
+    iKeep4: 'Označenie „vytvorené AI", ak ho súbor mal — jeden neutrálny štítok bez promptu, mena a účtu.',
+    iDropT: 'Čo sa odstráni',
+    iDrop1: 'Poloha GPS, dátum a čas, zariadenie, sériové čísla, softvér, autor.',
+    iDrop2: 'Blok výrobcu (MakerNote) — neokomentované dáta, v ktorých často býva sériové číslo.',
+    iDrop3: 'Vložená miniatúra — pri orezanej fotke môže ukazovať pôvodný, neorezaný záber.',
+    iDrop4: 'História úprav z Photoshopu a Lightroomu, IPTC popisy a názvy miest.',
+    iDrop5: 'Prompty a workflow zo Stable Diffusion a ComfyUI, vrátane ciest na disku.',
+    iDrop6: 'Dáta pripojené za koncom obrázka — napr. video z Motion Photo alebo HDR mapa.',
+    iDrop7: 'Podpísaný záznam o pôvode (C2PA). Ak šlo o AI obrázok, nahradí ho jednoduchý štítok „vytvorené AI" — ten nie je podpísaný, takže sa nedá overiť ako originál.',
+    iNotT: 'Čo tento nástroj nerieši',
+    iNot1: 'Obsah fotky. Tvár, ŠPZ, výhľad z okna či odraz v zrkadle môžu prezradiť viac než metadáta.',
+    iNot2: 'Vodoznak vložený priamo do pixelov (napr. pri AI obrázkoch). Nie je to metadáta a zostáva.',
+    iNot3: 'HEIC a AVIF — prehliadač ich nevie prečítať.',
+    iNot4: 'Niektoré telefóny odstránia polohu už pri výbere fotky. Vtedy ju tu neuvidíš — do stránky sa vôbec nedostala.',
+    iChkT: 'Ako si to overiť',
+    iChk1: 'Fotky sa nikam neodosielajú. Otvor DevTools → Network: pri spracovaní nepribudne žiadna požiadavka.',
+    iChk2: 'Vyčistený súbor stránka prečíta znova a vypíše, koľko metadát v ňom našla. Ponechať smie len to, čo je v zozname „Čo ostane".',
+    iChk3: 'Nezávislá kontrola: napr. exiftool alebo vlastnosti súboru v systéme.',
+    footTag: 'bez reklám, bez registrácie, bez sledovania',
+    footPrivacy: 'Ukladáme len nastavenie jazyka vo vašom prehliadači. Fotky neopustia vaše zariadenie.',
+    namePrefix: 'foto-'
+  },
+  en: {
+    title: 'plainkit · remove photo metadata (EXIF, GPS)',
+    desc: 'See what your photo reveals — location, device, serial numbers — and remove it. Runs in your browser, nothing is uploaded.',
+    h1: 'Photos without metadata',
+    lead: 'Shows what a photo reveals — location, device, serial numbers, time — and removes it. The image itself stays untouched. Everything runs in your browser; your photos are not uploaded anywhere.',
+    dropT: 'Drop photos here', dropS: 'or click to choose · JPEG, PNG, WebP · several at once',
+    rename: 'Rename files (photo-1.jpg…) — the original name often contains the date and time of the shot',
+    dlAll: '↓ Download all (ZIP)', clearAll: 'Clear list', dl: '↓ Download', zipBusy: 'packing…',
+    working: 'processing…', noneFound: 'We found no metadata that we recognise.',
+    errHeic: 'HEIC and AVIF are not supported yet — the browser cannot read these formats. On iPhone: Settings → Camera → Formats → Most Compatible.',
+    errUnknown: 'Unsupported format. This page handles JPEG, PNG and WebP.', errRead: 'The file could not be processed — it looks damaged.',
+    vdHigh: '{0} sensitive', vdAny: '{0~item|items}', vdNone: 'no metadata',
+    cleanOk: '✓ cleaned', checkOk: 'output check: 0 metadata', checkBad: '⚠ output check: {0~item remains|items remain} — do not download',
+    kept: 'kept: {0}', keptTag: 'kept', k_fOrient: 'orientation', k_fIcc: 'colour profile', k_fAiLabel: '"AI-generated" label',
+    mapLink: 'map ↗', mapTitle: 'Opens OpenStreetMap — the coordinates are sent to their server', gpsAlt: ' · altitude {0} m',
+    fGps: 'Location (GPS)', fGpsRec: 'GPS record', vGpsZero: 'coordinates 0, 0 — location was off when shooting', vGpsMeta: 'no coordinates', vGpsBad: 'coordinates in an invalid format',
+    fGpsTime: 'GPS time', fPlace: 'Place name', fDevice: 'Device', fLens: 'Lens',
+    fSerial: 'Device serial number', fLensSerial: 'Lens serial number', fOwner: 'Owner name',
+    fAuthor: 'Author', fCopyright: 'Copyright', fUid: 'Unique image ID', fHost: 'Computer',
+    fDate: 'Date and time taken', fDateMod: 'Date modified', fSoftware: 'Software', fDesc: 'Description', fTitle: 'Title', fKeywords: 'Keywords',
+    fUserComment: 'Comment', fComment: 'File comment',
+    fMaker: 'Maker block (MakerNote)', vMaker: '{0b} · undocumented vendor data, often including a serial number',
+    fThumb: 'Embedded thumbnail', vThumb: '{0b} · may show the original, uncropped shot', vThumbJfif: 'thumbnail in the JFIF header', vThumbPs: 'Photoshop thumbnail', vThumbOther: 'second image inside EXIF',
+    fTech: 'Technical data', vTech: '{0~item|items} (exposure, aperture, ISO, resolution…)',
+    fExif: 'EXIF block', fXmp: 'XMP block', fXmpExt: 'Extended XMP', fIptc: 'IPTC / Photoshop block', vBytes: '{0b}',
+    fDocId: 'Document identifiers', vDocId: 'link the file to its original and other copies',
+    fHistory: 'Edit history', vSteps: '{0~step|steps} (Photoshop, Lightroom…)',
+    fMotion: 'Motion Photo', vMotion: 'a short video is attached to the photo',
+    fC2pa: 'Provenance record (C2PA)', vC2pa: '{0b} · signed record; may contain the author\'s name or account', fJumbf: 'JUMBF block',
+    fAiPrompt: 'AI prompt and settings', fAiWorkflow: 'Workflow (ComfyUI)', vComfy: '{0b} · JSON with the whole pipeline', fPath: 'Path on disk',
+    fPngText: 'Text entry', vKeyBytes: '{0} · {1b}', fChunk: 'Unknown block', vChunk: '{0} · {1b}',
+    fApp: 'Other application block', vApp: '{0} · {1b}', fMpf: 'Index of attached images', vMpf: 'MPF — pointers to further images in the file',
+    fTrailing: 'Data after the end of the image', vTrailing: '{0b} · e.g. a Motion Photo video, an HDR map or another image', vTrailingExif: '{0b} · another image with its own metadata',
+    fOrient: 'Orientation', o2: 'mirrored', o3: 'rotated 180°', o4: 'mirrored', o5: 'mirrored and rotated', o6: 'rotated 90°', o7: 'mirrored and rotated', o8: 'rotated 270°',
+    fIcc: 'Colour profile (ICC)', vIcc: 'needed for correct colours',
+    fAiLabel: '"AI-generated" label', vAiLabel: 'kept as a single label — no prompt, name or account',
+    iKeepT: 'What stays',
+    iKeep1: 'The image — pixels are not changed and the photo is not recompressed.',
+    iKeep2: 'Orientation — without it a phone photo would show sideways.',
+    iKeep3: 'Colour profile — without it colours would shift.',
+    iKeep4: 'An "AI-generated" label, if the file had one — a single neutral label with no prompt, name or account.',
+    iDropT: 'What is removed',
+    iDrop1: 'GPS location, date and time, device, serial numbers, software, author.',
+    iDrop2: 'The maker block (MakerNote) — undocumented data that often includes a serial number.',
+    iDrop3: 'Embedded thumbnail — on a cropped photo it may show the original, uncropped shot.',
+    iDrop4: 'Photoshop and Lightroom edit history, IPTC captions and place names.',
+    iDrop5: 'Stable Diffusion and ComfyUI prompts and workflows, including paths on disk.',
+    iDrop6: 'Data attached after the end of the image — e.g. a Motion Photo video or an HDR map.',
+    iDrop7: 'The signed provenance record (C2PA). If the image was AI-generated, a simple "AI-generated" label replaces it — that label is not signed, so it cannot be verified as the original.',
+    iNotT: 'What this tool does not do',
+    iNot1: 'The content of the photo. A face, a licence plate, the view from a window or a mirror reflection can reveal more than metadata.',
+    iNot2: 'Watermarks embedded in the pixels (e.g. in AI images). They are not metadata and remain.',
+    iNot3: 'HEIC and AVIF — the browser cannot read them.',
+    iNot4: 'Some phones strip the location as soon as you pick the photo. Then you will not see it here — it never reached the page.',
+    iChkT: 'How to verify',
+    iChk1: 'Photos are not uploaded. Open DevTools → Network: processing adds no requests.',
+    iChk2: 'The page reads the cleaned file again and shows how much metadata it found. Only the items under "What stays" may remain.',
+    iChk3: 'Independent check: e.g. exiftool or the file properties in your system.',
+    footTag: 'no ads, no signup, no tracking',
+    footPrivacy: 'We only store your language setting in your browser. Your photos never leave your device.',
+    namePrefix: 'photo-'
+  }
+};
+
+let lang = 'sk';
+const items = []; let seq = 0, queue = Promise.resolve();
+const FMT_NAME = { jpeg: 'JPEG', png: 'PNG', webp: 'WebP', heic: 'HEIC', avif: 'AVIF' };
+const EXT = { jpeg: 'jpg', png: 'png', webp: 'webp' };
+const MIME = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const SEV_ORDER = { high: 0, mid: 1, low: 2, kept: 3 };
+
+function fmtBytes(n) {
+  const s = n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' kB' : (n / 1048576).toFixed(1) + ' MB';
+  return lang === 'sk' ? s.replace('.', ',') : s;
+}
+// Šablóny: {0} hodnota · {0b} veľkosť v bajtoch · {0~tvar1|tvar2|tvar5} číslo so skloňovaním
+// (SK: 1 položka / 2–4 položky / 5+ položiek; EN: 1 item / items)
+function plural(n, forms) {
+  const f = forms.split('|');
+  if (lang === 'sk') return f[n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2];
+  return f[n === 1 ? 0 : 1];
+}
+function t(k, ...a) {
+  const s = (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
+  return s.replace(/\{(\d)(b|~([^}]*))?\}/g, (m, i, mod, forms) =>
+    mod === 'b' ? fmtBytes(a[i]) : forms ? a[i] + ' ' + plural(a[i], forms) : String(a[i]));
+}
+const tv = v => v == null ? '' : typeof v === 'string' ? v : t(v.t, ...(v.a || []));
+
+if (typeof document !== 'undefined') {
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const listEl = $('list'), barEl = $('bar'), renameEl = $('rename'), dropEl = $('drop'), fileEl = $('file');
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    $('lang-sk').classList.toggle('active', lang === 'sk');
+    $('lang-en').classList.toggle('active', lang === 'en');
+    document.querySelectorAll('[data-i18n]').forEach(e => { const k = e.getAttribute('data-i18n'); if (I18N[lang][k]) e.textContent = I18N[lang][k]; });
+    document.title = t('title');
+    $('meta-desc').setAttribute('content', t('desc'));
+    render();
+  }
+  function setLang(l) { lang = l; try { localStorage.setItem('pk_lang', l); } catch (e) {} applyLang(); }
+  $('lang-sk').addEventListener('click', () => setLang('sk'));
+  $('lang-en').addEventListener('click', () => setLang('en'));
+
+  function findingRow(f) {
+    const li = el('li', 'f f-' + f.sev);
+    li.append(el('span', 'f-l', t(f.k)));
+    const v = el('span', 'f-v', tv(f.v));
+    const x = f.x || {};
+    if (x.gps) {
+      if (isFinite(x.gps.alt)) v.append(t('gpsAlt', Math.round(x.gps.alt)));
+      const a = el('a', 'maplink', t('mapLink'));
+      const la = x.gps.lat.toFixed(5), lo = x.gps.lon.toFixed(5);
+      a.href = 'https://www.openstreetmap.org/?mlat=' + la + '&mlon=' + lo + '#map=15/' + la + '/' + lo;
+      a.target = '_blank'; a.rel = 'noopener noreferrer'; a.title = t('mapTitle');
+      v.append(a);
+    }
+    if (x.thumb) { const im = el('img', 'thumb'); im.src = x.thumb; im.alt = ''; v.append(im); }
+    li.append(v, el('span', 'f-s', f.sev === 'kept' ? t('keptTag') : (f.src || '')));
+    return li;
+  }
+  function card(it) {
+    const c = el('div', 'card'), head = el('div', 'card-head');
+    if (it.url) { const im = el('img', 'prev'); im.src = it.url; im.alt = ''; head.append(im); }
+    else head.append(el('div', 'prev prev-x', '?'));
+    const meta = el('div', 'meta');
+    meta.append(el('div', 'fname', it.name), el('div', 'fsub', [FMT_NAME[it.fmt] || '—', fmtBytes(it.size)].join(' · ')));
+    head.append(meta);
+    if (it.A) {
+      const F = it.A.F, high = F.filter(f => f.sev === 'high').length, rm = F.filter(f => f.sev !== 'kept').length;
+      head.append(el('span', 'verdict ' + (high ? 'v-high' : rm ? 'v-any' : 'v-none'), high ? t('vdHigh', high) : rm ? t('vdAny', rm) : t('vdNone')));
+    }
+    c.append(head);
+    if (it.status === 'work') { c.append(el('div', 'note', t('working'))); return c; }
+    if (it.err) { c.append(el('div', 'note err', t(it.err))); return c; }
+    const F = it.A.F.slice().sort((a, b) => SEV_ORDER[a.sev] - SEV_ORDER[b.sev]);
+    if (!F.length) c.append(el('div', 'note', t('noneFound')));
+    else { const ul = el('ul', 'finds'); F.forEach(f => ul.append(findingRow(f))); c.append(ul); }
+    const foot = el('div', 'card-foot'), chk = el('div', 'check' + (it.left ? ' bad' : ''));
+    if (it.left) chk.textContent = t('checkBad', it.left);
+    else {
+      chk.append(t('cleanOk') + ' · ' + t('checkOk'), el('br'));
+      chk.append(el('span', 'dim', fmtBytes(it.size) + ' → ' + fmtBytes(it.out.length)));
+      if (it.kept.length) chk.append(el('span', 'dim', ' · ' + t('kept', it.kept.map(k => t('k_' + k)).join(', '))));
+    }
+    const btn = el('button', 'btn primary', t('dl'));
+    btn.type = 'button'; btn.disabled = !!it.left;
+    btn.addEventListener('click', () => download(new Blob([it.out], { type: MIME[it.fmt] }), outName(it)));
+    foot.append(chk, btn);
+    c.append(foot);
+    return c;
+  }
+  function render() {
+    listEl.replaceChildren(...items.map(card));
+    barEl.hidden = !items.length;
+    $('zipBtn').disabled = !items.some(it => it.out && !it.left);
+  }
+  const outName = it => renameEl.checked ? t('namePrefix') + it.n + '.' + EXT[it.fmt] : it.name;
+  function download(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  async function processItem(it) {
+    try {
+      const b = new Uint8Array(await it.file.arrayBuffer());
+      const fmt = detectFormat(b); it.fmt = fmt;
+      if (fmt === 'heic' || fmt === 'avif') it.err = 'errHeic';
+      else if (!fmt) it.err = 'errUnknown';
+      else {
+        it.url = URL.createObjectURL(it.file);
+        it.A = await analyze(b, fmt, true);
+        it.out = clean(b, fmt, it.A);
+        const A2 = await analyze(it.out, fmt, false);             // kontrola: prečítať výstup znova
+        it.left = A2.F.filter(f => f.sev !== 'kept').length;
+        it.kept = [...new Set(A2.F.filter(f => f.sev === 'kept').map(f => f.k))];
+      }
+    } catch (e) { console.error(e); it.err = 'errRead'; it.A = null; }
+    it.status = 'done'; it.file = null;
+    render();
+  }
+  function addFiles(list) {
+    for (const f of list) {
+      const it = { n: ++seq, name: f.name, size: f.size, file: f, status: 'work' };
+      items.push(it);
+      queue = queue.then(() => processItem(it));                  // po jednom — šetrí pamäť na mobile
+    }
+    render();
+  }
+  fileEl.addEventListener('change', () => { addFiles([...fileEl.files]); fileEl.value = ''; });
+  ['dragenter', 'dragover'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dropEl.addEventListener(ev, () => dropEl.classList.remove('over')));
+  dropEl.addEventListener('drop', e => { e.preventDefault(); addFiles([...e.dataTransfer.files]); });
+  window.addEventListener('dragover', e => e.preventDefault());   // pustenie mimo zóny neotvorí fotku v karte
+  window.addEventListener('drop', e => e.preventDefault());
+  renameEl.addEventListener('change', render);
+
+  $('zipBtn').addEventListener('click', async () => {
+    if (typeof JSZip === 'undefined') return;
+    const btn = $('zipBtn'); btn.disabled = true; btn.textContent = t('zipBusy');
+    const zip = new JSZip(), used = new Set();
+    for (const it of items) {
+      if (!it.out || it.left) continue;
+      let name = outName(it), i = 2;
+      while (used.has(name)) name = outName(it).replace(/(\.[^.]*)?$/, '-' + (i++) + '$1');
+      used.add(name); zip.file(name, it.out);
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    download(blob, lang === 'en' ? 'photos-clean.zip' : 'fotky-ciste.zip');
+    btn.textContent = t('dlAll'); render();
+  });
+  $('clearBtn').addEventListener('click', () => {
+    for (const it of items) { if (it.url) URL.revokeObjectURL(it.url); if (it.A) it.A.ctx.urls.forEach(u => URL.revokeObjectURL(u)); }
+    items.length = 0; render();
+  });
+
+  try { const s = localStorage.getItem('pk_lang'); if (s === 'en' || s === 'sk') lang = s; } catch (e) {}
+  applyLang();
+}
+</script>
+</body>
+</html>
