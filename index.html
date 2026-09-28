@@ -353,7 +353,7 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.5<span class="ver-tip" data-i18n="verTip">Nové vo v1.5: plainkit. audit — vlastná Android aplikácia, ktorá ukáže, čo vaše appky skutočne môžu</span></span></div>
+      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.6<span class="ver-tip" data-i18n="verTip">Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.</span></span></div>
     </div>
     <!-- Svetové hodiny -->
     <div class="clock-card">
@@ -408,6 +408,12 @@ h3.section-title {
       <a href="/chat" class="tool-link featured">
         <div class="label"><span><span class="live-dot"></span><span data-i18n="tChat">Chat</span></span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/chat</div>
+      </a>
+      <!-- ── F ── -->
+      <!-- NÁSTROJ: Fotky bez metadát (EXIF). Odznak „nové" zmaž, keď prestane byť nový. -->
+      <a href="/exif" class="tool-link">
+        <div class="label"><span><span data-i18n="tExif">Fotky bez metadát</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="url">plainkit.app/exif</div>
       </a>
       <!-- ── H ── -->
       <!-- NÁSTROJ: Heslo / Password -->
@@ -678,7 +684,8 @@ const I18N = {
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.5: plainkit. audit — vlastná Android aplikácia, ktorá ukáže, čo vaše appky skutočne môžu',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.',
+    tExif:'Fotky bez metadát', theslo:'Heslo', tpdf:'PDF', tzvuk:'Zvuk', thad:'Had', tpuzzle:'Puzzle', tbomby:'Bomby',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
@@ -704,7 +711,8 @@ const I18N = {
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.5: plainkit. audit — our own Android app that shows what your apps can actually do',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.6: Photos without metadata — shows what a photo reveals (location, device, serial numbers) and removes it. The image stays untouched.',
+    tExif:'Photos without metadata', theslo:'Password', tpdf:'PDF', tzvuk:'Sound', thad:'Snake', tpuzzle:'Puzzle', tbomby:'Bombs',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
@@ -874,8 +882,11 @@ if ('serviceWorker' in navigator) {
     activeCities = (Array.isArray(saved) && saved.length) ? saved : [...DEFAULT_CITIES];
   } catch { activeCities = [...DEFAULT_CITIES]; }
   applyLang();
-  buildVariableQr();
-  document.getElementById('iban-display').textContent = IBAN_FULL;
+  // Blok s podporou (QR + IBAN) momentálne v HTML nie je — bez týchto podmienok
+  // tu skript spadol a hodiny ani tlačidlo „Na plochu" sa nespustili.
+  if (document.getElementById('qr-variable') && typeof QRCodeStyling !== 'undefined') buildVariableQr();
+  const ibanEl = document.getElementById('iban-display');
+  if (ibanEl) ibanEl.textContent = IBAN_FULL;
   setInterval(tickClocks, 1000);
   setupInstall();
 })();
