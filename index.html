@@ -192,7 +192,7 @@ h3.section-title {
 .app-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-3); line-height: 1.6; }
 /* ═══ Svetové hodiny ═══ */
 .clock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.clocks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.clocks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .clock {
   position: relative;
   background: var(--glass); border: 1px solid var(--border);
@@ -206,7 +206,7 @@ h3.section-title {
 .clock:hover .remove { opacity: 1; }
 .clock .remove:hover { color: var(--accent); }
 .clock .city { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px; }
-.clock .time { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+.clock .time { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 600; color: var(--text); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .clock .time .sec { color: var(--accent); font-size: 1rem; }
 .clock .date { font-size: 0.68rem; color: var(--text-3); margin-top: 4px; }
 .add-city {
@@ -227,7 +227,7 @@ h3.section-title {
 }
 .install-btn:hover { background: rgba(0,212,232,0.18); }
 .install-btn .ico { font-size: 0.95rem; line-height: 1; }
-@media (max-width: 600px) { .clocks { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .clocks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* ═══ iOS návod (modal) ═══ */
 .ios-modal {
   position: fixed; inset: 0; z-index: 100; display: none;
@@ -333,7 +333,8 @@ h3.section-title {
 </head>
 <body>
 <!-- Prepínač jazyka -->
-<div class="lang-switch">
+<!-- translate="no": automatický prekladač Chrome by inak prepísal EN na „SK" -->
+<div class="lang-switch" translate="no">
   <button id="lang-sk" class="active" onclick="setLang('sk')">SK</button>
   <button id="lang-en" onclick="setLang('en')">EN</button>
 </div>
@@ -352,15 +353,15 @@ h3.section-title {
   <!-- ═══════════════ STRED ═══════════════ -->
   <main class="panel panel-center">
     <div class="home-head">
-      <div class="home-eyebrow">no ads · no signup · no tracking</div>
-      <div class="home-logo">plainkit<span class="dot">.</span><span class="ver" tabindex="0">v1.6<span class="ver-tip" data-i18n="verTip">Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.</span></span></div>
+      <div class="home-eyebrow" translate="no">no ads · no signup · no tracking</div>
+      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.6<span class="ver-tip" data-i18n="verTip">Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.</span></span></div>
     </div>
     <!-- Svetové hodiny -->
     <div class="clock-card">
       <div class="clock-head">
         <h3 class="section-title" data-i18n="worldTime">Svetový čas</h3>
       </div>
-      <div class="clocks" id="clocks"></div>
+      <div class="clocks" id="clocks" translate="no"></div>
       <div class="clock-controls">
         <select class="add-city" id="add-city" onchange="addCity(this.value); this.value=''">
           <option value="" data-i18n="addCity">+ Pridať mesto</option>
@@ -768,7 +769,7 @@ function renderClocks() {
     return `<div class="clock" data-tz="${tz}">
       <button class="remove" onclick="removeCity('${tz}')" title="✕">✕</button>
       <div class="city">${name}</div>
-      <div class="time">--:--<span class="sec">:--</span></div>
+      <div class="time"><span class="hm">--:--</span><span class="sec">:--</span></div>
       <div class="date"></div>
     </div>`;
   }).join('');
@@ -780,7 +781,10 @@ function tickClocks() {
     const tz = el.dataset.tz;
     const parts = new Intl.DateTimeFormat('sk-SK', { timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }).formatToParts(now);
     const get = p => (parts.find(x => x.type === p) || {}).value || '00';
-    el.querySelector('.time').innerHTML = `${get('hour')}:${get('minute')}<span class="sec">:${get('second')}</span>`;
+    // Len prepíšeme text v dvoch existujúcich prvkoch — žiadne innerHTML každú sekundu
+    // (to rozbíjalo zobrazenie, keď stránku prekladal automatický prekladač prehliadača).
+    el.querySelector('.hm').textContent = `${get('hour')}:${get('minute')}`;
+    el.querySelector('.sec').textContent = `:${get('second')}`;
     el.querySelector('.date').textContent = new Intl.DateTimeFormat(lang==='en'?'en-GB':'sk-SK', { timeZone: tz, weekday:'short', day:'numeric', month:'short' }).format(now);
   });
 }
