@@ -50,6 +50,12 @@ h1{font-size:22px;margin:8px 0 4px}
 .ava{width:min(64vw,260px);height:min(64vw,260px)}
 .ringing .ava{animation:bob 1.2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
+.ava .blink{animation:blink 5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.ava .tw{animation:tw 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes tw{50%{opacity:.2;transform:scale(.5)}}
+.ava .pulse{animation:pl 3s ease-in-out infinite}
+@keyframes pl{50%{opacity:.55}}
 .acts{display:flex;justify-content:space-around;width:100%;max-width:340px}
 .circ{width:72px;height:72px;border-radius:50%;border:none;font-size:30px;color:#fff;cursor:pointer}
 .circ.ok{background:var(--ok)}.circ.no{background:var(--no)}
@@ -224,21 +230,61 @@ function startRing(){ringOnce();ringTimer=setInterval(ringOnce,3000)}
 function stopRing(){clearInterval(ringTimer);ringTimer=null;ringNodes.forEach(o=>{try{o.stop()}catch(e){}});ringNodes=[];if(navigator.vibrate)navigator.vibrate(0)}
 
 /* ---------- Postavičky (SVG, vlastné) ---------- */
+const f1=n=>n.toFixed(1);
+// chlpy/brada: kruhy po oblúku
+const fl=(cx,cy,r,a0,a1,n,br,fill)=>Array.from({length:n},(_,i)=>{const a=a0+(a1-a0)*i/(n-1);return `<circle cx="${f1(cx+Math.cos(a)*r)}" cy="${f1(cy+Math.sin(a)*r)}" r="${br}" fill="${fill}"/>`}).join('');
+const star=(cx,cy,ro,ri)=>'M'+Array.from({length:10},(_,i)=>{const a=-Math.PI/2+i*Math.PI/5,r=i%2?ri:ro;return f1(cx+Math.cos(a)*r)+' '+f1(cy+Math.sin(a)*r)}).join(' L')+'Z';
+const spark=(x,y,s,d)=>`<g transform="translate(${x} ${y}) scale(${s})"><path class="tw" style="animation-delay:${d}s" d="M0 -8Q1 -1 8 0Q1 1 0 8Q-1 1 -8 0Q-1 -1 0 -8Z" fill="#fff6d6"/></g>`;
+const tufts=`<g fill="#45376a">${Array.from({length:44},(_,i)=>{const a=i/34*Math.PI*2,p=(r,d)=>f1(100+Math.cos(a+d)*r)+','+f1(110+Math.sin(a+d)*r);return `<polygon points="${p(74,-0.08)} ${p(84+(i%3)*3,0.02)} ${p(74,0.08)}"/>`}).join('')}</g>`;
+const shadow='<ellipse cx="100" cy="190" rx="54" ry="6" fill="#000" opacity=".35"/>';
 const AVA={
-jezisko:`<defs><radialGradient id="gl"><stop offset="0" stop-color="#ffe9a8"/><stop offset="1" stop-color="#ffc629" stop-opacity="0"/></radialGradient></defs>
-<circle cx="100" cy="100" r="98" fill="url(#gl)" opacity=".5"/>
-<path d="M100 18 L121 70 L178 74 L134 109 L148 165 L100 135 L52 165 L66 109 L22 74 L79 70Z" fill="#ffc629" stroke="#ffe08a" stroke-width="4" stroke-linejoin="round"/>
-<circle cx="84" cy="98" r="7" fill="#3a2a00"/><circle cx="116" cy="98" r="7" fill="#3a2a00"/>
-<circle cx="86" cy="96" r="2" fill="#fff"/><circle cx="118" cy="96" r="2" fill="#fff"/>
-<circle cx="72" cy="114" r="7" fill="#ff9f6b" opacity=".6"/><circle cx="128" cy="114" r="7" fill="#ff9f6b" opacity=".6"/>
-<ellipse id="mouth" cx="100" cy="122" rx="10" ry="3" fill="#7a3b00"/>`,
-bubak:`<g fill="#5b4a7a">${Array.from({length:28},(_,i)=>{const a=i/28*Math.PI*2,r1=72,r2=88+(i%2)*6;const p=(r,d)=>[100+Math.cos(a+d)*r,108+Math.sin(a+d)*r].map(n=>n.toFixed(1)).join(',');return `<polygon points="${p(r1,-0.12)} ${p(r2,0)} ${p(r1,0.12)}"/>`}).join('')}</g>
-<circle cx="100" cy="108" r="74" fill="#5b4a7a"/>
-<ellipse cx="78" cy="96" rx="16" ry="18" fill="#f4f0ff"/><ellipse cx="122" cy="96" rx="16" ry="18" fill="#f4f0ff"/>
-<circle cx="80" cy="100" r="7" fill="#1b1430"/><circle cx="120" cy="100" r="7" fill="#1b1430"/>
-<path d="M60 74 L94 82" stroke="#2a2040" stroke-width="7" stroke-linecap="round"/><path d="M140 74 L106 82" stroke="#2a2040" stroke-width="7" stroke-linecap="round"/>
-<ellipse cx="100" cy="122" rx="9" ry="6" fill="#3d2f57"/>
-<ellipse id="mouth" cx="100" cy="146" rx="16" ry="3" fill="#2a1d3d"/>`};
+jezisko:`<defs>
+<radialGradient id="jh"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".75"/><stop offset="1" stop-color="#ffc629" stop-opacity="0"/></radialGradient>
+<radialGradient id="jg" cx=".45" cy=".4" r=".65"><stop offset="0" stop-color="#fff4c8"/><stop offset=".55" stop-color="#ffd24a"/><stop offset="1" stop-color="#f4a62a"/></radialGradient></defs>
+<circle class="pulse" cx="100" cy="104" r="96" fill="url(#jh)"/>
+<path d="${star(100,108,80,38)}" fill="url(#jg)" stroke="#f7b733" stroke-width="16" stroke-linejoin="round"/>
+<path d="M72 74 Q86 60 100 58" stroke="#fff8dc" stroke-width="5" stroke-linecap="round" fill="none" opacity=".7"/>
+<g class="blink"><ellipse cx="86" cy="104" rx="6" ry="8" fill="#5a3500"/><ellipse cx="114" cy="104" rx="6" ry="8" fill="#5a3500"/>
+<circle cx="88" cy="101" r="2.4" fill="#fff"/><circle cx="116" cy="101" r="2.4" fill="#fff"/></g>
+<ellipse cx="73" cy="120" rx="8" ry="5" fill="#ff7f50" opacity=".45"/><ellipse cx="127" cy="120" rx="8" ry="5" fill="#ff7f50" opacity=".45"/>
+<ellipse id="mouth" cx="100" cy="124" rx="9" ry="3" fill="#8a3b12"/>
+${spark(30,40,1.1,0)}${spark(170,46,.8,.8)}${spark(176,150,1,1.5)}${spark(24,150,.7,.4)}${spark(150,14,.6,1.1)}`,
+
+santa:`<defs><radialGradient id="sk" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#ffe0cc"/><stop offset="1" stop-color="#f0a888"/></radialGradient></defs>
+${shadow}
+<ellipse cx="100" cy="112" rx="44" ry="40" fill="url(#sk)"/>
+${fl(100,140,40,-0.35,Math.PI+0.35,15,17,'#dfe6ef')}
+<ellipse cx="100" cy="148" rx="46" ry="38" fill="#f4f7fb"/>
+${fl(100,140,34,0.2,Math.PI-0.2,9,14,'#ffffff')}
+<path d="M56 82 C58 44 88 24 118 26 C138 28 150 42 154 58 L148 82Z" fill="#d6283b"/>
+<path d="M118 27 C148 16 172 30 172 60" stroke="#c21f33" stroke-width="18" stroke-linecap="round" fill="none"/>
+<circle cx="172" cy="66" r="13" fill="#fff"/>
+<rect x="50" y="74" width="100" height="20" rx="10" fill="#fff"/>
+<path d="M76 98 Q86 92 94 98" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M106 98 Q114 92 124 98" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"/>
+<g class="blink"><ellipse cx="86" cy="108" rx="5" ry="6" fill="#2b1a12"/><ellipse cx="114" cy="108" rx="5" ry="6" fill="#2b1a12"/>
+<circle cx="87.5" cy="106" r="1.8" fill="#fff"/><circle cx="115.5" cy="106" r="1.8" fill="#fff"/></g>
+<ellipse cx="72" cy="120" rx="8" ry="5" fill="#ff6b6b" opacity=".45"/><ellipse cx="128" cy="120" rx="8" ry="5" fill="#ff6b6b" opacity=".45"/>
+<ellipse id="mouth" cx="100" cy="140" rx="11" ry="3" fill="#7a2a2a"/>
+<g fill="#fff" stroke="#c9d2de" stroke-width="2"><path d="M100 128 Q90 122 78 126 Q70 130 74 136 Q88 140 100 132Z"/><path d="M100 128 Q110 122 122 126 Q130 130 126 136 Q112 140 100 132Z"/></g>
+<circle cx="100" cy="122" r="9" fill="#ec8e78"/><circle cx="97" cy="119" r="3" fill="#fff" opacity=".5"/>`,
+
+bubak:`<defs><radialGradient id="bf" cx=".4" cy=".32" r=".75"><stop offset="0" stop-color="#9483ba"/><stop offset="1" stop-color="#4f4072"/></radialGradient></defs>
+${shadow}
+${tufts}
+<path d="M46 74 Q18 8 80 40Z" fill="#5c4b82"/><path d="M154 74 Q182 8 120 40Z" fill="#5c4b82"/><path d="M52 64 Q34 28 70 44Z" fill="#c77dba" opacity=".55"/><path d="M148 64 Q166 28 130 44Z" fill="#c77dba" opacity=".55"/>
+${fl(100,110,68,0,Math.PI*2,26,15,'#45376a')}
+${fl(100,106,64,0.12,Math.PI*2+0.12,26,14,'#6c5a93')}
+<circle cx="100" cy="108" r="68" fill="url(#bf)"/>
+<path d="M88 46 Q84 18 100 6 Q96 26 108 42Z" fill="#8a78b0"/><path d="M102 44 Q112 16 132 14 Q114 28 116 48Z" fill="#7c6aa5"/>
+<g class="blink"><ellipse cx="76" cy="94" rx="17" ry="19" fill="#f6f2ff"/><ellipse cx="124" cy="94" rx="17" ry="19" fill="#f6f2ff"/>
+<circle cx="80" cy="99" r="8" fill="#1b1430"/><circle cx="120" cy="99" r="8" fill="#1b1430"/>
+<circle cx="82.5" cy="96" r="2.6" fill="#fff"/><circle cx="122.5" cy="96" r="2.6" fill="#fff"/></g>
+<path d="M57 80 L95 88 Q96 70 76 70 Q57 70 57 80Z" fill="#7c6aa5"/><path d="M143 80 L105 88 Q104 70 124 70 Q143 70 143 80Z" fill="#7c6aa5"/>
+<path d="M58 74 Q74 66 94 78" stroke="#3b2e5c" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M142 74 Q126 66 106 78" stroke="#3b2e5c" stroke-width="6" stroke-linecap="round" fill="none"/>
+<ellipse cx="64" cy="124" rx="9" ry="5" fill="#ff8fc8" opacity=".35"/><ellipse cx="136" cy="124" rx="9" ry="5" fill="#ff8fc8" opacity=".35"/>
+<ellipse cx="100" cy="118" rx="11" ry="8" fill="#c77dba"/><ellipse cx="96" cy="115" rx="3.5" ry="2.5" fill="#fff" opacity=".45"/>
+<ellipse id="mouth" cx="100" cy="142" rx="18" ry="3" fill="#2a1d3d"/>
+<path d="M107 140 L113 140 L110 147Z" fill="#fffbe8"/>`};
 
 /* ---------- Tok hovoru ---------- */
 let who=null,delay=10,waitT=null,lock=null,playing=null,raf=0,tick=0;
@@ -260,7 +306,7 @@ $('#bCancel').onclick=()=>{clearTimeout(waitT);$('#vWait').classList.remove('on'
 
 function setPhone(sub,acts){
   $('#who').textContent=t(who==='jezisko'?'nameJ':'nameB');
-  $('#what').textContent=sub;$('#ava').innerHTML=AVA[who];
+  $('#what').textContent=sub;$('#ava').innerHTML=AVA[who==='jezisko'&&lang==='en'?'santa':who];
   $('#acts').innerHTML=acts.map(([cls,ic,l,id])=>`<div><button class="circ ${cls}" id="${id}">${ic}</button><div class="lbl">${t(l)}</div></div>`).join('');
   $('#vPhone').classList.add('on');
 }
