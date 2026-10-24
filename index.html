@@ -99,8 +99,9 @@ body {
 }
 @media (max-width: 1100px) {
   .layout { grid-template-columns: 1fr; }
-  .panel-left, .panel-right { order: 2; }
   .panel-center { order: 1; }
+  .panel-right { order: 2; }   /* nástroje hneď pod stredom */
+  .panel-left { order: 3; }    /* poznámky až na konci */
 }
 .panel { display: flex; flex-direction: column; gap: 20px; }
 h3.section-title {
@@ -354,7 +355,7 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow" translate="no">no ads · no signup · no tracking</div>
-      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.6<span class="ver-tip" data-i18n="verTip">Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.</span></span></div>
+      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.7<span class="ver-tip" data-i18n="verTip">Nové vo v1.7: Volanie — falošný hovor od Ježiška alebo Bubáka, bez reklám. Nahráš vlastnú správu, hlas sa zmení a nahrávka ostane len v telefóne.</span></span></div>
     </div>
     <!-- Svetové hodiny -->
     <div class="clock-card">
@@ -399,9 +400,9 @@ h3.section-title {
            ║  Súkromie zostáva úplne dole (nie je to nástroj).         ║
            ╚══════════════════════════════════════════════════════════╝ -->
       <!-- ── A ── -->
-      <!-- NÁSTROJ: Audit — Android aplikácia. Odznak „nové" zmaž, keď prestane byť nová. -->
+      <!-- NÁSTROJ: Audit — Android aplikácia -->
       <a href="/audit" class="tool-link">
-        <div class="label"><span><span data-i18n="tAudit">Audit · Android</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tAudit">Audit · Android</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/audit</div>
       </a>
       <!-- ── C ── -->
@@ -411,9 +412,9 @@ h3.section-title {
         <div class="url">plainkit.app/chat</div>
       </a>
       <!-- ── F ── -->
-      <!-- NÁSTROJ: Fotky bez metadát (EXIF). Odznak „nové" zmaž, keď prestane byť nový. -->
+      <!-- NÁSTROJ: Fotky bez metadát (EXIF) -->
       <a href="/exif" class="tool-link">
-        <div class="label"><span><span data-i18n="tExif">Fotky bez metadát</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span style="color:var(--text-dim)">↗</span></div>
+        <div class="label"><span data-i18n="tExif">Fotky bez metadát</span><span style="color:var(--text-dim)">↗</span></div>
         <div class="url">plainkit.app/exif</div>
       </a>
       <!-- ── H ── -->
@@ -429,7 +430,8 @@ h3.section-title {
            ╚══════════════════════════════════════════════╝ -->
       <details class="tool-group">
         <summary>
-          <div class="label"><span data-i18n="tGames">Hry</span><span class="chev">›</span></div>
+          <!-- Odznak „nové" na skupine zmaž spolu s odznakom pri Volaní -->
+          <div class="label"><span><span data-i18n="tGames">Hry</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span class="chev">›</span></div>
           <div class="url" data-i18n="tGamesSub">Hopko · Skokan · Tetris · Bludisko · Šach</div>
         </summary>
         <div class="group-body">
@@ -477,6 +479,11 @@ h3.section-title {
           <a href="/pocty" class="tool-link">
             <div class="label"><span data-i18n="tpocty">Počty</span><span style="color:var(--text-dim)">↗</span></div>
             <div class="url">plainkit.app/pocty</div>
+          </a>
+          <!-- HRA: Volanie (Ježiško / Bubák). Odznak „nové" zmaž, keď prestane byť nové. -->
+          <a href="/volanie/" class="tool-link">
+            <div class="label"><span><span data-i18n="tvolanie">Volanie · Ježiško a Bubák</span><span class="tag-new" data-i18n="tagNew">nové</span></span><span style="color:var(--text-dim)">↗</span></div>
+            <div class="url">plainkit.app/volanie</div>
           </a>
         </div>
       </details>
@@ -680,12 +687,12 @@ const I18N = {
     search:'Vyhľadávanie', searchPh:'Zadajte hľadaný výraz a vyberte vyhľadávač...',
     tools:'Nástroje', tPreklad:'Prekladač', tQr:'QR generátor', tJednotky:'Prevodník jednotiek', tHopko:'Hopko · hra', tSkokan:'Skokan · hra', tChat:'Chat',
     tAudit:'Audit · Android', tagNew:'nové',
-    tGames:'Hry', tGamesSub:'9 hier · od Hada po Šach', tpocty:'Počty',
+    tGames:'Hry', tGamesSub:'10 hier · od Hada po Šach', tvolanie:'Volanie · Ježiško a Bubák', tpocty:'Počty',
     tEdu:'Vzdelávanie', tEduSub:'Chémia · Fyzika · Jednotky', tChem:'Chémia', tChemSub:'Tabuľka · molárna · rozpustnosť · rovnice · pH', tChemTab:'Periodická tabuľka',
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.6: Fotky bez metadát — ukáže, čo fotka prezrádza (poloha, zariadenie, sériové čísla), a odstráni to. Obraz ostane nedotknutý.',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.7: Volanie — falošný hovor od Ježiška alebo Bubáka, bez reklám. Nahráš vlastnú správu, hlas sa zmení a nahrávka ostane len v telefóne.',
     tExif:'Fotky bez metadát', theslo:'Heslo', tpdf:'PDF', tzvuk:'Zvuk', thad:'Had', tpuzzle:'Puzzle', tbomby:'Bomby',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
@@ -707,12 +714,12 @@ const I18N = {
     search:'Search', searchPh:'Type your query and choose a search engine...',
     tools:'Tools', tPreklad:'Translator', tQr:'QR generator', tJednotky:'Unit converter', tHopko:'Hopko · game', tSkokan:'Skokan · game', tChat:'Chat',
     tAudit:'Audit · Android', tagNew:'new',
-    tGames:'Games', tGamesSub:'9 games · from Snake to Chess', tpocty:'Mental math',
+    tGames:'Games', tGamesSub:'10 games · from Snake to Chess', tvolanie:'Call · Santa & Bogeyman', tpocty:'Mental math',
     tEdu:'Education', tEduSub:'Chemistry · Physics · Units', tChem:'Chemistry', tChemSub:'Table · molar · solubility · equations · pH', tChemTab:'Periodic table',
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.6: Photos without metadata — shows what a photo reveals (location, device, serial numbers) and removes it. The image stays untouched.',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.7: Call — a pretend phone call from Santa or the Bogeyman, no ads. Record your own message, the voice gets changed and the recording stays on your phone.',
     tExif:'Photos without metadata', theslo:'Password', tpdf:'PDF', tzvuk:'Sound', thad:'Snake', tpuzzle:'Puzzle', tbomby:'Bombs',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
