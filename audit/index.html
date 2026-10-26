@@ -233,7 +233,7 @@
         <span data-lang="en">Install from Google Play</span>
       </a>
     </p>
-    <p class="meta">v1.7 · 1,50 MB · Android 8.0+ · GPLv3</p>
+    <p class="meta">v1.8 · 1,54 MB · Android 8.0+ · GPLv3</p>
     <p class="meta" style="margin-top:.4rem">
       <a href="https://github.com/Zelitte/plainkit-audit/releases/latest/download/app-release.apk" style="color:inherit;text-decoration:underline">
         <span data-lang="sk">alebo stiahnuť súbor APK priamo (GitHub)</span>
@@ -271,7 +271,7 @@
       <span data-lang="en"><strong>Verifying the file.</strong> If you want to be sure
       you have exactly the file we published, compare its SHA-256 fingerprint:</span>
     </p>
-      <code class="hash">b7a58a08a53c6e4df654f888da2f1874fadf155a7f3f56a6cc35830011de07c6</code>
+      <code class="hash">7365889dff03c882f5210865f540374b5421ee427202dccac35562508f2f1e6b</code>
     <p style="margin-top:.6rem">
       <span data-lang="sk">Vo Windows: <code>Get-FileHash .\app-release.apk -Algorithm SHA256</code>.
       Ak sa odtlačok nezhoduje, súbor nie je náš — neinštalujte ho.</span>
@@ -374,7 +374,9 @@
     <h2>Sieťové spojenia</h2>
   <p>Aplikácia <strong>vôbec nežiada povolenie na prístup k internetu</strong>.
   Android jej preto žiadne sieťové spojenie neumožní — nie je to sľub, ale
-  vlastnosť systému, ktorú si môžete overiť v zozname jej povolení. Od verzie 1.5 má navyše bežné povolenie ACCESS_NETWORK_STATE, len aby v Nastaveniach ukázala, či máš zapnuté Súkromné DNS. Na internet sa ním pripojiť nedá.</p>
+  vlastnosť systému, ktorú si môžete overiť v zozname jej povolení. Od verzie 1.5 má navyše bežné povolenie ACCESS_NETWORK_STATE, len aby v Nastaveniach ukázala, či máte zapnuté Súkromné DNS. Na internet sa ním pripojiť nedá.
+  Od verzie 1.8 má aj povolenie REQUEST_DELETE_PACKAGES — len pre tlačidlo Odinštalovať, ktoré otvorí okno Androidu; bez vášho potvrdenia sa nič neodstráni.</p>
+
   <div class="note">
     <p><strong>Inštalácia z Google Play.</strong> Ak aplikáciu nainštalujete
     z obchodu, Google — ako pri každej aplikácii — eviduje jej stiahnutie a mne
@@ -458,7 +460,8 @@
     you are. Installing the file above does not go through the store at all.</p>
   <p>The app <strong>does not request internet access at all</strong>. Android
   therefore cannot grant it any network connection — this is not a promise but a
-  property of the system, and you can verify it in the app's permission list. Since version 1.5 it also has the ordinary <code>ACCESS_NETWORK_STATE</code> permission, only to show in Settings whether Private DNS is on. It cannot be used to connect to the internet.</p>
+  property of the system, and you can verify it in the app's permission list. Since version 1.5 it also has the ordinary <code>ACCESS_NETWORK_STATE</code> permission, only to show in Settings whether Private DNS is on. It cannot be used to connect to the internet.
+  Since version 1.8 it also has the <code>REQUEST_DELETE_PACKAGES</code> permission, only for the Uninstall button, which opens Android's own dialog; nothing is removed unless you confirm it.</p>
   <div class="note">
     <p>The <strong>signature list</strong> of tracking libraries is bundled inside
     the app. It grows with new versions of the app, not by downloading from a server.</p>
