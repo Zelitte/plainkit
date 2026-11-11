@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>plainkit. audit — čo vaše aplikácie skutočne môžu</title>
-<meta name="description" content="Android aplikácia, ktorá zrozumiteľne ukáže, čo vaše aplikácie môžu a aké sledovacie knižnice obsahujú. Celá analýza prebieha v telefóne, nič sa neodosiela. Bez reklám, bez účtu.">
+<title>plainkit. audit — čo tvoje aplikácie skutočne môžu</title>
+<meta name="description" content="Android aplikácia, ktorá zrozumiteľne ukáže, čo tvoje aplikácie môžu a aké sledovacie knižnice obsahujú. Celá analýza prebieha v telefóne, nič sa neodosiela. Bez reklám, bez účtu.">
 <style>
   :root{
     --bg:#0a0f14;
@@ -210,11 +210,11 @@
 <!-- ═════════════  STRÁNKA APLIKÁCIE (spoločná, texty prepínané)  ═════════════ -->
   <section class="hero">
   <h1>
-<span data-lang="sk">Zistite, čo vaše aplikácie naozaj môžu</span>
+<span data-lang="sk">Zisti, čo tvoje aplikácie naozaj môžu</span>
 <span data-lang="en">See what your apps are really allowed to do</span>
 </h1>
 <p class="lead">
-<span data-lang="sk">plainkit.audit prejde každú nainštalovanú aplikáciu — jej povolenia, špeciálne prístupy a známe sledovacie knižnice v jej kóde — a povie vám to ľudskou rečou. A keď niečo prečítať nevie, napríklad kód v JavaScripte, povie aj to, namiesto falošného „v poriadku“. Všetko priamo v telefóne, bez reklám, bez účtu. Samotná appka nemá povolenie na prístup k internetu.</span>
+<span data-lang="sk">plainkit.audit prejde každú nainštalovanú aplikáciu — jej povolenia, špeciálne prístupy a známe sledovacie knižnice v jej kóde — a povie ti to ľudskou rečou. A keď niečo prečítať nevie, napríklad kód v JavaScripte, povie aj to, namiesto falošného „v poriadku“. Všetko priamo v telefóne, bez reklám, bez účtu. Samotná appka nemá povolenie na prístup k internetu.</span>
 <span data-lang="en">plainkit.audit goes through every installed app — its permissions, special access and known tracking libraries in its code — and explains it in plain language. And when it can't read something, such as code written in JavaScript, it says so instead of a false "all clear". All on your phone, no ads, no account. The app itself has no permission to access the internet.</span>
 </p>
   <div class="shots">
@@ -228,7 +228,7 @@
         <span data-lang="en">Install from Google Play</span>
       </a>
     </p>
-    <p class="meta">v2.2 · 1,80 MB · Android 8.0+ · GPLv3</p>
+    <p class="meta">v2.3 · 1,81 MB · Android 8.0+ · GPLv3</p>
     <p class="meta" style="margin-top:.4rem">
       <a href="https://github.com/Zelitte/plainkit-audit/releases/latest/download/app-release.apk" style="color:inherit;text-decoration:underline">
         <span data-lang="sk">alebo stiahnuť súbor APK priamo (GitHub)</span>
@@ -251,9 +251,9 @@
     </p>
     <p>
       <span data-lang="sk"><strong>Upozornenie na novú verziu.</strong> Aplikácia sama od seba nikdy nekomunikuje so serverom,
-      takže o novom vydaní sa nedozvie. Ak chcete byť
-      upozornený, použite <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> —
-      vložte doň odkaz na zdrojový kód a dá vám vedieť, keď vyjde nová verzia.</span>
+      takže o novom vydaní sa nedozvie. Ak chceš byť
+      upozornený, použi <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> —
+      vlož doň odkaz na zdrojový kód a dá ti vedieť, keď vyjde nová verzia.</span>
       <span data-lang="en"><strong>Getting notified about new versions.</strong> The
       app never contacts a server on its own, so it cannot tell you when a new
       release exists. If you want to be notified, use
@@ -261,12 +261,12 @@
       source-code link to it and it will let you know when a new version is out.</span>
     </p>
     <p>
-      <span data-lang="sk"><strong>Overenie súboru.</strong> Ak chcete mať istotu, že
-      máte presne ten súbor, ktorý sme vydali, porovnajte jeho odtlačok SHA-256:</span>
+      <span data-lang="sk"><strong>Overenie súboru.</strong> Ak chceš mať istotu, že
+      máš presne ten súbor, ktorý sme vydali, porovnaj jeho odtlačok SHA-256:</span>
       <span data-lang="en"><strong>Verifying the file.</strong> If you want to be sure
       you have exactly the file we published, compare its SHA-256 fingerprint:</span>
     </p>
-      <code class="hash">19a8866c99e16e5c7cd464cf00ee1d67a3ccffec76695be5135d7252b6a517a8</code>
+      <code class="hash">bf09c3a83a584e5d6b414dbf66ec15cc0006de58dfa6ce47c89838118615f569</code>
     <p style="margin-top:.6rem">
       <span data-lang="sk">Vo Windows: <code>Get-FileHash .\app-release.apk -Algorithm SHA256</code>.
       Ak sa odtlačok nezhoduje, súbor nie je náš — neinštalujte ho.</span>
@@ -283,7 +283,7 @@
     <code>ACCESS_FINE_LOCATION</code>.</li>
     <li data-lang="sk">Rozlišuje <strong>udelené / neudelené / automaticky pri
     inštalácii</strong> — väčšina aplikácií dostane kopu povolení bez toho, aby sa
-    vás niekto pýtal.</li>
+    ťa niekto pýtal.</li>
     <li data-lang="sk">Hľadá v inštalačných súboroch 144 známych sledovacích
     knižníc a rozlišuje ich účel: reklama, marketing, atribúcia, analytika, detekcia
     podvodov, hlásenie pádov. Pri každej nájdenej povie, kto ju vlastní, z akej krajiny
@@ -292,6 +292,7 @@
     závažnosti.</li>
     <li data-lang="sk">Pamätá si výsledky a po aktualizácii aplikácie ukáže, čo sa zmenilo.</li>
     <li data-lang="sk">Nález z jednej aplikácie môžeš zdieľať — bez údajov o telefóne a iných aplikáciách.</li>
+    <li data-lang="sk">Kontrola telefónu: bezpečnostná aktualizácia, zámok obrazovky, ladenie USB, známe znaky rootu — a časť „Môže ma niekto sledovať?“ so zoznamom aplikácií, ktoré majú právomoci zneužiteľné na sledovanie (služba dostupnosti, prístup k notifikáciám, správca zariadenia, klávesnica, inštalovanie aplikácií).</li>
     <li data-lang="sk">Sedem jazykov: slovenčina, angličtina, nemčina, francúzština, španielčina, taliančina a zjednodušená čínština (čínsky preklad neskontroloval rodený hovoriaci).</li>
     <li data-lang="en">Shows permissions in plain language — “precise location”
     instead of <code>ACCESS_FINE_LOCATION</code>.</li>
@@ -302,6 +303,7 @@
     and what it does.</li>
     <li data-lang="en">Explains each finding in one sentence and sorts apps by severity.</li>
     <li data-lang="en">Lets you share the finding for a single app — with no data about your phone or other apps.</li>
+    <li data-lang="en">Phone check: security patch, screen lock, USB debugging, known signs of root — and a section “Could someone be spying on me?” listing apps with powers that can be abused for spying (accessibility service, notification access, device admin, keyboard, installing apps).</li>
     <li data-lang="en">Seven languages: Slovak, English, German, French, Spanish, Italian and Simplified Chinese (the Chinese translation has not been reviewed by a native speaker).</li>
   </ul>
   <h2>
@@ -315,7 +317,7 @@
     <li data-lang="sk">Zoznam signatúr nie je úplný, takže skôr <strong>podhodnocuje</strong>,
     než preháňa.</li>
     <li data-lang="sk">Nie je to obvinenie ani odborný posudok — je to informácia,
-    ktorá vám má pomôcť rozhodnúť sa.</li>
+    ktorá ti má pomôcť rozhodnúť sa.</li>
     <li data-lang="en">It does not tell you what is happening right now — it reports
     <strong>what is present in the code</strong>. A bundled analytics library does not
     mean data is being sent at this moment.</li>
@@ -339,16 +341,16 @@
 <!-- ─────────────────────────  SK  ───────────────────────── -->
 <main data-lang="sk">
   <h2 class="major">Zásady ochrany súkromia</h2>
-  <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 26. 9. 2026</p>
+  <p class="updated">Android aplikácia „plainkit. audit“ · posledná aktualizácia 11. 11. 2026</p>
   <p class="lead"><strong>Aplikácia nezbiera, neukladá ani neodosiela žiadne osobné údaje.</strong>
-  Celá analýza prebieha vo vašom telefóne. Výsledky nikdy neopustia zariadenie.</p>
+  Celá analýza prebieha v tvojom telefóne. Výsledky nikdy neopustia zariadenie.</p>
   <h2>Čo aplikácia robí</h2>
-  <p>Audit prečíta zoznam aplikácií nainštalovaných vo vašom telefóne, pozrie sa
+  <p>Audit prečíta zoznam aplikácií nainštalovaných v tvojom telefóne, pozrie sa
   do ich inštalačných súborov (APK) a hľadá v nich známe sledovacie knižnice —
   reklamné, marketingové, analytické, nástroje na detekciu podvodov a na hlásenie
   pádov. Výsledok spojí s povoleniami, ktoré daná aplikácia žiada a ktoré má
-  skutočne udelené, a zobrazí vám ho v zrozumiteľnej vete.</p>
-  <p>Všetky tieto operácie prebiehajú <strong>lokálne, vo vašom zariadení</strong>.
+  skutočne udelené, a zobrazí ti ho v zrozumiteľnej vete.</p>
+  <p>Všetky tieto operácie prebiehajú <strong>lokálne, v tvojom zariadení</strong>.
   Nič sa pri nich neodosiela na žiadny server.</p>
   <h2>Prečo aplikácia potrebuje vidieť ostatné aplikácie</h2>
   <p>Aby mohla robiť to, na čo je určená, potrebuje systémové oprávnenie
@@ -358,18 +360,18 @@
   <strong>Nikam sa neodosiela, nikde sa nezálohuje a s nikým sa nezdieľa.</strong></p>
   <h2>Kde sú uložené výsledky</h2>
   <p>Výsledky skenov a história zmien sa ukladajú do lokálnej databázy v súkromnom
-  úložisku aplikácie vo vašom zariadení. Prístup k nim nemá žiadna iná aplikácia
+  úložisku aplikácie v tvojom zariadení. Prístup k nim nemá žiadna iná aplikácia
   ani my.</p>
   <ul>
-    <li>V Nastaveniach aplikácie môžete kedykoľvek vymazať log zmien alebo všetky
+    <li>V Nastaveniach aplikácie môžeš kedykoľvek vymazať log zmien alebo všetky
     výsledky skenov.</li>
     <li>Odinštalovaním aplikácie sa všetky jej údaje nenávratne odstránia.</li>
   </ul>
     <h2>Sieťové spojenia</h2>
   <p>Aplikácia <strong>vôbec nežiada povolenie na prístup k internetu</strong>.
   Android jej preto žiadne sieťové spojenie neumožní — nie je to sľub, ale
-  vlastnosť systému, ktorú si môžete overiť v zozname jej povolení. Od verzie 1.5 má navyše bežné povolenie ACCESS_NETWORK_STATE, len aby v Nastaveniach ukázala, či máte zapnuté Súkromné DNS. Na internet sa ním pripojiť nedá.
-  Od verzie 1.8 má aj povolenie REQUEST_DELETE_PACKAGES — len pre tlačidlo Odinštalovať, ktoré otvorí okno Androidu; bez vášho potvrdenia sa nič neodstráni.</p>
+  vlastnosť systému, ktorú si môžeš overiť v zozname jej povolení. Od verzie 1.5 má navyše bežné povolenie ACCESS_NETWORK_STATE, len aby v Nastaveniach ukázala, či máš zapnuté Súkromné DNS. Na internet sa ním pripojiť nedá.
+  Od verzie 1.8 má aj povolenie REQUEST_DELETE_PACKAGES — len pre tlačidlo Odinštalovať, ktoré otvorí okno Androidu; bez tvojho potvrdenia sa nič neodstráni.</p>
 
   <div class="note">
     <p><strong>Inštalácia z Google Play.</strong> Ak aplikáciu nainštalujete
@@ -380,8 +382,8 @@
     <p><strong>Zoznam signatúr</strong> sledovacích knižníc je zabudovaný priamo
     v aplikácii. Dopĺňa sa novou verziou aplikácie, nie sťahovaním zo siete.</p>
     <p>Jediné spojenie súvisiace s Auditom vzniká <strong>mimo aplikácie</strong>:
-    keď si inštalačný súbor stiahnete tlačidlom vyššie. Súbor je uložený na
-    <strong>GitHube</strong>, ktorý pri sťahovaní vidí IP adresu vášho pripojenia.
+    keď si inštalačný súbor stiahneš tlačidlom vyššie. Súbor je uložený na
+    <strong>GitHube</strong>, ktorý pri sťahovaní vidí IP adresu tvojho pripojenia.
     Spojenie vznikne až po kliknutí — táto stránka sa naň sama nepripája.</p>
   </div>
   <h2>Čo aplikácia nerobí</h2>
@@ -390,7 +392,7 @@
     <li>Nevyžaduje registráciu ani účet.</li>
     <li>Neobsahuje analytiku, meranie používania ani hlásenie pádov —
     <strong>samotný Audit neobsahuje žiadnu sledovaciu knižnicu</strong>, čo si
-    môžete overiť ktorýmkoľvek nástrojom tohto typu vrátane jeho samého.</li>
+    môžeš overiť ktorýmkoľvek nástrojom tohto typu vrátane jeho samého.</li>
     <li>Nepoužíva reklamné identifikátory.</li>
     <li>Nepredáva ani nezdieľa žiadne údaje s tretími stranami, pretože žiadne
     nezískava.</li>
@@ -403,7 +405,7 @@
     odosielajú údaje.</li>
     <li>Zoznam signatúr <strong>nie je úplný</strong>, takže výsledky skôr
     podhodnocujú, než preháňajú.</li>
-    <li>Výsledok je informácia, ktorá vám má pomôcť rozhodnúť sa. Nie je to
+    <li>Výsledok je informácia, ktorá ti má pomôcť rozhodnúť sa. Nie je to
     obvinenie ani odborný posudok.</li>
   </ul>
   <h2>Deti a citlivé údaje</h2>
@@ -512,7 +514,7 @@
     sk.setAttribute('aria-pressed', lang === 'sk' ? 'true' : 'false');
     en.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
     document.title = (lang === 'sk')
-      ? 'plainkit. audit — čo vaše aplikácie skutočne môžu'
+      ? 'plainkit. audit — čo tvoje aplikácie skutočne môžu'
       : 'plainkit. audit — what your apps can actually do';
   }
   sk.addEventListener('click', function () { set('sk'); });
