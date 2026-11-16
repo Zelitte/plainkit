@@ -229,6 +229,13 @@
       </a>
     </p>
     <p class="meta">v2.4 · 1,81 MB · Android 8.0+ · GPLv3</p>
+    <!-- Android Code 2026: obyčajný odkaz, po 31. 12. sa sám skryje -->
+    <p id="vote-note" style="margin:.9rem 0 0;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;font-size:.85rem;line-height:1.45;color:var(--muted)">
+      <a href="https://androidcode.mojandroid.sk/hlasovanie/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">
+        <span data-lang="sk">plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný</span>
+        <span data-lang="en">plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional</span>
+      </a>
+    </p>
     <p class="meta" style="margin-top:.4rem">
       <a href="https://github.com/Zelitte/plainkit-audit/releases/latest/download/app-release.apk" style="color:inherit;text-decoration:underline">
         <span data-lang="sk">alebo stiahnuť súbor APK priamo (GitHub)</span>
@@ -524,6 +531,9 @@
   if (nav.indexOf('sk') !== 0 && nav.indexOf('cs') !== 0) set('en');
 })();
 </script>
+<script>
+/* hlasovanie Android Code 2026 — oznam sa po Silvestri sám skryje */
+(function(){ if (Date.now() >= Date.parse('2027-01-01T00:00:00+01:00')) { var v=document.getElementById('vote-note'); if (v) v.remove(); } })();
+</script>
 </body>
 </html>
- 
