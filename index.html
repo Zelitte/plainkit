@@ -152,6 +152,8 @@ h3.section-title {
 }
 .iban-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
 .home-head { text-align: center; margin-bottom: 8px; }
+.vote-note { display:block; margin:6px auto 12px; max-width:560px; padding:8px 12px; border:1px solid var(--border-strong); border-radius:10px; font-size:0.8rem; line-height:1.45; text-align:center; color:var(--text-dim); text-decoration:none; }
+.vote-note:hover, .vote-note:focus { border-color: var(--accent); color: var(--accent); }
 .home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
 .home-logo .dot { color: var(--accent); }
@@ -355,8 +357,10 @@ h3.section-title {
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow" translate="no">no ads · no signup · no tracking</div>
-      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.7<span class="ver-tip" data-i18n="verTip">Nové vo v1.7: Volanie — falošný hovor od Ježiška alebo Bubáka, bez reklám. Nahráš vlastnú správu, hlas sa zmení a nahrávka ostane len v telefóne.</span></span></div>
+      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.8<span class="ver-tip" data-i18n="verTip">Nové vo v1.8: plainkit. audit je nominovaný v súťaži Android Code 2026 — hlasovať sa dá do Silvestra.</span></span></div>
     </div>
+    <!-- Android Code 2026: obyčajný odkaz, cudzia stránka sa načíta až po kliknutí; po 31. 12. sa sám skryje -->
+    <a class="vote-note" id="vote-note" href="https://androidcode.mojandroid.sk/hlasovanie/" target="_blank" rel="noopener noreferrer"><span data-i18n="voteNote">plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný</span></a>
     <!-- Svetové hodiny -->
     <div class="clock-card">
       <div class="clock-head">
@@ -692,7 +696,7 @@ const I18N = {
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.7: Volanie — falošný hovor od Ježiška alebo Bubáka, bez reklám. Nahráš vlastnú správu, hlas sa zmení a nahrávka ostane len v telefóne.',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.8: plainkit. audit je nominovaný v súťaži Android Code 2026 — hlasovať sa dá do Silvestra.', voteNote:'plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný',
     tExif:'Fotky bez metadát', theslo:'Heslo', tpdf:'PDF', tzvuk:'Zvuk', thad:'Had', tpuzzle:'Puzzle', tbomby:'Bomby',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
@@ -719,7 +723,7 @@ const I18N = {
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.7: Call — a pretend phone call from Santa or the Bogeyman, no ads. Record your own message, the voice gets changed and the recording stays on your phone.',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.8: plainkit. audit is nominated in the Android Code 2026 awards — voting is open until New Year’s Eve.', voteNote:'plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional',
     tExif:'Photos without metadata', theslo:'Password', tpdf:'PDF', tzvuk:'Sound', thad:'Snake', tpuzzle:'Puzzle', tbomby:'Bombs',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
@@ -901,6 +905,10 @@ if ('serviceWorker' in navigator) {
   setInterval(tickClocks, 1000);
   setupInstall();
 })();
+</script>
+<script>
+/* hlasovanie Android Code 2026 — oznam sa po Silvestri sám skryje */
+(function(){ if (Date.now() >= Date.parse('2027-01-01T00:00:00+01:00')) { var v=document.getElementById('vote-note'); if (v) v.remove(); } })();
 </script>
 </body>
 </html>
