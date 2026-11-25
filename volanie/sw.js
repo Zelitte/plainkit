@@ -1,6 +1,6 @@
 // plainkit. volanie — offline cache. Žiadne požiadavky mimo plainkit.app.
-const C = 'pk-volanie-v1';
-const CORE = ['/volanie/', '/volanie/manifest.json', '/volanie/icon-192.png', '/volanie/icon-512.png'];
+const C = 'pk-volanie-v2';
+const CORE = ['/volanie/', '/volanie/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -23,3 +23,4 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.match(e.request))
   );
 });
+
