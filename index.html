@@ -112,7 +112,7 @@ h3.section-title {
   color: var(--accent);
   margin-bottom: 12px;
 }
-.notes-card, .support-card, .clock-card, .search-card, .links-card {
+.notes-card, .support-card, .clock-card, .search-card, .links-card, .offline-card {
   background: var(--glass);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -331,6 +331,24 @@ h3.section-title {
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
 }
+.off-sub { font-size: 0.8rem; color: var(--text-2); line-height: 1.5; margin-bottom: 12px; }
+.off-check { display: flex; gap: 8px; align-items: center; font-size: 0.78rem; color: var(--text-2); cursor: pointer; }
+.off-check input { accent-color: var(--accent); }
+.off-btn { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.off-btn:hover { background: rgba(0,212,232,0.18); }
+.off-btn:disabled { opacity: 0.6; cursor: progress; }
+.off-bar { height: 4px; background: var(--border); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+.off-bar > div { height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+.off-status { font-size: 0.75rem; color: var(--text-2); line-height: 1.5; margin-top: 10px; }
+.off-status:empty { display: none; }
+.off-status.err { color: var(--yellow); }
+.off-del { background: none; border: none; color: var(--text-3); font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; cursor: pointer; margin-top: 6px; text-decoration: underline; }
+.off-del:hover { color: var(--accent); }
+.off-list { margin-top: 12px; font-size: 0.75rem; color: var(--text-2); line-height: 1.55; }
+.off-list summary { cursor: pointer; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.06em; }
+.off-list ul { list-style: none; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+.off-list .ok { color: var(--green); } .off-list .part { color: var(--yellow); } .off-list .no { color: #ff6b6b; }
+.off-list p { color: var(--text-3); }
 .foot { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); letter-spacing: 0.08em; padding: 20px; margin-top: 20px; line-height: 1.8; }
 </style>
 </head>
@@ -352,12 +370,32 @@ h3.section-title {
       <textarea id="notes" data-i18n-ph="notesPh" placeholder="Píšte tu vaše poznámky..."></textarea>
       <button class="notes-btn" onclick="downloadNotes()" data-i18n="downloadNotes">↓ Stiahnuť poznámky</button>
     </div>
+    <!-- ═══ Offline: stiahnutie nástrojov do zariadenia (len na vedomý klik) ═══
+         Zoznam súborov je v skripte nižšie (OFFLINE_CORE / OFFLINE_HEAVY). -->
+    <div class="offline-card" id="off-card" style="display:none">
+      <h3 class="section-title" data-i18n="offTitle">Offline</h3>
+      <p class="off-sub" data-i18n="offSub">Stiahni si nástroje do tohto zariadenia — budú fungovať aj bez internetu.</p>
+      <label class="off-check"><input type="checkbox" id="off-heavy"> <span data-i18n="offHeavy">vrátane nástroja Zvuk (+ ≈ 32 MB)</span></label>
+      <button class="notes-btn off-btn" id="off-dl" type="button" onclick="offlineDownload()">↓ Stiahnuť pre použitie offline (≈ 6 MB)</button>
+      <div class="off-bar" id="off-bar" hidden><div id="off-bar-fill"></div></div>
+      <p class="off-status" id="off-status" aria-live="polite"></p>
+      <button class="off-del" id="off-del" type="button" onclick="offlineDelete()" hidden data-i18n="offDel">Zmazať offline dáta</button>
+      <details class="off-list">
+        <summary data-i18n="offWhat">Čo bude fungovať offline?</summary>
+        <ul>
+          <li><b class="ok">✓</b> <span data-i18n="offOk">Všetky ostatné nástroje a hry.</span></li>
+          <li><b class="part">◐</b> <span data-i18n="offPart">Čiastočne: Heslo (sila hesla áno, kontrola únikov nie), Šach (proti počítaču áno, online nie), Audit (popis áno, stiahnutie aplikácie nie), vyhľadávanie na tejto stránke nie.</span></li>
+          <li><b class="no">✕</b> <span data-i18n="offNo">Nestiahne sa, lebo bez internetu nefunguje: Chat, Prekladač, Počasie. Zvuk len ak ho začiarkneš.</span></li>
+        </ul>
+        <p data-i18n="offNote">Ukladá sa len do tohto prehliadača a len verejné súbory plainkit.app — nič o tebe. Keď si online, uložená kópia sa sama aktualizuje.</p>
+      </details>
+    </div>
   </aside>
   <!-- ═══════════════ STRED ═══════════════ -->
   <main class="panel panel-center">
     <div class="home-head">
       <div class="home-eyebrow" translate="no">no ads · no signup · no tracking</div>
-      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.8<span class="ver-tip" data-i18n="verTip">Nové vo v1.8: plainkit. audit je nominovaný v súťaži Android Code 2026 — hlasovať sa dá do Silvestra.</span></span></div>
+      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.9<span class="ver-tip" data-i18n="verTip">Nové vo v1.9: nástroje si môžeš stiahnuť pre použitie offline (karta Offline pri poznámkach) — potom fungujú aj bez internetu.</span></span></div>
     </div>
     <!-- Android Code 2026: obyčajný odkaz, cudzia stránka sa načíta až po kliknutí; po 31. 12. sa sám skryje -->
     <a class="vote-note" id="vote-note" href="https://androidcode.mojandroid.sk/hlasovanie/" target="_blank" rel="noopener noreferrer"><span data-i18n="voteNote">plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný</span></a>
@@ -402,6 +440,7 @@ h3.section-title {
            ║  • Skupina (Hry, Vzdelávanie) = pridaj <a> do .group-body.║
            ║  Poradie: samostatné nástroje + skupiny podľa abecedy,    ║
            ║  Súkromie zostáva úplne dole (nie je to nástroj).         ║
+           ║  • OFFLINE: pridaj priečinok aj do OFF_PAGES v skripte.   ║
            ╚══════════════════════════════════════════════════════════╝ -->
       <!-- ── A ── -->
       <!-- NÁSTROJ: Audit — Android aplikácia -->
@@ -696,8 +735,18 @@ const I18N = {
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.8: plainkit. audit je nominovaný v súťaži Android Code 2026 — hlasovať sa dá do Silvestra.', voteNote:'plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.9: nástroje si môžeš stiahnuť pre použitie offline (karta Offline pri poznámkach) — potom fungujú aj bez internetu.', voteNote:'plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný',
     tExif:'Fotky bez metadát', theslo:'Heslo', tpdf:'PDF', tzvuk:'Zvuk', thad:'Had', tpuzzle:'Puzzle', tbomby:'Bomby',
+    offTitle:'Offline', offSub:'Stiahni si nástroje do tohto zariadenia — budú fungovať aj bez internetu.',
+    offHeavy:'vrátane nástroja Zvuk (+ ≈ 32 MB)', offDl:'↓ Stiahnuť pre použitie offline (≈ 6 MB)',
+    offUpd:'↻ Aktualizovať offline verziu', offRedo:'↻ Stiahnuť znova', offBusy:'Sťahujem… {pct} %',
+    offHave:'Stiahnuté v tomto zariadení: {ver} · {date} · {mb} MB.', offOld:'Na webe je novšia verzia — aktualizuj.',
+    offFailed:'{n} súborov sa nepodarilo stiahnuť — skús znova.', offNeedNet:'Na stiahnutie potrebuješ internet.',
+    offDeleted:'Offline dáta sú zmazané.', offNoSpace:'Nepodarilo sa uložiť — v prehliadači asi nie je miesto.',
+    offDel:'Zmazať offline dáta', offWhat:'Čo bude fungovať offline?', offOk:'Všetky ostatné nástroje a hry.',
+    offPart:'Čiastočne: Heslo (sila hesla áno, kontrola únikov nie), Šach (proti počítaču áno, online nie), Audit (popis áno, stiahnutie aplikácie nie), vyhľadávanie na tejto stránke nie.',
+    offNo:'Nestiahne sa, lebo bez internetu nefunguje: Chat, Prekladač, Počasie. Zvuk len ak ho začiarkneš.',
+    offNote:'Ukladá sa len do tohto prehliadača a len verejné súbory plainkit.app — nič o tebe. Keď si online, uložená kópia sa sama aktualizuje.',
     footTag:'plainkit.app · bez reklám, bez registrácie, bez sledovania',
     footPrivacy:'Ukladáme len vaše nastavenie jazyka a miest vo vašom prehliadači. Žiadne sledovanie.',
     title:'plainkit · prekladač, QR, prevodník — zadarmo, bez reklám',
@@ -723,8 +772,18 @@ const I18N = {
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.8: plainkit. audit is nominated in the Android Code 2026 awards — voting is open until New Year’s Eve.', voteNote:'plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.9: you can download the tools for offline use (Offline card next to Notes) — then they work without the internet.', voteNote:'plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional',
     tExif:'Photos without metadata', theslo:'Password', tpdf:'PDF', tzvuk:'Sound', thad:'Snake', tpuzzle:'Puzzle', tbomby:'Bombs',
+    offTitle:'Offline', offSub:'Download the tools to this device — they will work without the internet too.',
+    offHeavy:'include the Sound tool (+ ≈ 32 MB)', offDl:'↓ Download for offline use (≈ 6 MB)',
+    offUpd:'↻ Update offline copy', offRedo:'↻ Download again', offBusy:'Downloading… {pct} %',
+    offHave:'Downloaded on this device: {ver} · {date} · {mb} MB.', offOld:'A newer version is online — update.',
+    offFailed:'{n} files could not be downloaded — try again.', offNeedNet:'You need the internet to download.',
+    offDeleted:'Offline data deleted.', offNoSpace:'Could not save — the browser is probably out of space.',
+    offDel:'Delete offline data', offWhat:'What will work offline?', offOk:'All other tools and games.',
+    offPart:'Partly: Password (strength yes, breach check no), Chess (vs computer yes, online no), Audit (description yes, app download no), the search box on this page no.',
+    offNo:'Not downloaded because it can’t work offline: Chat, Translator, Weather. Sound only if you tick it.',
+    offNote:'Stored only in this browser, and only public plainkit.app files — nothing about you. When you’re online, the saved copy updates itself.',
     footTag:'plainkit.app · no ads, no signup, no tracking',
     footPrivacy:'We only store your language and city settings in your browser. No tracking.',
     title:'plainkit · free translator, QR generator, unit converter',
@@ -760,6 +819,7 @@ function applyLang() {
   // dropdown + hodiny (názvy miest v správnom jazyku)
   buildCityDropdown();
   renderClocks();
+  renderOffline();
 }
 // ═══ Svetové hodiny ═══
 function cityByTz(tz) { return CITY_POOL.find(c => c.tz === tz); }
@@ -886,6 +946,110 @@ function closeIosHelp(e) {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
+// ═══ Offline: stiahnutie nástrojov (len na vedomý klik) ═══
+// ┌───────────────────────────────────────────────────────────────────┐
+// │ NOVÝ NÁSTROJ → pridaj jeho priečinok do OFF_PAGES (a jeho vlastné  │
+// │ .js/.css/obrázky do OFFLINE_CORE), inak offline nepôjde.           │
+// │ NEPRIDÁVAJ nástroje, čo bez internetu nefungujú (chat, preklad,    │
+// │ pocasie) — v karte sú vypísané ako „nestiahne sa".                 │
+// └───────────────────────────────────────────────────────────────────┘
+const OFF_CACHE = 'pk-offline';               // rovnaký názov ako v /sw.js
+const OFF_META  = '/__pk-offline-meta';
+const OFF_PAGES = ['audit','bludisko','bomby','chemia/molarna','chemia/ph','chemia/rovnice','chemia/rozpustnost',
+  'chemia/tabulka','exif','fyzika/kalkulacka','had','heslo','hopko','jednotky','kancelaria/tabulka','pdf','pocty',
+  'politika','puzzle','qr','sach','skokan','statistika','tetris','volanie'];
+const OFF_FONTS = { 'inter':[300,400,500,600,700], 'jetbrains-mono':[400,500,600,700], 'ibm-plex-sans':[400,500,600,700],
+  'ibm-plex-mono':[400,500,600], 'fredoka':[400,500,600,700], 'baloo-2':[700,800] };
+const OFFLINE_CORE = [
+  '/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png',
+  ...OFF_PAGES.map(p => '/' + p + '/'),
+  '/exceljs.min.js', '/jszip.min.js', '/pdf-lib.min.js', '/pdf.min.js', '/pdf.worker.min.js', '/qr-code-styling.js', '/qrious.min.js',
+  '/pdf/app.js', '/qr/app.js', '/qr/i18n.js', '/qr/styles.css', '/volanie/manifest.json',
+  '/audit/img/povolenia.png', '/audit/img/uvodna_obrazovka.jpg', '/audit/img/zoznam_sken.jpg',
+  ...Object.entries(OFF_FONTS).flatMap(([f, ws]) => ws.flatMap(w => ['latin','latin-ext'].map(s => `/fonts/${f}-${s}-${w}-normal.woff2`)))
+];
+const OFFLINE_HEAVY = ['/zvuk/', ...['index.js','classes.js','const.js','errors.js','types.js','utils.js','ffmpeg-core.js',
+  'ffmpeg-core.worker.js','ffmpeg-core.wasm.part00','ffmpeg-core.wasm.part01'].map(f => '/zvuk/' + f)];
+const offState = { meta: null, busy: false, pct: 0, msgKey: '', err: false };
+function offVer() { const v = document.querySelector('.home-logo .ver'); return v ? v.firstChild.textContent.trim() : ''; }
+function offMsg(key, err) { offState.msgKey = key; offState.err = !!err; renderOffline(); }
+function renderOffline() {
+  const card = document.getElementById('off-card');
+  if (!card || card.style.display === 'none') return;
+  const t = I18N[lang], m = offState.meta;
+  const btn = document.getElementById('off-dl'), st = document.getElementById('off-status');
+  btn.disabled = offState.busy;
+  btn.textContent = offState.busy ? t.offBusy.replace('{pct}', Math.round(offState.pct * 100))
+                  : !m ? t.offDl : (m.ver !== offVer() ? t.offUpd : t.offRedo);
+  document.getElementById('off-bar').hidden = !offState.busy;
+  document.getElementById('off-bar-fill').style.width = (offState.pct * 100) + '%';
+  document.getElementById('off-del').hidden = !m || offState.busy;
+  let msg = '';
+  const failed = !!(m && m.failed && m.failed.length);
+  if (offState.msgKey) msg = t[offState.msgKey];
+  else if (m && !offState.busy) {
+    const mb = (m.bytes / 1048576).toFixed(1);
+    msg = t.offHave.replace('{ver}', m.ver)
+          .replace('{date}', new Date(m.date).toLocaleDateString(lang === 'en' ? 'en-GB' : 'sk-SK'))
+          .replace('{mb}', lang === 'en' ? mb : mb.replace('.', ','));
+    if (failed) msg += ' ' + t.offFailed.replace('{n}', m.failed.length);
+    if (m.ver !== offVer()) msg += ' ' + t.offOld;
+  }
+  st.textContent = msg;
+  st.classList.toggle('err', offState.msgKey ? offState.err : failed);
+}
+async function offlineDownload() {
+  if (offState.busy) return;
+  if (!navigator.onLine) { offMsg('offNeedNet', true); return; }
+  const heavy = document.getElementById('off-heavy').checked;
+  const list = heavy ? OFFLINE_CORE.concat(OFFLINE_HEAVY) : OFFLINE_CORE;
+  offState.busy = true; offState.pct = 0; offState.msgKey = ''; offState.err = false; renderOffline();
+  // Požiadaj prehliadač, aby stiahnuté dáta sám nemazal (nemusí vyhovieť).
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
+  const failed = [], keep = new Set([location.origin + OFF_META]);
+  let bytes = 0, done = 0, next = 0, noSpace = false;
+  try {
+    const cache = await caches.open(OFF_CACHE);
+    const worker = async () => {
+      while (next < list.length) {
+        const u = list[next++];
+        try {
+          const r = await fetch(u, { cache: 'no-cache' });   // vždy čerstvé zo servera
+          if (!r.ok) throw new Error(r.status);
+          const b = await r.blob();
+          const key = new URL(r.url).pathname;                 // cesta po prípadnom presmerovaní
+          const h = new Headers();
+          for (const k of ['content-type', 'etag', 'last-modified']) if (r.headers.get(k)) h.set(k, r.headers.get(k));
+          await cache.put(key, new Response(b, { status: 200, headers: h }));
+          keep.add(location.origin + key); bytes += b.size;
+        } catch (e) { failed.push(u); if (e && e.name === 'QuotaExceededError') noSpace = true; }
+        done++; offState.pct = done / list.length; renderOffline();
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    // Upratanie: zmaž, čo už v zozname nie je (napr. Zvuk po odškrtnutí, zrušený nástroj).
+    for (const req of await cache.keys()) if (!keep.has(req.url)) await cache.delete(req);
+    offState.meta = { ver: offVer(), date: Date.now(), bytes, heavy, failed };
+    await cache.put(OFF_META, new Response(JSON.stringify(offState.meta), { headers: { 'Content-Type': 'application/json' } }));
+  } catch (e) { if (e && e.name === 'QuotaExceededError') noSpace = true; }
+  offState.busy = false;
+  if (noSpace) offMsg('offNoSpace', true); else renderOffline();
+}
+async function offlineDelete() {
+  try { await caches.delete(OFF_CACHE); } catch (_) {}
+  offState.meta = null; offMsg('offDeleted');
+}
+async function offlineInit() {
+  if (!('caches' in window) || !('serviceWorker' in navigator)) return;   // starý prehliadač → karta ostane skrytá
+  document.getElementById('off-card').style.display = '';
+  try {
+    if (await caches.has(OFF_CACHE)) {
+      const r = await (await caches.open(OFF_CACHE)).match(OFF_META);
+      if (r) { offState.meta = await r.json(); document.getElementById('off-heavy').checked = !!offState.meta.heavy; }
+    }
+  } catch (_) {}
+  renderOffline();
+}
 // ═══ Init: načítaj uložené nastavenia ═══
 (function init() {
   // jazyk
@@ -904,6 +1068,7 @@ if ('serviceWorker' in navigator) {
   if (ibanEl) ibanEl.textContent = IBAN_FULL;
   setInterval(tickClocks, 1000);
   setupInstall();
+  offlineInit();
 })();
 </script>
 <script>
