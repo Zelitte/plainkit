@@ -152,9 +152,20 @@ h3.section-title {
 }
 .iban-copy { background: none; border: none; cursor: pointer; font-size: 0.9rem; }
 .home-head { text-align: center; margin-bottom: 8px; }
-.vote-note { display:block; margin:6px auto 12px; max-width:560px; padding:8px 12px; border:1px solid var(--border-strong); border-radius:10px; font-size:0.8rem; line-height:1.45; text-align:center; color:var(--text-dim); text-decoration:none; }
+.vote-note { display:block; margin:6px auto 12px; max-width:560px; padding:8px 12px; border:1px solid rgba(0,212,232,0.35); border-left:2px solid var(--accent); border-radius:10px; font-size:0.8rem; line-height:1.45; text-align:center; color:var(--text-2); text-decoration:none; background: linear-gradient(90deg, var(--accent-dim), transparent 70%); transition: border-color 0.15s, color 0.15s; }
 .vote-note:hover, .vote-note:focus { border-color: var(--accent); color: var(--accent); }
-.home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
+.home-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); white-space: nowrap; min-height: 1.4em; }
+@media (max-width: 420px) { .home-eyebrow { letter-spacing: 0.18em; } }
+/* mobil: slogan pod prepínačom jazyka, nie pod ním schovaný */
+@media (max-width: 600px) { .home-head { padding-top: 34px; } }
+/* Striedajúci sa slogan: „dekódovanie" písmen + krátky glitch po dopísaní */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.slogan { position: relative; display: inline-block; }
+.slogan.glitch::before, .slogan.glitch::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.slogan.glitch::before { color: #ff3df2; animation: glitchA 0.6s steps(2, end) 1; }
+.slogan.glitch::after  { color: var(--accent); filter: brightness(1.6); animation: glitchB 0.6s steps(2, end) 1; }
+@keyframes glitchA { 0% { opacity: .8; transform: translate(-2px,0); clip-path: inset(0 0 55% 0); } 50% { opacity: .8; transform: translate(2px,0); clip-path: inset(40% 0 0 0); } 100% { opacity: 0; transform: none; } }
+@keyframes glitchB { 0% { opacity: .8; transform: translate(2px,0); clip-path: inset(50% 0 0 0); } 50% { opacity: .8; transform: translate(-2px,0); clip-path: inset(0 0 60% 0); } 100% { opacity: 0; transform: none; } }
 .home-logo { font-size: 2.6rem; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
 .home-logo .dot { color: var(--accent); }
 .home-logo .ver { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0; margin-left: 8px; vertical-align: middle; }
@@ -394,11 +405,12 @@ h3.section-title {
   <!-- ═══════════════ STRED ═══════════════ -->
   <main class="panel panel-center">
     <div class="home-head">
-      <div class="home-eyebrow" translate="no">no ads · no signup · no tracking</div>
-      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v1.9<span class="ver-tip" data-i18n="verTip">Nové vo v1.9: nástroje si môžeš stiahnuť pre použitie offline (karta Offline pri poznámkach) — potom fungujú aj bez internetu.</span></span></div>
+      <!-- Slogan: text sa strieda (zoznam SLOGANS v skripte). Čítačky obrazovky dostanú len pevný text. -->
+      <div class="home-eyebrow" translate="no"><span class="sr-only">no ads · no signup · no tracking</span><span class="slogan" id="slogan" aria-hidden="true">no ads · no signup · no tracking</span></div>
+      <div class="home-logo"><span translate="no">plainkit<span class="dot">.</span></span><span class="ver" tabindex="0">v2.0<span class="ver-tip" data-i18n="verTip">Nové vo v2.0: striedajúci sa slogan pod logom a nástroje na stiahnutie pre použitie offline (karta Offline pri poznámkach).</span></span></div>
     </div>
     <!-- Android Code 2026: obyčajný odkaz, cudzia stránka sa načíta až po kliknutí; po 31. 12. sa sám skryje -->
-    <a class="vote-note" id="vote-note" href="https://androidcode.mojandroid.sk/hlasovanie/" target="_blank" rel="noopener noreferrer"><span data-i18n="voteNote">plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný</span></a>
+    <a class="vote-note" id="vote-note" href="https://androidcode.mojandroid.sk/hlasovanie/" target="_blank" rel="noopener noreferrer"><span class="live-dot"></span><span data-i18n="voteNote">plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný</span></a>
     <!-- Svetové hodiny -->
     <div class="clock-card">
       <div class="clock-head">
@@ -735,7 +747,7 @@ const I18N = {
     tFyz:'Fyzika', tFyzSub:'Fyzikálna kalkulačka', tFyzKalk:'Fyzikálna kalkulačka',
     tChemMol:'Molárna hmotnosť', tChemSol:'Tabuľka rozpustnosti', tChemEq:'Vyrovnávanie rovníc', tChemPh:'pH a koncentrácia',
     ttetris:'Tetris', tbludisko:'Bludisko', tsach:'Šach', tpocasie:'Počasie', tpolitika:'Súkromie a podmienky',
-    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v1.9: nástroje si môžeš stiahnuť pre použitie offline (karta Offline pri poznámkach) — potom fungujú aj bez internetu.', voteNote:'plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný',
+    tstatistika:'Štatistika', tKanc:'Kancelária', tKancSub:'Tabuľka · Štatistika · PDF · Prekladač · QR', tTabulka:'Tabuľka', verTip:'Nové vo v2.0: striedajúci sa slogan pod logom a nástroje na stiahnutie pre použitie offline (karta Offline pri poznámkach).', voteNote:'plainkit. audit je nominovaný v súťaži Android Code 2026 (Slovenské aplikácie všeobecne) — hlasovanie do 31. 12. → · hlas sa potvrdzuje e-mailom, odber noviniek je nepovinný',
     tExif:'Fotky bez metadát', theslo:'Heslo', tpdf:'PDF', tzvuk:'Zvuk', thad:'Had', tpuzzle:'Puzzle', tbomby:'Bomby',
     offTitle:'Offline', offSub:'Stiahni si nástroje do tohto zariadenia — budú fungovať aj bez internetu.',
     offHeavy:'vrátane nástroja Zvuk (+ ≈ 32 MB)', offDl:'↓ Stiahnuť pre použitie offline (≈ 6 MB)',
@@ -772,7 +784,7 @@ const I18N = {
     tFyz:'Physics', tFyzSub:'Physics calculator', tFyzKalk:'Physics calculator',
     tChemMol:'Molar mass', tChemSol:'Solubility table', tChemEq:'Equation balancing', tChemPh:'pH and concentration',
     ttetris:'Tetris', tbludisko:'Maze', tsach:'Chess', tpocasie:'Weather', tpolitika:'Privacy & Terms',
-    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v1.9: you can download the tools for offline use (Offline card next to Notes) — then they work without the internet.', voteNote:'plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional',
+    tstatistika:'Statistics', tKanc:'Office', tKancSub:'Spreadsheet · Statistics · PDF · Translator · QR', tTabulka:'Spreadsheet', verTip:'New in v2.0: a rotating slogan under the logo, and tools you can download for offline use (Offline card next to Notes).', voteNote:'plainkit. audit is nominated in the Android Code 2026 awards (Slovak apps, general) — voting until 31 Dec → · the vote is confirmed by e-mail, the newsletter is optional',
     tExif:'Photos without metadata', theslo:'Password', tpdf:'PDF', tzvuk:'Sound', thad:'Snake', tpuzzle:'Puzzle', tbomby:'Bombs',
     offTitle:'Offline', offSub:'Download the tools to this device — they will work without the internet too.',
     offHeavy:'include the Sound tool (+ ≈ 32 MB)', offDl:'↓ Download for offline use (≈ 6 MB)',
@@ -820,6 +832,7 @@ function applyLang() {
   buildCityDropdown();
   renderClocks();
   renderOffline();
+  sloganLangChanged();
 }
 // ═══ Svetové hodiny ═══
 function cityByTz(tz) { return CITY_POOL.find(c => c.tz === tz); }
@@ -1050,6 +1063,51 @@ async function offlineInit() {
   } catch (_) {}
   renderOffline();
 }
+// ═══ Slogan pod logom (striedanie + „dekódovanie" písmen) ═══
+// Vety meň tu. Prvá je značka — zobrazuje sa najdlhšie. Drž ich do ~30 znakov (mobil).
+// „until" = po tomto dátume sa veta prestane zobrazovať sama.
+const SLOGANS = [
+  { sk:'no ads · no signup · no tracking', en:'no ads · no signup · no tracking', hold:6000 },
+  { sk:'načítava sa len z plainkit.app',   en:'loads only from plainkit.app' },
+  { sk:'rm -rf reklamy',                   en:'rm -rf ads' },
+  { sk:'nominácia · android code 2026',    en:'nominee · android code 2026', until:'2027-01-01T00:00:00+01:00' },
+];
+const SLOGAN_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*<>/';
+const slogan = { i: 0, raf: null, timer: null };
+function sloganList() { return SLOGANS.filter(x => !x.until || Date.now() < Date.parse(x.until)); }
+function sloganShow() {
+  const el = document.getElementById('slogan'); if (!el) return;
+  const list = sloganList(), item = list[slogan.i % list.length], text = item[lang] || item.sk;
+  el.classList.remove('glitch');
+  slogan.shown = true;
+  let n = 0;
+  const step = () => {
+    if (n <= text.length) {
+      el.textContent = Array.from(text, (ch, k) => (k < n || ch === ' ') ? ch : SLOGAN_CHARS[Math.floor(Math.random() * SLOGAN_CHARS.length)]).join('');
+      n++; slogan.raf = requestAnimationFrame(step);
+    } else {
+      slogan.raf = null;
+      el.dataset.text = text; void el.offsetWidth; el.classList.add('glitch');
+      slogan.i = (slogan.i + 1) % list.length;
+      slogan.timer = setTimeout(sloganShow, item.hold || 3000);
+    }
+  };
+  slogan.raf = requestAnimationFrame(step);
+}
+function sloganLangChanged() {
+  // po prepnutí jazyka hneď dopíš aktuálnu vetu v novom jazyku (bez čakania na ďalšiu)
+  if (!slogan.shown) return;                      // ešte sa nič neanimovalo → nič netreba
+  const midDecode = !!slogan.raf;                 // počas dekódovania sa index ešte neposunul
+  cancelAnimationFrame(slogan.raf); clearTimeout(slogan.timer); slogan.raf = slogan.timer = null;
+  const list = sloganList();
+  if (!midDecode) slogan.i = (slogan.i - 1 + list.length) % list.length;
+  sloganShow();
+}
+function sloganInit() {
+  // „Obmedziť pohyb" v systéme → len pevná značka, bez animácie.
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  slogan.timer = setTimeout(sloganShow, 2500);
+}
 // ═══ Init: načítaj uložené nastavenia ═══
 (function init() {
   // jazyk
@@ -1069,6 +1127,7 @@ async function offlineInit() {
   setInterval(tickClocks, 1000);
   setupInstall();
   offlineInit();
+  sloganInit();
 })();
 </script>
 <script>
